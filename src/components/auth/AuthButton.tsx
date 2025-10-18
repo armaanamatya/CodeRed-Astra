@@ -25,7 +25,7 @@ export function AuthButton() {
             Welcome, {session.user.name || session.user.email}
           </span>
         </div>
-        <Button onClick={signOut} variant="outline">
+        <Button onClick={signOut} className="bg-white text-[#8A817C] hover:bg-gray-100 border-white">
           Sign Out
         </Button>
       </div>
@@ -33,8 +33,8 @@ export function AuthButton() {
   }
 
   return (
-    <Button onClick={signIn}>
-      Sign in with Google
+    <Button onClick={signIn} className="bg-white text-[#8A817C] hover:bg-gray-100">
+      Sign in
     </Button>
   );
 }
