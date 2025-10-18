@@ -1,0 +1,7 @@
+# core dependencies for AI Vision Assistant (Gesture Detection)
+mediapipe==0.10.14
+opencv-python==4.9.0.80
+numpy==1.26.4
+
+# optional utilities
+protobuf>=3.20.3

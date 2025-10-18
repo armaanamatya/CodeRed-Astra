@@ -107,3 +107,33 @@ pids
 # Temporary folders
 tmp/
 temp/
+
+# --- Python virtual environments ---
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+*.pkl
+*.log
+
+# --- Build / distribution directories ---
+*.egg-info/
+
+# --- Jupyter notebooks cache ---
+.ipynb_checkpoints/
+
+# --- Environment & secrets ---
+*.env
+*.json
+token.txt
+secrets.json
+
+# --- Optional: AI model files / large data ---
+*.h5
+*.tflite
+*.onnx
+*.pt
+*.weights
