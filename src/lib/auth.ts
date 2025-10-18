@@ -6,7 +6,8 @@ import connectDB from './db/mongodb';
 import User from '@/models/User';
 
 export const authOptions: NextAuthOptions = {
-  adapter: MongoDBAdapter(clientPromise),
+  // Temporarily disable MongoDB adapter due to SSL issues
+  // adapter: MongoDBAdapter(clientPromise),
   trustHost: true,
   providers: [
     GoogleProvider({
@@ -37,26 +38,43 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user, account }) {
       // Initial sign in
       if (account && user) {
-        await connectDB();
-        
-        // Save tokens to database
-        await User.findOneAndUpdate(
-          { email: user.email },
-          {
-            googleId: account.providerAccountId,
+        try {
+          await connectDB();
+          
+          // Save or update user in database
+          const updatedUser = await User.findOneAndUpdate(
+            { email: user.email },
+            {
+              email: user.email,
+              name: user.name,
+              image: user.image,
+              googleId: account.providerAccountId,
+              accessToken: account.access_token,
+              refreshToken: account.refresh_token,
+              tokenExpiry: account.expires_at ? new Date(account.expires_at * 1000) : undefined,
+              emailVerified: new Date(),
+            },
+            { upsert: true, new: true }
+          );
+
+          return {
+            ...token,
             accessToken: account.access_token,
             refreshToken: account.refresh_token,
-            tokenExpiry: account.expires_at ? new Date(account.expires_at * 1000) : undefined,
-          }
-        );
-
-        return {
-          ...token,
-          accessToken: account.access_token,
-          refreshToken: account.refresh_token,
-          expiresAt: account.expires_at,
-          id: user.id,
-        };
+            expiresAt: account.expires_at,
+            id: updatedUser._id.toString(),
+          };
+        } catch (error) {
+          console.error('Database save error:', error);
+          // Continue with JWT-only auth if database fails
+          return {
+            ...token,
+            accessToken: account.access_token,
+            refreshToken: account.refresh_token,
+            expiresAt: account.expires_at,
+            id: user.id,
+          };
+        }
       }
 
       // Return previous token if the access token has not expired yet
@@ -101,14 +119,19 @@ async function refreshAccessToken(token: any) {
     }
 
     // Update tokens in database
-    await connectDB();
-    await User.findOneAndUpdate(
-      { email: token.email },
-      {
-        accessToken: refreshedTokens.access_token,
-        tokenExpiry: new Date(Date.now() + refreshedTokens.expires_in * 1000),
-      }
-    );
+    try {
+      await connectDB();
+      await User.findOneAndUpdate(
+        { email: token.email },
+        {
+          accessToken: refreshedTokens.access_token,
+          tokenExpiry: new Date(Date.now() + refreshedTokens.expires_in * 1000),
+        }
+      );
+    } catch (dbError) {
+      console.error('Database update error during token refresh:', dbError);
+      // Continue with token refresh even if database update fails
+    }
 
     return {
       ...token,

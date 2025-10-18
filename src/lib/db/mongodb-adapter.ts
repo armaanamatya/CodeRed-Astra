@@ -8,6 +8,16 @@ const uri = process.env.MONGODB_URI;
 const options = {
   // Explicitly specify the database name
   dbName: process.env.MONGODB_DB || 'NAVI',
+  // SSL/TLS configuration
+  tls: true,
+  tlsAllowInvalidCertificates: false,
+  tlsAllowInvalidHostnames: false,
+  // Connection settings
+  serverSelectionTimeoutMS: 5000,
+  connectTimeoutMS: 10000,
+  maxPoolSize: 10,
+  retryWrites: true,
+  w: 'majority',
 };
 
 let client: MongoClient;
