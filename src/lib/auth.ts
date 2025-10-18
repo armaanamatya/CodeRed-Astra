@@ -4,6 +4,7 @@ import { MongoDBAdapter } from '@auth/mongodb-adapter';
 import clientPromise from './db/mongodb-adapter';
 import connectDB from './db/mongodb';
 import User from '@/models/User';
+import NotionProvider from './notion-oauth';
 
 export const authOptions: NextAuthOptions = {
   // Temporarily disable MongoDB adapter due to SSL issues and account linking conflicts
@@ -32,6 +33,10 @@ export const authOptions: NextAuthOptions = {
         },
       },
     }),
+    NotionProvider({
+      clientId: process.env.NOTION_CLIENT_ID!,
+      clientSecret: process.env.NOTION_CLIENT_SECRET!,
+    }),
   ],
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
@@ -48,8 +53,56 @@ export const authOptions: NextAuthOptions = {
       return `${baseUrl}/dashboard`;
     },
     async signIn({ user, account, profile }) {
+<<<<<<< HEAD
       // Always allow sign in - we handle user creation/updates in the JWT callback
       return true;
+=======
+      if (account?.provider === 'google') {
+        try {
+          await connectDB();
+          
+          // Save or update user in database
+          const updateData: any = {
+            email: user.email,
+            name: user.name,
+            image: user.image,
+            emailVerified: new Date(),
+          };
+
+          // Handle Google OAuth
+          if (account.provider === 'google') {
+            updateData.googleId = account.providerAccountId;
+            updateData.accessToken = account.access_token;
+            updateData.refreshToken = account.refresh_token;
+            updateData.tokenExpiry = account.expires_at ? new Date(account.expires_at * 1000) : undefined;
+          }
+
+          // Handle Notion OAuth
+          if (account.provider === 'notion') {
+            updateData.notionToken = account.access_token;
+            updateData.notionWorkspaceId = account.workspace_id;
+          }
+
+          const updatedUser = await User.findOneAndUpdate(
+            { email: user.email },
+            updateData,
+            { upsert: true, new: true }
+          );
+
+          return {
+            ...token,
+            accessToken: account.access_token,
+            refreshToken: account.refresh_token,
+            expiresAt: account.expires_at,
+            id: updatedUser._id.toString(),
+          };
+        } catch (error) {
+          console.error('Database save error during sign in:', error);
+          // Continue with sign in even if database save fails
+        }
+      }
+      return true; // Always allow sign in
+>>>>>>> bb97474 (Notion Cal tab)
     },
     async session({ session, user }) {
       // Add guard to check if user exists
