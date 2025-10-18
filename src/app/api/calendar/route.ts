@@ -2,26 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { google } from 'googleapis';
-import connectDB from '@/lib/db/mongodb';
-import User from '@/models/User';
 
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session?.user?.email) {
+    if (!session?.user?.email || !session?.accessToken) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    await connectDB();
-    const user = await User.findOne({ email: session.user.email });
-    
-    if (!user?.accessToken) {
-      return NextResponse.json(
-        { error: 'No access token found. Please re-authenticate.' },
+        { error: 'Unauthorized - No valid session or access token' },
         { status: 401 }
       );
     }
@@ -33,8 +21,7 @@ export async function GET(request: NextRequest) {
     );
 
     oauth2Client.setCredentials({
-      access_token: user.accessToken,
-      refresh_token: user.refreshToken,
+      access_token: session.accessToken,
     });
 
     // Initialize Calendar API
@@ -70,19 +57,9 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session?.user?.email) {
+    if (!session?.user?.email || !session?.accessToken) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    await connectDB();
-    const user = await User.findOne({ email: session.user.email });
-    
-    if (!user?.accessToken) {
-      return NextResponse.json(
-        { error: 'No access token found. Please re-authenticate.' },
+        { error: 'Unauthorized - No valid session or access token' },
         { status: 401 }
       );
     }
@@ -103,8 +80,7 @@ export async function POST(request: NextRequest) {
     );
 
     oauth2Client.setCredentials({
-      access_token: user.accessToken,
-      refresh_token: user.refreshToken,
+      access_token: session.accessToken,
     });
 
     // Initialize Calendar API
