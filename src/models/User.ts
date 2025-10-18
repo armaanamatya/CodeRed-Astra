@@ -5,10 +5,14 @@ export interface IUser extends Document {
   name?: string;
   image?: string;
   googleId?: string;
+  microsoftId?: string;
   emailVerified?: Date;
   accessToken?: string;
   refreshToken?: string;
   tokenExpiry?: Date;
+  microsoftAccessToken?: string;
+  microsoftRefreshToken?: string;
+  microsoftTokenExpiry?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -34,6 +38,11 @@ const userSchema = new Schema<IUser>(
       unique: true,
       sparse: true,
     },
+    microsoftId: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
     emailVerified: {
       type: Date,
     },
@@ -44,6 +53,15 @@ const userSchema = new Schema<IUser>(
       type: String,
     },
     tokenExpiry: {
+      type: Date,
+    },
+    microsoftAccessToken: {
+      type: String,
+    },
+    microsoftRefreshToken: {
+      type: String,
+    },
+    microsoftTokenExpiry: {
       type: Date,
     },
   },
