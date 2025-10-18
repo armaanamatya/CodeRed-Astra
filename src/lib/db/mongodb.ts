@@ -27,7 +27,7 @@ async function connectDB() {
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
-      dbName: process.env.MONGODB_DB || 'codered-astra',
+      dbName: process.env.MONGODB_DB || 'NAVI',
     };
 
     cached.promise = mongoose.connect(MONGODB_URI!, opts).then((mongoose) => {

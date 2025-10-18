@@ -7,6 +7,7 @@ import User from '@/models/User';
 
 export const authOptions: NextAuthOptions = {
   adapter: MongoDBAdapter(clientPromise),
+  trustHost: true,
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
