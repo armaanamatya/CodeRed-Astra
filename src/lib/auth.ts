@@ -6,8 +6,7 @@ import connectDB from './db/mongodb';
 import User from '@/models/User';
 
 export const authOptions: NextAuthOptions = {
-  // Temporarily disable MongoDB adapter due to SSL issues
-  // adapter: MongoDBAdapter(clientPromise),
+  adapter: MongoDBAdapter(clientPromise),
   trustHost: true,
   providers: [
     GoogleProvider({
@@ -31,18 +30,17 @@ export const authOptions: NextAuthOptions = {
   ],
   secret: process.env.NEXTAUTH_SECRET,
   session: {
-    strategy: 'jwt',
+    strategy: 'database',
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
-    async jwt({ token, user, account }) {
-      // Initial sign in
-      if (account && user) {
+    async signIn({ user, account, profile }) {
+      if (account?.provider === 'google') {
         try {
           await connectDB();
           
-          // Save or update user in database
-          const updatedUser = await User.findOneAndUpdate(
+          // Save or update user with OAuth tokens in our custom User model
+          await User.findOneAndUpdate(
             { email: user.email },
             {
               email: user.email,
@@ -56,39 +54,30 @@ export const authOptions: NextAuthOptions = {
             },
             { upsert: true, new: true }
           );
-
-          return {
-            ...token,
-            accessToken: account.access_token,
-            refreshToken: account.refresh_token,
-            expiresAt: account.expires_at,
-            id: updatedUser._id.toString(),
-          };
+          
+          console.log(`✅ User ${user.email} saved to NAVI database`);
+          return true;
         } catch (error) {
-          console.error('Database save error:', error);
-          // Continue with JWT-only auth if database fails
-          return {
-            ...token,
-            accessToken: account.access_token,
-            refreshToken: account.refresh_token,
-            expiresAt: account.expires_at,
-            id: user.id,
-          };
+          console.error('Database save error during sign in:', error);
+          return true; // Still allow sign in even if database save fails
         }
       }
-
-      // Return previous token if the access token has not expired yet
-      if (Date.now() < (token.expiresAt as number) * 1000) {
-        return token;
-      }
-
-      // Access token has expired, try to refresh it
-      return await refreshAccessToken(token);
+      return true;
     },
-    async session({ session, token }) {
-      session.user.id = token.id as string;
-      session.accessToken = token.accessToken as string;
-      session.error = token.error as string | undefined;
+    async session({ session, user }) {
+      // Add user ID to session
+      session.user.id = user.id;
+      
+      // Get fresh access token from our custom User model
+      try {
+        await connectDB();
+        const dbUser = await User.findOne({ email: session.user.email });
+        if (dbUser?.accessToken) {
+          session.accessToken = dbUser.accessToken;
+        }
+      } catch (error) {
+        console.error('Error fetching access token:', error);
+      }
       
       return session;
     },
