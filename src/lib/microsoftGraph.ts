@@ -1,5 +1,6 @@
 import { Client } from '@microsoft/microsoft-graph-client';
 import { AuthenticationProvider } from '@microsoft/microsoft-graph-client';
+import 'isomorphic-fetch';
 
 class CustomAuthenticationProvider implements AuthenticationProvider {
   private accessToken: string;

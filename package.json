@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.14",
+    "@types/microsoft-graph": "^2.40.1",
     "@types/mongodb": "^4.0.6",
     "@types/node": "^24.8.1",
     "@types/react": "^19.2.2",
