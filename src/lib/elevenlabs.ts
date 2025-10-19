@@ -145,3 +145,130 @@ export async function streamToBlob(stream: ReadableStream<Uint8Array>): Promise<
     reader.releaseLock();
   }
 }
+
+// Speech-to-Text interfaces
+export interface SpeechToTextOptions {
+  language?: string;
+  model?: string;
+}
+
+export interface SpeechToTextResult {
+  transcription: string;
+  language: string;
+  duration?: number;
+  wordCount?: number;
+}
+
+// Speech-to-Text using ElevenLabs API
+export async function transcribeAudio(
+  apiKey: string,
+  audioFile: File,
+  options: SpeechToTextOptions = {}
+): Promise<SpeechToTextResult> {
+  try {
+    const formData = new FormData();
+    formData.append('file', audioFile);
+    formData.append('language', options.language || 'en');
+    
+    if (options.model) {
+      formData.append('model', options.model);
+    }
+
+    const response = await fetch('https://api.elevenlabs.io/v1/speech-to-text', {
+      method: 'POST',
+      headers: {
+        'xi-api-key': apiKey,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(`ElevenLabs Speech-to-Text API error: ${JSON.stringify(error)}`);
+    }
+
+    const result = await response.json();
+    return {
+      transcription: result.transcription || result.text || '',
+      language: result.language || options.language || 'en',
+      duration: result.duration || null,
+      wordCount: result.wordCount || null,
+    };
+  } catch (error) {
+    console.error('Error transcribing audio:', error);
+    throw error;
+  }
+}
+
+// Get supported languages for speech-to-text
+export const SUPPORTED_LANGUAGES = {
+  'en': 'English',
+  'es': 'Spanish',
+  'fr': 'French',
+  'de': 'German',
+  'it': 'Italian',
+  'pt': 'Portuguese',
+  'ru': 'Russian',
+  'ja': 'Japanese',
+  'ko': 'Korean',
+  'zh': 'Chinese',
+  'ar': 'Arabic',
+  'hi': 'Hindi',
+  'nl': 'Dutch',
+  'sv': 'Swedish',
+  'da': 'Danish',
+  'no': 'Norwegian',
+  'fi': 'Finnish',
+  'pl': 'Polish',
+  'tr': 'Turkish',
+  'cs': 'Czech',
+  'hu': 'Hungarian',
+  'ro': 'Romanian',
+  'bg': 'Bulgarian',
+  'hr': 'Croatian',
+  'sk': 'Slovak',
+  'sl': 'Slovenian',
+  'et': 'Estonian',
+  'lv': 'Latvian',
+  'lt': 'Lithuanian',
+  'uk': 'Ukrainian',
+  'el': 'Greek',
+  'he': 'Hebrew',
+  'th': 'Thai',
+  'vi': 'Vietnamese',
+  'id': 'Indonesian',
+  'ms': 'Malay',
+  'tl': 'Filipino',
+  'sw': 'Swahili',
+  'af': 'Afrikaans',
+  'sq': 'Albanian',
+  'az': 'Azerbaijani',
+  'be': 'Belarusian',
+  'bn': 'Bengali',
+  'bs': 'Bosnian',
+  'ca': 'Catalan',
+  'cy': 'Welsh',
+  'eu': 'Basque',
+  'fa': 'Persian',
+  'ga': 'Irish',
+  'gl': 'Galician',
+  'gu': 'Gujarati',
+  'is': 'Icelandic',
+  'ka': 'Georgian',
+  'kk': 'Kazakh',
+  'ky': 'Kyrgyz',
+  'lo': 'Lao',
+  'mk': 'Macedonian',
+  'ml': 'Malayalam',
+  'mn': 'Mongolian',
+  'mr': 'Marathi',
+  'my': 'Burmese',
+  'ne': 'Nepali',
+  'pa': 'Punjabi',
+  'si': 'Sinhala',
+  'ta': 'Tamil',
+  'te': 'Telugu',
+  'ur': 'Urdu',
+  'uz': 'Uzbek',
+  'zu': 'Zulu',
+};
