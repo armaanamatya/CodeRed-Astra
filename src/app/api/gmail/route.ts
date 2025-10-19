@@ -2,14 +2,24 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { google } from 'googleapis';
+import { getFreshGoogleToken } from '@/lib/googleAuth';
 
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session?.user?.email || !session?.accessToken) {
+    if (!session?.user?.email) {
       return NextResponse.json(
-        { error: 'Unauthorized - No valid session or access token' },
+        { error: 'Unauthorized - No valid session' },
+        { status: 401 }
+      );
+    }
+
+    // Get fresh Google access token
+    const accessToken = await getFreshGoogleToken(session.user.email);
+    if (!accessToken) {
+      return NextResponse.json(
+        { error: 'Google account not connected or token refresh failed' },
         { status: 401 }
       );
     }
@@ -21,7 +31,7 @@ export async function GET(request: NextRequest) {
     );
 
     oauth2Client.setCredentials({
-      access_token: session.accessToken,
+      access_token: accessToken,
     });
 
     // Initialize Gmail API

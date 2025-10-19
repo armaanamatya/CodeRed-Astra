@@ -6,7 +6,11 @@ import connectDB from './db/mongodb';
 import User from '@/models/User';
 
 export const authOptions: NextAuthOptions = {
-  adapter: MongoDBAdapter(clientPromise),
+  // Temporarily disable MongoDB adapter due to SSL issues and account linking conflicts
+  // adapter: MongoDBAdapter(clientPromise),
+  session: {
+    strategy: "jwt",
+  },
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -30,10 +34,6 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   secret: process.env.NEXTAUTH_SECRET,
-  session: {
-    strategy: 'database',
-    maxAge: 30 * 24 * 60 * 60, // 30 days
-  },
   callbacks: {
     async redirect({ url, baseUrl }) {
       // If redirecting after sign in and no specific URL, go to dashboard
@@ -48,50 +48,8 @@ export const authOptions: NextAuthOptions = {
       return `${baseUrl}/dashboard`;
     },
     async signIn({ user, account, profile }) {
-      if (account?.provider === 'google') {
-        try {
-          await connectDB();
-          
-          // Check if user exists with different googleId
-          const existingUser = await User.findOne({ email: user.email });
-          
-          if (existingUser && existingUser.googleId && existingUser.googleId !== account.providerAccountId) {
-            // Update the existing user with new Google ID
-            await User.findOneAndUpdate(
-              { email: user.email },
-              {
-                googleId: account.providerAccountId,
-                accessToken: account.access_token,
-                refreshToken: account.refresh_token,
-                tokenExpiry: account.expires_at ? new Date(account.expires_at * 1000) : undefined,
-                emailVerified: new Date(),
-              }
-            );
-            console.log(`✅ Updated existing user ${user.email} with new Google ID`);
-          } else {
-            // Create or update user
-            await User.findOneAndUpdate(
-              { email: user.email },
-              {
-                email: user.email,
-                name: user.name,
-                image: user.image,
-                googleId: account.providerAccountId,
-                accessToken: account.access_token,
-                refreshToken: account.refresh_token,
-                tokenExpiry: account.expires_at ? new Date(account.expires_at * 1000) : undefined,
-                emailVerified: new Date(),
-              },
-              { upsert: true, new: true }
-            );
-            console.log(`✅ User ${user.email} saved to NAVI database`);
-          }
-        } catch (error) {
-          console.error('Database save error during sign in:', error);
-          // Continue with sign in even if database save fails
-        }
-      }
-      return true; // Always allow sign in
+      // Always allow sign in - we handle user creation/updates in the JWT callback
+      return true;
     },
     async session({ session, user }) {
       // Add guard to check if user exists
@@ -116,15 +74,56 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
     async jwt({ token, user, account }) {
-      // Persist the OAuth access_token to the token right after signin
+      // Initial sign in
       if (account && user) {
-        return {
-          ...token,
-          accessToken: account.access_token,
-          refreshToken: account.refresh_token,
-        };
+        try {
+          await connectDB();
+          
+          // Create or update user in database
+          const updatedUser = await User.findOneAndUpdate(
+            { email: user.email },
+            {
+              email: user.email,
+              name: user.name,
+              image: user.image,
+              googleId: account.providerAccountId,
+              accessToken: account.access_token,
+              refreshToken: account.refresh_token,
+              tokenExpiry: account.expires_at ? new Date(account.expires_at * 1000) : undefined,
+              emailVerified: new Date(),
+            },
+            { upsert: true, new: true }
+          );
+
+          console.log(`✅ User ${user.email} saved to NAVI database`);
+
+          return {
+            ...token,
+            accessToken: account.access_token,
+            refreshToken: account.refresh_token,
+            expiresAt: account.expires_at,
+            id: (updatedUser as any)._id.toString(),
+          };
+        } catch (error) {
+          console.error('Database save error:', error);
+          // Continue with JWT-only auth if database fails
+          return {
+            ...token,
+            accessToken: account.access_token,
+            refreshToken: account.refresh_token,
+            expiresAt: account.expires_at,
+            id: user.id,
+          };
+        }
       }
-      return token;
+
+      // Return previous token if the access token has not expired yet
+      if (Date.now() < (token.expiresAt as number) * 1000) {
+        return token;
+      }
+
+      // Access token has expired, try to refresh it
+      return await refreshAccessToken(token);
     },
   },
   pages: {

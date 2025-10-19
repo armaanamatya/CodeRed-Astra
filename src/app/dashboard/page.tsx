@@ -23,6 +23,7 @@ export default function DashboardPage() {
   const [showSendOutlookEmailModal, setShowSendOutlookEmailModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'calendar' | 'gmail' | 'outlook' | 'elevenlabs' | 'account'>('calendar');
   const [outlookSubTab, setOutlookSubTab] = useState<'calendar' | 'email'>('calendar');
+  const [googleConnected, setGoogleConnected] = useState(false);
   const [microsoftConnected, setMicrosoftConnected] = useState(false);
   const [microsoftLoading, setMicrosoftLoading] = useState(false);
 
@@ -175,8 +176,20 @@ export default function DashboardPage() {
     }
   };
 
-  // Check Microsoft connection status on component mount
+  // Check connection status on component mount
   React.useEffect(() => {
+    const checkGoogleStatus = async () => {
+      try {
+        const response = await fetch('/api/google/auth');
+        const data = await response.json();
+        if (response.ok) {
+          setGoogleConnected(data.connected);
+        }
+      } catch (error) {
+        console.error('Error checking Google status:', error);
+      }
+    };
+
     const checkMicrosoftStatus = async () => {
       try {
         const response = await fetch('/api/microsoft/auth');
@@ -189,6 +202,7 @@ export default function DashboardPage() {
       }
     };
 
+    checkGoogleStatus();
     checkMicrosoftStatus();
 
     // Check for Microsoft connection success in URL params
@@ -373,10 +387,10 @@ export default function DashboardPage() {
                   <h3 className="text-lg font-medium mb-2">Connected Services</h3>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span><strong>Google:</strong> {session?.accessToken ? '✅ Connected' : '❌ Not connected'}</span>
-                      {session?.accessToken && (
+                      <span><strong>Google:</strong> {googleConnected ? '✅ Connected' : '❌ Not connected'}</span>
+                      {googleConnected && (
                         <span className="text-sm text-gray-500">
-                          Token: {session.accessToken.length} characters
+                          Calendar & Gmail access enabled
                         </span>
                       )}
                     </div>
