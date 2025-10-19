@@ -10,6 +10,7 @@ import Image from 'next/image';
 import UnifiedCalendarGrid from '@/components/calendar/UnifiedCalendarGrid';
 import UnifiedEmailView from '@/components/email/UnifiedEmailView';
 import { TextToSpeechForm } from '@/components/elevenlabs/TextToSpeechForm';
+import { SpeechToTextForm } from '@/components/elevenlabs/SpeechToTextForm';
 import { SubscriptionInfo } from '@/components/elevenlabs/SubscriptionInfo';
 import UnifiedEventModal from '@/components/modals/UnifiedEventModal';
 import SendEmailModal from '@/components/modals/SendEmailModal';
@@ -56,6 +57,7 @@ export default function DashboardPage() {
   const [showSendEmailModal, setShowSendEmailModal] = useState(false);
   const [showSendOutlookEmailModal, setShowSendOutlookEmailModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'calendar' | 'emails' | 'notion' | 'elevenlabs' | 'account'>('calendar');
+  const [elevenLabsTab, setElevenLabsTab] = useState<'tts' | 'stt'>('tts');
   const [googleConnected, setGoogleConnected] = useState(false);
   const [microsoftConnected, setMicrosoftConnected] = useState(false);
   const [microsoftLoading, setMicrosoftLoading] = useState(false);
@@ -424,23 +426,62 @@ export default function DashboardPage() {
           )}
 
           {activeTab === 'elevenlabs' && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2">
-                <div className="bg-white rounded-lg border">
-                  <TextToSpeechForm />
+            <div>
+              {/* ElevenLabs Tab Navigation */}
+              <div className="flex justify-center mb-8">
+                <div className="bg-white rounded-lg shadow-lg border-2 border-gray-200 p-1">
+                  <button
+                    onClick={() => setElevenLabsTab('tts')}
+                    className={`px-8 py-3 rounded-md transition-all duration-200 font-medium ${
+                      elevenLabsTab === 'tts'
+                        ? 'bg-blue-500 text-white shadow-md'
+                        : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+                    }`}
+                  >
+                    🎵 Text to Speech
+                  </button>
+                  <button
+                    onClick={() => setElevenLabsTab('stt')}
+                    className={`px-8 py-3 rounded-md transition-all duration-200 font-medium ${
+                      elevenLabsTab === 'stt'
+                        ? 'bg-blue-500 text-white shadow-md'
+                        : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+                    }`}
+                  >
+                    🎤 Speech to Text
+                  </button>
                 </div>
               </div>
-              <div className="space-y-4">
-                <div className="bg-white rounded-lg border">
-                  <SubscriptionInfo />
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2">
+                  <div className="bg-white rounded-lg border">
+                    {elevenLabsTab === 'tts' ? <TextToSpeechForm /> : <SpeechToTextForm />}
+                  </div>
                 </div>
-                <div className="bg-white rounded-lg border p-4">
-                  <h3 className="font-semibold mb-2">ElevenLabs Features</h3>
-                  <div className="text-sm text-gray-600 space-y-1">
-                    <p>• AI-powered text-to-speech</p>
-                    <p>• Multiple voice options</p>
-                    <p>• Adjustable voice settings</p>
-                    <p>• Download MP3 files</p>
+                <div className="space-y-4">
+                  <div className="bg-white rounded-lg border">
+                    <SubscriptionInfo />
+                  </div>
+                  <div className="bg-white rounded-lg border p-4">
+                    <h3 className="font-semibold mb-2">ElevenLabs Features</h3>
+                    <div className="text-sm text-gray-600 space-y-1">
+                      {elevenLabsTab === 'tts' ? (
+                        <>
+                          <p>• AI-powered text-to-speech</p>
+                          <p>• Multiple voice options</p>
+                          <p>• Adjustable voice settings</p>
+                          <p>• Download MP3 files</p>
+                        </>
+                      ) : (
+                        <>
+                          <p>• Real-time speech recognition</p>
+                          <p>• File upload transcription</p>
+                          <p>• 99+ language support</p>
+                          <p>• High accuracy AI transcription</p>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

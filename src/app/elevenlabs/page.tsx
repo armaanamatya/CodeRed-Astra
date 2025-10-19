@@ -22,26 +22,26 @@ export default function ElevenLabsPage() {
 
           {/* Tab Navigation */}
           <div className="flex justify-center mb-8">
-            <div className="bg-white rounded-lg shadow-sm border p-1">
+            <div className="bg-white rounded-lg shadow-lg border-2 border-gray-200 p-1">
               <button
                 onClick={() => setActiveTab('tts')}
-                className={`px-6 py-2 rounded-md transition-colors ${
+                className={`px-8 py-3 rounded-md transition-all duration-200 font-medium ${
                   activeTab === 'tts'
-                    ? 'bg-blue-500 text-white'
-                    : 'text-gray-600 hover:text-gray-800'
+                    ? 'bg-blue-500 text-white shadow-md'
+                    : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
                 }`}
               >
-                Text to Speech
+                🎵 Text to Speech
               </button>
               <button
                 onClick={() => setActiveTab('stt')}
-                className={`px-6 py-2 rounded-md transition-colors ${
+                className={`px-8 py-3 rounded-md transition-all duration-200 font-medium ${
                   activeTab === 'stt'
-                    ? 'bg-blue-500 text-white'
-                    : 'text-gray-600 hover:text-gray-800'
+                    ? 'bg-blue-500 text-white shadow-md'
+                    : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
                 }`}
               >
-                Speech to Text
+                🎤 Speech to Text
               </button>
             </div>
           </div>
@@ -75,8 +75,9 @@ export default function ElevenLabsPage() {
                   ) : (
                     <>
                       <p>• Real-time speech recognition</p>
-                      <p>• Continuous transcription</p>
-                      <p>• High accuracy voice-to-text</p>
+                      <p>• File upload transcription</p>
+                      <p>• 99+ language support</p>
+                      <p>• High accuracy AI transcription</p>
                       <p>• Copy transcript to clipboard</p>
                       <p>• Works in modern browsers</p>
                     </>
@@ -97,10 +98,11 @@ export default function ElevenLabsPage() {
                     </>
                   ) : (
                     <>
-                      <p><strong>Microphone:</strong> Ensure browser has mic permissions</p>
+                      <p><strong>Real-time Mode:</strong> Ensure browser has mic permissions</p>
+                      <p><strong>File Mode:</strong> Supports MP3, WAV, FLAC, M4A, OGG files</p>
                       <p><strong>Environment:</strong> Use in a quiet space for best results</p>
-                      <p><strong>Speaking:</strong> Speak clearly and at normal pace</p>
-                      <p><strong>Browser:</strong> Works best in Chrome, Edge, or Safari</p>
+                      <p><strong>Languages:</strong> 99+ languages supported in file mode</p>
+                      <p><strong>File Size:</strong> Up to 3GB files, 10 hours duration</p>
                     </>
                   )}
                 </div>
