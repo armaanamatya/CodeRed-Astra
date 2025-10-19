@@ -20,13 +20,13 @@ export default function NavBar() {
     <header 
       className={`fixed top-4 left-4 right-4 z-50 transition-all duration-300 ${
         isScrolled 
-          ? 'bg-[#BCB8B1] shadow-[0px_10px_4px_0px_rgba(0,0,0,0.25)] opacity-95' 
-          : 'bg-[#BCB8B1] shadow-[0px_10px_4px_0px_rgba(0,0,0,0.25)] opacity-82'
+          ? 'bg-[#26200D] shadow-[0px_10px_4px_0px_rgba(0,0,0,0.25)] opacity-95' 
+          : 'bg-[#26200D] shadow-[0px_10px_4px_0px_rgba(0,0,0,0.25)] opacity-82'
       } h-[100px] rounded-[60px]`}
     >
       <div className="flex justify-between items-center h-full px-8">
         {/* Animated NAVI Logo */}
-        <div className="text-[#463f3a] font-bold text-2xl">
+        <div className="text-[#98CD85] font-bold text-2xl">
           <span className="inline-block hover:transform hover:translate-y-[-2px] hover:scale-110 transition-all duration-200 ease-in-out cursor-pointer">N</span>
           <span className="inline-block hover:transform hover:translate-y-[-2px] hover:scale-110 transition-all duration-200 ease-in-out cursor-pointer">A</span>
           <span className="inline-block hover:transform hover:translate-y-[-2px] hover:scale-110 transition-all duration-200 ease-in-out cursor-pointer">V</span>
