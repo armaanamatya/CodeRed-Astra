@@ -84,8 +84,12 @@ export function SubscriptionInfo() {
     );
   }
 
-  const usagePercentage = Math.round((subscription.character_count / subscription.character_limit) * 100);
-  const resetDate = new Date(subscription.next_character_count_reset_unix * 1000);
+  const usagePercentage = subscription.character_count && subscription.character_limit 
+    ? Math.round((subscription.character_count / subscription.character_limit) * 100) 
+    : 0;
+  const resetDate = subscription.next_character_count_reset_unix 
+    ? new Date(subscription.next_character_count_reset_unix * 1000)
+    : new Date();
 
   return (
     <div className="max-w-md mx-auto p-6">
@@ -102,8 +106,8 @@ export function SubscriptionInfo() {
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
           <h4 className="font-medium mb-2">Character Usage</h4>
           <div className="flex justify-between text-sm mb-1">
-            <span>{subscription.character_count.toLocaleString()} used</span>
-            <span>{subscription.character_limit.toLocaleString()} limit</span>
+            <span>{subscription.character_count?.toLocaleString() || '0'} used</span>
+            <span>{subscription.character_limit?.toLocaleString() || 'N/A'} limit</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div 
@@ -125,15 +129,15 @@ export function SubscriptionInfo() {
           <div className="text-sm space-y-1">
             <div className="flex justify-between">
               <span>Voice Limit:</span>
-              <span>{subscription.voice_limit}</span>
+              <span>{subscription.voice_limit || 'N/A'}</span>
             </div>
             <div className="flex justify-between">
               <span>Professional Voices:</span>
-              <span>{subscription.professional_voice_limit}</span>
+              <span>{subscription.professional_voice_limit || 'N/A'}</span>
             </div>
             <div className="flex justify-between">
               <span>Voice Edits:</span>
-              <span>{subscription.voice_add_edit_counter}/{subscription.max_voice_add_edits}</span>
+              <span>{subscription.voice_add_edit_counter || 0}/{subscription.max_voice_add_edits || 'N/A'}</span>
             </div>
           </div>
         </div>
