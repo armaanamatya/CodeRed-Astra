@@ -155,6 +155,26 @@ export default function DashboardPage() {
     }
   };
 
+  const handleMicrosoftReconnect = async () => {
+    try {
+      setMicrosoftLoading(true);
+      const response = await fetch('/api/microsoft/reconnect');
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to get Microsoft reconnect URL');
+      }
+
+      // Redirect to Microsoft OAuth for reconnection
+      window.location.href = data.authUrl;
+    } catch (error) {
+      console.error('Error reconnecting to Microsoft:', error);
+      alert('Failed to reconnect to Microsoft. Please try again.');
+    } finally {
+      setMicrosoftLoading(false);
+    }
+  };
+
   // Check Microsoft connection status on component mount
   React.useEffect(() => {
     const checkMicrosoftStatus = async () => {
@@ -373,13 +393,23 @@ export default function DashboardPage() {
                             {microsoftLoading ? 'Connecting...' : 'Connect'}
                           </Button>
                         ) : (
-                          <Button 
-                            onClick={refreshMicrosoftStatus}
-                            size="sm"
-                            variant="outline"
-                          >
-                            Refresh
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button 
+                              onClick={refreshMicrosoftStatus}
+                              size="sm"
+                              variant="outline"
+                            >
+                              Refresh
+                            </Button>
+                            <Button 
+                              onClick={handleMicrosoftReconnect}
+                              size="sm"
+                              variant="outline"
+                              className="text-orange-600 border-orange-300 hover:bg-orange-50"
+                            >
+                              Reconnect
+                            </Button>
+                          </div>
                         )}
                       </div>
                     </div>
