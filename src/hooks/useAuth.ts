@@ -9,7 +9,7 @@ export function useAuth() {
     session,
     status,
     update,
-    signIn: () => signIn('google'),
+    signIn: () => signIn('google', { callbackUrl: '/dashboard' }),
     signOut: () => signOut({ callbackUrl: '/' }),
     isAuthenticated: status === 'authenticated',
     isLoading: status === 'loading',
