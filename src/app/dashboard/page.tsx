@@ -265,13 +265,13 @@ export default function DashboardPage() {
     <ProtectedRoute>
       <main className="relative min-h-screen overflow-hidden">
         {/* Background with solid color */}
-        <div className="absolute inset-0 bg-[#26200D]" />
+        <div className="absolute inset-0 bg-theme-background" />
         
         {/* Navigation Bar */}
-        <div className="fixed top-4 left-4 right-4 z-50 transition-all duration-300 border-2 border-[#98CD85] bg-[#463F3A] shadow-[0px_10px_4px_0px_rgba(0,0,0,0.25)] opacity-95 h-[60px] rounded-[30px]">
+        <div className="fixed top-4 left-4 right-4 z-50 transition-all duration-300 border-2 border-theme-border bg-theme-secondary shadow-[0px_10px_4px_0px_rgba(0,0,0,0.25)] opacity-95 h-[60px] rounded-[30px]">
           <div className="flex justify-between items-center h-full px-8">
             {/* Animated NAVI Logo */}
-            <div className="text-[#98CD85] font-bold text-2xl navi-logo relative group cursor-pointer">
+            <div className="text-theme-primary font-bold text-2xl navi-logo relative group cursor-pointer">
               {/* SVG Background - Slides from center to right on hover */}
               <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out -z-10">
                 <Image
@@ -301,12 +301,12 @@ export default function DashboardPage() {
                     className="w-8 h-8 rounded-full"
                   />
                 )}
-                <span className="text-sm font-medium text-[#98CD85]">
+                <span className="text-sm font-medium text-theme-foreground">
                   {session?.user?.name || session?.user?.email}
                 </span>
                 <Button 
                   onClick={signOut} 
-                  className="bg-[#98CD85] text-[#26200D] hover:bg-[#7AB370] border border-[#98CD85] text-sm px-3 py-1"
+                  className="bg-theme-primary text-theme-primary-foreground hover:bg-theme-accent border border-theme-border text-sm px-3 py-1"
                 >
                   Sign Out
                 </Button>
@@ -319,18 +319,18 @@ export default function DashboardPage() {
         <div className="pt-32 relative z-10">
           <div className="max-w-6xl mx-auto p-8">
             <div className="mb-8">
-              <h1 className="text-4xl font-bold text-[#98CD85] mb-2">Dashboard</h1>
-              <p className="text-[#98CD85] opacity-80">Welcome back, {session?.user?.name || 'User'}!</p>
+              <h1 className="text-4xl font-bold text-theme-foreground mb-2">Dashboard</h1>
+              <p className="text-theme-foreground opacity-80">Welcome back, {session?.user?.name || 'User'}!</p>
             </div>
 
           {/* Tab Navigation */}
-          <div className="flex gap-4 mb-6 border-b border-[#98CD85]">
+          <div className="flex gap-4 mb-6 border-b border-theme-border">
             <button
               onClick={() => setActiveTab('unified')}
               className={`px-4 py-2 font-medium transition-colors ${
                 activeTab === 'unified'
-                  ? 'border-b-2 border-[#98CD85] text-[#98CD85]'
-                  : 'text-[#98CD85] hover:text-[#7AB370]'
+                  ? 'border-b-2 border-theme-border text-theme-foreground'
+                  : 'text-theme-foreground hover:text-theme-accent'
               }`}
             >
               Unified Calendar
@@ -339,8 +339,8 @@ export default function DashboardPage() {
               onClick={() => setActiveTab('gmail')}
               className={`px-4 py-2 font-medium transition-colors ${
                 activeTab === 'gmail'
-                  ? 'border-b-2 border-[#98CD85] text-[#98CD85]'
-                  : 'text-[#98CD85] hover:text-[#7AB370]'
+                  ? 'border-b-2 border-theme-border text-theme-foreground'
+                  : 'text-theme-foreground hover:text-theme-accent'
               }`}
             >
               Gmail
@@ -349,8 +349,8 @@ export default function DashboardPage() {
               onClick={() => setActiveTab('outlook')}
               className={`px-4 py-2 font-medium transition-colors ${
                 activeTab === 'outlook'
-                  ? 'border-b-2 border-[#98CD85] text-[#98CD85]'
-                  : 'text-[#98CD85] hover:text-[#7AB370]'
+                  ? 'border-b-2 border-theme-border text-theme-foreground'
+                  : 'text-theme-foreground hover:text-theme-accent'
               }`}
             >
               Outlook
@@ -359,8 +359,8 @@ export default function DashboardPage() {
               onClick={() => setActiveTab('notion')}
               className={`px-4 py-2 font-medium transition-colors ${
                 activeTab === 'notion'
-                  ? 'border-b-2 border-[#98CD85] text-[#98CD85]'
-                  : 'text-[#98CD85] hover:text-[#7AB370]'
+                  ? 'border-b-2 border-theme-border text-theme-foreground'
+                  : 'text-theme-foreground hover:text-theme-accent'
               }`}
             >
               Notion
@@ -369,8 +369,8 @@ export default function DashboardPage() {
               onClick={() => setActiveTab('elevenlabs')}
               className={`px-4 py-2 font-medium transition-colors ${
                 activeTab === 'elevenlabs'
-                  ? 'border-b-2 border-[#98CD85] text-[#98CD85]'
-                  : 'text-[#98CD85] hover:text-[#7AB370]'
+                  ? 'border-b-2 border-theme-border text-theme-foreground'
+                  : 'text-theme-foreground hover:text-theme-accent'
               }`}
             >
               ElevenLabs AI
@@ -379,8 +379,8 @@ export default function DashboardPage() {
               onClick={() => setActiveTab('account')}
               className={`px-4 py-2 font-medium transition-colors ${
                 activeTab === 'account'
-                  ? 'border-b-2 border-[#98CD85] text-[#98CD85]'
-                  : 'text-[#98CD85] hover:text-[#7AB370]'
+                  ? 'border-b-2 border-theme-border text-theme-foreground'
+                  : 'text-theme-foreground hover:text-theme-accent'
               }`}
             >
               Account Info
@@ -414,11 +414,11 @@ export default function DashboardPage() {
             <div className="space-y-6">
               {!microsoftConnected ? (
                 <div className="text-center py-8">
-                  <div className="text-[#98CD85] text-lg mb-4">Microsoft account not connected</div>
+                  <div className="text-theme-foreground text-lg mb-4">Microsoft account not connected</div>
                   <Button 
                     onClick={handleMicrosoftConnect}
                     disabled={microsoftLoading}
-                    className="bg-[#98CD85] hover:bg-[#7AB370] text-[#26200D] border border-[#98CD85]"
+                    className="bg-theme-primary hover:bg-theme-accent text-theme-primary-foreground border border-theme-border"
                   >
                     {microsoftLoading ? 'Connecting...' : 'Connect to Microsoft'}
                   </Button>
@@ -430,8 +430,8 @@ export default function DashboardPage() {
                       onClick={() => setOutlookSubTab('calendar')}
                       className={`px-4 py-2 font-medium rounded-lg transition-colors ${
                         outlookSubTab === 'calendar'
-                          ? 'bg-[#98CD85] text-[#26200D]'
-                          : 'bg-[#26200D] text-[#98CD85] hover:bg-[#7AB370] hover:text-[#26200D] border border-[#98CD85]'
+                          ? 'bg-theme-primary text-theme-primary-foreground'
+                          : 'bg-theme-background text-theme-foreground hover:bg-theme-accent hover:text-theme-primary-foreground border border-theme-border'
                       }`}
                     >
                       Calendar
@@ -440,8 +440,8 @@ export default function DashboardPage() {
                       onClick={() => setOutlookSubTab('email')}
                       className={`px-4 py-2 font-medium rounded-lg transition-colors ${
                         outlookSubTab === 'email'
-                          ? 'bg-[#98CD85] text-[#26200D]'
-                          : 'bg-[#26200D] text-[#98CD85] hover:bg-[#7AB370] hover:text-[#26200D] border border-[#98CD85]'
+                          ? 'bg-theme-primary text-theme-primary-foreground'
+                          : 'bg-theme-background text-theme-foreground hover:bg-theme-accent hover:text-theme-primary-foreground border border-theme-border'
                       }`}
                     >
                       Email
@@ -489,35 +489,35 @@ export default function DashboardPage() {
           )}
 
           {activeTab === 'account' && (
-            <div className="p-6 border border-[#98CD85] rounded-lg bg-[#26200D]">
-              <h2 className="text-xl font-semibold mb-4 text-[#98CD85]">Account Information</h2>
+            <div className="p-6 border border-theme-border rounded-lg bg-theme-background">
+              <h2 className="text-xl font-semibold mb-4 text-theme-foreground">Account Information</h2>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <p className="text-[#98CD85]"><strong>Email:</strong> {session?.user?.email}</p>
-                  <p className="text-[#98CD85]"><strong>Name:</strong> {session?.user?.name}</p>
-                  <p className="text-[#98CD85]"><strong>User ID:</strong> {session?.user?.id || 'Not available'}</p>
+                  <p className="text-theme-foreground"><strong>Email:</strong> {session?.user?.email}</p>
+                  <p className="text-theme-foreground"><strong>Name:</strong> {session?.user?.name}</p>
+                  <p className="text-theme-foreground"><strong>User ID:</strong> {session?.user?.id || 'Not available'}</p>
                 </div>
                 
-                <div className="border-t border-[#98CD85] pt-4">
-                  <h3 className="text-lg font-medium mb-2 text-[#98CD85]">Connected Services</h3>
+                <div className="border-t border-theme-border pt-4">
+                  <h3 className="text-lg font-medium mb-2 text-theme-foreground">Connected Services</h3>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-[#98CD85]"><strong>Google:</strong> {googleConnected ? '✅ Connected' : '❌ Not connected'}</span>
+                      <span className="text-theme-foreground"><strong>Google:</strong> {googleConnected ? '✅ Connected' : '❌ Not connected'}</span>
                       {googleConnected && (
-                        <span className="text-sm text-[#98CD85] opacity-70">
+                        <span className="text-sm text-theme-foreground opacity-70">
                           Calendar & Gmail access enabled
                         </span>
                       )}
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-[#98CD85]"><strong>Microsoft:</strong> {microsoftConnected ? '✅ Connected' : '❌ Not connected'}</span>
+                      <span className="text-theme-foreground"><strong>Microsoft:</strong> {microsoftConnected ? '✅ Connected' : '❌ Not connected'}</span>
                       <div className="flex gap-2">
                         {!microsoftConnected ? (
                           <Button 
                             onClick={handleMicrosoftConnect}
                             disabled={microsoftLoading}
                             size="sm"
-                            className="bg-[#98CD85] hover:bg-[#7AB370] text-[#26200D] border border-[#98CD85]"
+                            className="bg-theme-primary hover:bg-theme-accent text-theme-primary-foreground border border-theme-border"
                           >
                             {microsoftLoading ? 'Connecting...' : 'Connect'}
                           </Button>

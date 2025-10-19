@@ -1,48 +1,78 @@
 @import "tailwindcss";
 
 :root {
-  --background: 0 0% 100%;
-  --foreground: 0 0% 3.9%;
-  --card: 0 0% 100%;
-  --card-foreground: 0 0% 3.9%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 3.9%;
-  --primary: 0 0% 9%;
-  --primary-foreground: 0 0% 98%;
-  --secondary: 0 0% 96.1%;
-  --secondary-foreground: 0 0% 9%;
-  --muted: 0 0% 96.1%;
-  --muted-foreground: 0 0% 45.1%;
-  --accent: 0 0% 96.1%;
-  --accent-foreground: 0 0% 9%;
+  /* Default (Dark mode) color scheme */
+  --color-background: #26200D;
+  --color-foreground: #98CD85;
+  --color-primary: #98CD85;
+  --color-primary-foreground: #26200D;
+  --color-secondary: #463F3A;
+  --color-secondary-foreground: #98CD85;
+  --color-accent: #7AB370;
+  --color-accent-foreground: #26200D;
+  --color-muted: #463F3A;
+  --color-muted-foreground: rgba(152, 205, 133, 0.8);
+  --color-border: #98CD85;
+  --color-input: #98CD85;
+  
+  /* Shadcn UI defaults for dark mode */
+  --background: 38 100% 8%;
+  --foreground: 96 49% 69%;
+  --card: 38 100% 8%;
+  --card-foreground: 96 49% 69%;
+  --popover: 38 100% 8%;
+  --popover-foreground: 96 49% 69%;
+  --primary: 96 49% 69%;
+  --primary-foreground: 38 100% 8%;
+  --secondary: 20 14% 25%;
+  --secondary-foreground: 96 49% 69%;
+  --muted: 20 14% 25%;
+  --muted-foreground: 96 49% 59%;
+  --accent: 96 26% 59%;
+  --accent-foreground: 38 100% 8%;
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 0 0% 98%;
-  --border: 0 0% 89.8%;
-  --input: 0 0% 89.8%;
-  --ring: 0 0% 3.9%;
+  --border: 96 49% 69%;
+  --input: 96 49% 69%;
+  --ring: 96 49% 69%;
   --radius: 0.5rem;
 }
 
-.dark {
-  --background: 0 0% 3.9%;
-  --foreground: 0 0% 98%;
-  --card: 0 0% 3.9%;
-  --card-foreground: 0 0% 98%;
-  --popover: 0 0% 3.9%;
-  --popover-foreground: 0 0% 98%;
-  --primary: 0 0% 98%;
-  --primary-foreground: 0 0% 9%;
-  --secondary: 0 0% 14.9%;
-  --secondary-foreground: 0 0% 98%;
-  --muted: 0 0% 14.9%;
-  --muted-foreground: 0 0% 63.9%;
-  --accent: 0 0% 14.9%;
-  --accent-foreground: 0 0% 98%;
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 0 0% 14.9%;
-  --input: 0 0% 14.9%;
-  --ring: 0 0% 83.1%;
+[data-theme="light"] {
+  /* Light mode color scheme */
+  --color-background: #F2ECD9;
+  --color-foreground: #1F5C0A;
+  --color-primary: #1F5C0A;
+  --color-primary-foreground: #F2ECD9;
+  --color-secondary: #E8DCC0;
+  --color-secondary-foreground: #1F5C0A;
+  --color-accent: #164507;
+  --color-accent-foreground: #F2ECD9;
+  --color-muted: #E8DCC0;
+  --color-muted-foreground: #2A7A0F;
+  --color-border: #1F5C0A;
+  --color-input: #1F5C0A;
+  
+  /* Shadcn UI light mode */
+  --background: 48 42% 90%;
+  --foreground: 101 74% 21%;
+  --card: 48 42% 90%;
+  --card-foreground: 101 74% 21%;
+  --popover: 48 42% 90%;
+  --popover-foreground: 101 74% 21%;
+  --primary: 101 74% 21%;
+  --primary-foreground: 48 42% 90%;
+  --secondary: 43 26% 82%;
+  --secondary-foreground: 101 74% 21%;
+  --muted: 43 26% 82%;
+  --muted-foreground: 101 60% 31%;
+  --accent: 103 88% 15%;
+  --accent-foreground: 48 42% 90%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 48 42% 90%;
+  --border: 101 74% 21%;
+  --input: 101 74% 21%;
+  --ring: 101 74% 21%;
 }
 
 * {
@@ -50,9 +80,10 @@
 }
 
 body {
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
+  background-color: var(--color-background);
+  color: var(--color-foreground);
   font-family: 'Inter', sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Override all font specifications to use Inter globally */
@@ -72,53 +103,40 @@ h1, h2, h3, h4, h5, h6, p, span, div, button, a, input, textarea {
   font-family: 'Kenia', sans-serif !important;
 }
 
-/* Light mode styles */
-.light {
-  --background: 0 0% 100%;
-  --foreground: 0 0% 3.9%;
+/* Theme-aware utility classes */
+.bg-theme-background {
+  background-color: var(--color-background);
 }
 
-.light body {
-  background-color: #F2ECD9 !important;
-  color: #1F5C0A !important;
+.bg-theme-secondary {
+  background-color: var(--color-secondary);
 }
 
-.light main {
-  background-color: #F2ECD9 !important;
+.text-theme-foreground {
+  color: var(--color-foreground);
 }
 
-/* Target the absolute positioned background div */
-.light main .absolute.inset-0 {
-  background-color: #F2ECD9 !important;
+.text-theme-primary {
+  color: var(--color-primary);
 }
 
-/* Target all sections */
-.light section {
-  background-color: #F2ECD9 !important;
+.border-theme-border {
+  border-color: var(--color-border);
 }
 
-.light .bg-\[#26200D\] {
-  background-color: #F2ECD9 !important;
+.bg-theme-primary {
+  background-color: var(--color-primary);
 }
 
-.light .text-\[#98CD85\] {
-  color: #1F5C0A !important;
+.text-theme-primary-foreground {
+  color: var(--color-primary-foreground);
 }
 
-.light .border-\[#98CD85\] {
-  border-color: #1F5C0A !important;
+.hover\:bg-theme-accent:hover {
+  background-color: var(--color-accent);
 }
 
-.light .bg-\[#463F3A\] {
-  background-color: #F2ECD9 !important;
-}
-
-.light .text-\[#98CD85\].font-bold {
-  color: #1F5C0A !important;
-}
-
-/* Target feature boxes specifically */
-.light .bg-\[#26200D\].border-2 {
-  background-color: #F2ECD9 !important;
-  border-color: #1F5C0A !important;
+/* Smooth transitions for theme changes */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
