@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
+import { ThemeToggle } from '@/components/ThemeToggle';
+import Image from 'next/image';
 import UnifiedCalendarGrid from '@/components/calendar/UnifiedCalendarGrid';
 import GmailView from '@/components/gmail/GmailView';
 import OutlookCalendarView from '@/components/outlook/OutlookCalendarView';
@@ -16,7 +18,7 @@ import SendOutlookEmailModal from '@/components/modals/SendOutlookEmailModal';
 import type { EventData, EmailData, OutlookEventData, OutlookEmailData } from '@/types/event.d';
 
 export default function DashboardPage() {
-  const { session } = useAuth();
+  const { session, signOut } = useAuth();
   const [showUnifiedEventModal, setShowUnifiedEventModal] = useState(false);
   const [showSendEmailModal, setShowSendEmailModal] = useState(false);
   const [showSendOutlookEmailModal, setShowSendOutlookEmailModal] = useState(false);
@@ -261,82 +263,124 @@ export default function DashboardPage() {
 
   return (
     <ProtectedRoute>
-      <main className="min-h-screen p-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold">Dashboard</h1>
-            <div className="flex items-center gap-4">
-              {session?.user?.image && (
-                <img
-                  src={session.user.image}
-                  alt={session.user.name || 'User'}
-                  className="w-10 h-10 rounded-full"
+      <main className="relative min-h-screen overflow-hidden">
+        {/* Background with solid color */}
+        <div className="absolute inset-0 bg-theme-background" />
+        
+        {/* Navigation Bar */}
+        <div className="fixed top-4 left-4 right-4 z-50 transition-all duration-300 border-2 border-theme-border bg-theme-secondary shadow-[0px_10px_4px_0px_rgba(0,0,0,0.25)] opacity-95 h-[60px] rounded-[30px]">
+          <div className="flex justify-between items-center h-full px-8">
+            {/* Animated NAVI Logo */}
+            <div className="text-theme-primary font-bold text-2xl navi-logo relative group cursor-pointer">
+              {/* SVG Background - Slides from center to right on hover */}
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out -z-10">
+                <Image
+                  src="/assets/NaviDarkMode.svg"
+                  alt="NAVI Logo Background"
+                  width={120}
+                  height={40}
+                  className="transform translate-x-0 group-hover:translate-x-full transition-transform duration-300 ease-out"
                 />
-              )}
-              <span className="text-lg font-medium">
-                {session?.user?.name || session?.user?.email}
-              </span>
+              </div>
+              <div className="relative z-10">
+                <span className="inline-block hover:transform hover:translate-y-[-2px] hover:scale-110 transition-all duration-200 ease-in-out">N</span>
+                <span className="inline-block hover:transform hover:translate-y-[-2px] hover:scale-110 transition-all duration-200 ease-in-out">A</span>
+                <span className="inline-block hover:transform hover:translate-y-[-2px] hover:scale-110 transition-all duration-200 ease-in-out">V</span>
+                <span className="inline-block hover:transform hover:translate-y-[-2px] hover:scale-110 transition-all duration-200 ease-in-out">I</span>
+              </div>
+            </div>
+            
+            {/* Right side buttons */}
+            <div className="flex items-center gap-3">
+              <ThemeToggle />
+              <div className="flex items-center gap-4">
+                {session?.user?.image && (
+                  <img
+                    src={session.user.image}
+                    alt={session.user.name || 'User'}
+                    className="w-8 h-8 rounded-full"
+                  />
+                )}
+                <span className="text-sm font-medium text-theme-foreground">
+                  {session?.user?.name || session?.user?.email}
+                </span>
+                <Button 
+                  onClick={signOut} 
+                  className="bg-theme-primary text-theme-primary-foreground hover:bg-theme-accent border border-theme-border text-sm px-3 py-1"
+                >
+                  Sign Out
+                </Button>
+              </div>
             </div>
           </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="pt-32 relative z-10">
+          <div className="max-w-6xl mx-auto p-8">
+            <div className="mb-8">
+              <h1 className="text-4xl font-bold text-theme-foreground mb-2">Dashboard</h1>
+              <p className="text-theme-foreground opacity-80">Welcome back, {session?.user?.name || 'User'}!</p>
+            </div>
 
           {/* Tab Navigation */}
-          <div className="flex gap-4 mb-6 border-b">
+          <div className="flex gap-4 mb-6 border-b border-theme-border">
             <button
               onClick={() => setActiveTab('unified')}
-              className={`px-4 py-2 font-medium ${
+              className={`px-4 py-2 font-medium transition-colors ${
                 activeTab === 'unified'
-                  ? 'border-b-2 border-blue-500 text-blue-600'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'border-b-2 border-theme-border text-theme-foreground'
+                  : 'text-theme-foreground hover:text-theme-accent'
               }`}
             >
               Unified Calendar
             </button>
             <button
               onClick={() => setActiveTab('gmail')}
-              className={`px-4 py-2 font-medium ${
+              className={`px-4 py-2 font-medium transition-colors ${
                 activeTab === 'gmail'
-                  ? 'border-b-2 border-blue-500 text-blue-600'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'border-b-2 border-theme-border text-theme-foreground'
+                  : 'text-theme-foreground hover:text-theme-accent'
               }`}
             >
               Gmail
             </button>
             <button
               onClick={() => setActiveTab('outlook')}
-              className={`px-4 py-2 font-medium ${
+              className={`px-4 py-2 font-medium transition-colors ${
                 activeTab === 'outlook'
-                  ? 'border-b-2 border-blue-500 text-blue-600'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'border-b-2 border-theme-border text-theme-foreground'
+                  : 'text-theme-foreground hover:text-theme-accent'
               }`}
             >
               Outlook
             </button>
             <button
               onClick={() => setActiveTab('notion')}
-              className={`px-4 py-2 font-medium ${
+              className={`px-4 py-2 font-medium transition-colors ${
                 activeTab === 'notion'
-                  ? 'border-b-2 border-blue-500 text-blue-600'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'border-b-2 border-theme-border text-theme-foreground'
+                  : 'text-theme-foreground hover:text-theme-accent'
               }`}
             >
               Notion
             </button>
             <button
               onClick={() => setActiveTab('elevenlabs')}
-              className={`px-4 py-2 font-medium ${
+              className={`px-4 py-2 font-medium transition-colors ${
                 activeTab === 'elevenlabs'
-                  ? 'border-b-2 border-blue-500 text-blue-600'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'border-b-2 border-theme-border text-theme-foreground'
+                  : 'text-theme-foreground hover:text-theme-accent'
               }`}
             >
               ElevenLabs AI
             </button>
             <button
               onClick={() => setActiveTab('account')}
-              className={`px-4 py-2 font-medium ${
+              className={`px-4 py-2 font-medium transition-colors ${
                 activeTab === 'account'
-                  ? 'border-b-2 border-blue-500 text-blue-600'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'border-b-2 border-theme-border text-theme-foreground'
+                  : 'text-theme-foreground hover:text-theme-accent'
               }`}
             >
               Account Info
@@ -370,11 +414,11 @@ export default function DashboardPage() {
             <div className="space-y-6">
               {!microsoftConnected ? (
                 <div className="text-center py-8">
-                  <div className="text-gray-500 text-lg mb-4">Microsoft account not connected</div>
+                  <div className="text-theme-foreground text-lg mb-4">Microsoft account not connected</div>
                   <Button 
                     onClick={handleMicrosoftConnect}
                     disabled={microsoftLoading}
-                    className="bg-blue-600 hover:bg-blue-700"
+                    className="bg-theme-primary hover:bg-theme-accent text-theme-primary-foreground border border-theme-border"
                   >
                     {microsoftLoading ? 'Connecting...' : 'Connect to Microsoft'}
                   </Button>
@@ -384,20 +428,20 @@ export default function DashboardPage() {
                   <div className="flex gap-4">
                     <button
                       onClick={() => setOutlookSubTab('calendar')}
-                      className={`px-4 py-2 font-medium rounded-lg ${
+                      className={`px-4 py-2 font-medium rounded-lg transition-colors ${
                         outlookSubTab === 'calendar'
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          ? 'bg-theme-primary text-theme-primary-foreground'
+                          : 'bg-theme-background text-theme-foreground hover:bg-theme-accent hover:text-theme-primary-foreground border border-theme-border'
                       }`}
                     >
                       Calendar
                     </button>
                     <button
                       onClick={() => setOutlookSubTab('email')}
-                      className={`px-4 py-2 font-medium rounded-lg ${
+                      className={`px-4 py-2 font-medium rounded-lg transition-colors ${
                         outlookSubTab === 'email'
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          ? 'bg-theme-primary text-theme-primary-foreground'
+                          : 'bg-theme-background text-theme-foreground hover:bg-theme-accent hover:text-theme-primary-foreground border border-theme-border'
                       }`}
                     >
                       Email
@@ -445,35 +489,35 @@ export default function DashboardPage() {
           )}
 
           {activeTab === 'account' && (
-            <div className="p-6 border rounded-lg">
-              <h2 className="text-xl font-semibold mb-4">Account Information</h2>
+            <div className="p-6 border border-theme-border rounded-lg bg-theme-background">
+              <h2 className="text-xl font-semibold mb-4 text-theme-foreground">Account Information</h2>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <p><strong>Email:</strong> {session?.user?.email}</p>
-                  <p><strong>Name:</strong> {session?.user?.name}</p>
-                  <p><strong>User ID:</strong> {session?.user?.id || 'Not available'}</p>
+                  <p className="text-theme-foreground"><strong>Email:</strong> {session?.user?.email}</p>
+                  <p className="text-theme-foreground"><strong>Name:</strong> {session?.user?.name}</p>
+                  <p className="text-theme-foreground"><strong>User ID:</strong> {session?.user?.id || 'Not available'}</p>
                 </div>
                 
-                <div className="border-t pt-4">
-                  <h3 className="text-lg font-medium mb-2">Connected Services</h3>
+                <div className="border-t border-theme-border pt-4">
+                  <h3 className="text-lg font-medium mb-2 text-theme-foreground">Connected Services</h3>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span><strong>Google:</strong> {googleConnected ? '✅ Connected' : '❌ Not connected'}</span>
+                      <span className="text-theme-foreground"><strong>Google:</strong> {googleConnected ? '✅ Connected' : '❌ Not connected'}</span>
                       {googleConnected && (
-                        <span className="text-sm text-gray-500">
+                        <span className="text-sm text-theme-foreground opacity-70">
                           Calendar & Gmail access enabled
                         </span>
                       )}
                     </div>
                     <div className="flex items-center justify-between">
-                      <span><strong>Microsoft:</strong> {microsoftConnected ? '✅ Connected' : '❌ Not connected'}</span>
+                      <span className="text-theme-foreground"><strong>Microsoft:</strong> {microsoftConnected ? '✅ Connected' : '❌ Not connected'}</span>
                       <div className="flex gap-2">
                         {!microsoftConnected ? (
                           <Button 
                             onClick={handleMicrosoftConnect}
                             disabled={microsoftLoading}
                             size="sm"
-                            className="bg-blue-600 hover:bg-blue-700"
+                            className="bg-theme-primary hover:bg-theme-accent text-theme-primary-foreground border border-theme-border"
                           >
                             {microsoftLoading ? 'Connecting...' : 'Connect'}
                           </Button>
@@ -537,6 +581,7 @@ export default function DashboardPage() {
             onClose={() => setShowSendOutlookEmailModal(false)}
             onSubmit={handleSendOutlookEmail}
           />
+          </div>
         </div>
       </main>
     </ProtectedRoute>

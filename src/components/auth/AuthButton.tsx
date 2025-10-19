@@ -21,11 +21,11 @@ export function AuthButton() {
               className="w-8 h-8 rounded-full"
             />
           )}
-          <span className="text-sm font-medium">
+          <span className="text-sm font-medium text-[#98CD85]">
             Welcome, {session.user.name || session.user.email}
           </span>
         </div>
-        <Button onClick={signOut} className="bg-white text-[#8A817C] hover:bg-gray-100 border-white">
+        <Button onClick={signOut} className="bg-[#98CD85] text-[#26200D] hover:bg-[#7AB370] border border-[#98CD85]">
           Sign Out
         </Button>
       </div>
@@ -33,7 +33,7 @@ export function AuthButton() {
   }
 
   return (
-    <Button onClick={signIn} className="bg-white text-[#8A817C] hover:bg-gray-100">
+    <Button onClick={signIn} className="bg-[#98CD85] text-[#26200D] hover:bg-[#7AB370] border border-[#98CD85]">
       Sign in
     </Button>
   );
