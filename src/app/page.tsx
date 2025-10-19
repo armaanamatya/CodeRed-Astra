@@ -16,7 +16,19 @@ export default function Home() {
           <h1 className="text-[107px]  leading-[normal] text-center relative z-30">
             <p className="text-[#98CD85] mb-0">Welcome To</p>
             <p className="leading-[normal]">
-              <span className="text-[#98CD85] navi-logo">NAVI</span><span className="text-[#98CD85]">!</span>
+              <span className="text-[#98CD85] navi-logo relative group cursor-pointer inline-block">
+                {/* SVG Background - Slides from center to right on hover */}
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out -z-10">
+                  <Image
+                    src="/assets/NaviDarkMode.svg"
+                    alt="NAVI Logo Background"
+                    width={120}
+                    height={40}
+                    className="transform translate-x-0 group-hover:translate-x-full transition-transform duration-300 ease-out"
+                  />
+                </div>
+                <span className="relative z-10">NAVI</span>
+              </span><span className="text-[#98CD85]">!</span>
             </p>
           </h1>
         </div>
