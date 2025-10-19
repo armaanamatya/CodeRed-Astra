@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import type { EventData } from '@/types/event.d';
 
 interface CalendarEvent {
   id: string;
@@ -23,7 +24,7 @@ interface CalendarEvent {
 }
 
 interface CalendarViewProps {
-  onCreateEvent: (eventData: any) => void;
+  onCreateEvent: (eventData: EventData) => void;
 }
 
 export default function CalendarView({ onCreateEvent }: CalendarViewProps) {
@@ -92,7 +93,13 @@ export default function CalendarView({ onCreateEvent }: CalendarViewProps) {
           <Button onClick={fetchEvents} variant="outline" size="sm">
             Refresh
           </Button>
-          <Button onClick={() => onCreateEvent({})} size="sm">
+          <Button onClick={() => onCreateEvent({
+            summary: '',
+            description: '',
+            startDateTime: '',
+            endDateTime: '',
+            location: ''
+          })} size="sm">
             Create Event
           </Button>
         </div>

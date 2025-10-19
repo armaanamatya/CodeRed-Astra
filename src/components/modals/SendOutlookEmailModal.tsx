@@ -2,11 +2,12 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import type { OutlookEmailData } from '@/types/event.d';
 
 interface SendOutlookEmailModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (emailData: any) => void;
+  onSubmit: (emailData: OutlookEmailData) => void;
 }
 
 export default function SendOutlookEmailModal({ 
@@ -14,7 +15,7 @@ export default function SendOutlookEmailModal({
   onClose, 
   onSubmit 
 }: SendOutlookEmailModalProps) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<OutlookEmailData>({
     to: '',
     subject: '',
     body: '',

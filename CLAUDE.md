@@ -11,15 +11,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Architecture
 
-**CodeRed Astra** is a Next.js 15 application with TypeScript, providing OAuth authentication and integration with Google and Microsoft services. The app enables users to manage Gmail, Google Calendar, Outlook email, and Microsoft Calendar through a unified interface.
+**CodeRed Astra** is a Next.js 15 application with TypeScript, providing OAuth authentication and integration with Google, Microsoft, and ElevenLabs services. The app enables users to manage Gmail, Google Calendar, Outlook email, Microsoft Calendar, and AI-powered text-to-speech through a unified dashboard interface.
 
 ### Core Technology Stack
 
 - **Framework**: Next.js 15 with App Router
-- **Authentication**: NextAuth.js v4 with MongoDB adapter
+- **Authentication**: NextAuth.js v4 with database sessions
 - **Database**: MongoDB (NAVI database) via Mongoose
 - **Styling**: Tailwind CSS v4 with Shadcn UI components
-- **APIs**: Google APIs (Gmail, Calendar) and Microsoft Graph API
+- **APIs**: Google APIs (Gmail, Calendar), Microsoft Graph API, and ElevenLabs AI
 
 ### Database Architecture
 
@@ -31,6 +31,8 @@ The custom User model includes:
 - Basic user info (email, name, image)
 - Google OAuth tokens (accessToken, refreshToken, tokenExpiry, googleId)
 - Microsoft OAuth tokens (microsoftAccessToken, microsoftRefreshToken, microsoftTokenExpiry, microsoftId)
+
+**Current Session Strategy**: Uses database sessions for persistent authentication across devices.
 
 ### Authentication Flow
 
@@ -54,6 +56,12 @@ The custom User model includes:
 - Microsoft Graph SDK integration
 - Separate token management for Microsoft services
 
+**ElevenLabs Integration APIs** (`/api/elevenlabs/`):
+- AI-powered text-to-speech functionality
+- Voice selection and audio generation
+- Subscription management and usage tracking
+- Audio streaming and file download capabilities
+
 **Database Connection**:
 - Mongoose connection with SSL/TLS configuration optimized for MongoDB Atlas
 - Connection caching for serverless environments
@@ -65,6 +73,7 @@ The custom User model includes:
 - **Service Views**: Dedicated components for Gmail, Calendar, Outlook in respective folders
 - **UI Components**: Shadcn UI components in `/components/ui/`
 - **Modals**: Service-specific modals for creating events and sending emails
+- **ElevenLabs Components**: AI voice synthesis components with subscription management in `/components/elevenlabs/`
 
 ### Environment Configuration
 
@@ -74,6 +83,7 @@ Required environment variables in `.env.local`:
 - `NEXTAUTH_URL` and `NEXTAUTH_SECRET`
 - Google OAuth: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
 - Microsoft OAuth: `MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET`, `MICROSOFT_TENANT_ID`
+- ElevenLabs: `ELEVENLABS_API_KEY`
 
 ### Key Implementation Details
 
@@ -86,6 +96,8 @@ Required environment variables in `.env.local`:
 **SSL Configuration**: MongoDB connections include specific SSL/TLS settings for Atlas compatibility
 
 **Session Strategy**: Database sessions for persistent authentication across devices
+
+**Authentication Redirects**: After successful sign-in, users are automatically redirected to `/dashboard`
 
 ### File Organization
 

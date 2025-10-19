@@ -13,9 +13,7 @@ import { SubscriptionInfo } from '@/components/elevenlabs/SubscriptionInfo';
 import UnifiedEventModal from '@/components/modals/UnifiedEventModal';
 import SendEmailModal from '@/components/modals/SendEmailModal';
 import SendOutlookEmailModal from '@/components/modals/SendOutlookEmailModal';
-import NotionMCPCalendarView from '@/components/notion/NotionMCPCalendarView';
-import { UnifiedEvent } from '@/types/calendar';
-import { CalendarService } from '@/lib/calendarService';
+import type { EventData, EmailData, OutlookEventData, OutlookEmailData } from '@/types/event.d';
 
 export default function DashboardPage() {
   const { session } = useAuth();
@@ -30,7 +28,7 @@ export default function DashboardPage() {
   const [selectedEvent, setSelectedEvent] = useState<UnifiedEvent | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
-  const handleCreateEvent = async (eventData: Partial<UnifiedEvent>) => {
+  const handleCreateEvent = async (eventData: EventData) => {
     try {
       console.log('Creating event:', eventData);
       
@@ -95,7 +93,7 @@ export default function DashboardPage() {
     }
   };
 
-  const handleSendEmail = async (emailData: any) => {
+  const handleSendEmail = async (emailData: EmailData) => {
     try {
       const response = await fetch('/api/gmail/send', {
         method: 'POST',
@@ -118,7 +116,30 @@ export default function DashboardPage() {
     }
   };
 
-  const handleSendOutlookEmail = async (emailData: any) => {
+  const handleCreateOutlookEvent = async (eventData: OutlookEventData) => {
+    try {
+      const response = await fetch('/api/outlook/calendar', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(eventData),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to create Outlook event');
+      }
+
+      alert('Outlook event created successfully!');
+    } catch (error) {
+      console.error('Error creating Outlook event:', error);
+      alert('Failed to create Outlook event. Please try again.');
+    }
+  };
+
+  const handleSendOutlookEmail = async (emailData: OutlookEmailData) => {
     try {
       const response = await fetch('/api/outlook/email', {
         method: 'POST',

@@ -1,12 +1,3 @@
-import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
-
-// Initialize ElevenLabs client
-export const createElevenLabsClient = (apiKey: string) => {
-  return new ElevenLabsClient({
-    apiKey: apiKey,
-  });
-};
-
 // Available voice models
 export const ELEVENLABS_VOICES = {
   RACHEL: "21m00Tcm4TlvDq8ikWAM",
@@ -36,83 +27,109 @@ export const DEFAULT_VOICE_SETTINGS: VoiceSettings = {
   useSpeakerBoost: true,
 };
 
-// Generate speech from text
+// Generate speech from text using REST API directly
 export async function generateSpeech(
   apiKey: string,
   text: string,
   voiceId: string = ELEVENLABS_VOICES.RACHEL,
   settings: VoiceSettings = DEFAULT_VOICE_SETTINGS
-) {
-  const client = createElevenLabsClient(apiKey);
-  
+): Promise<ReadableStream<Uint8Array>> {
   try {
-    const audio = await client.generate({
-      voice: voiceId,
-      text: text,
-      model_id: "eleven_monolingual_v1",
-      voice_settings: settings,
-    });
-    
-    return audio;
+    const response = await fetch(
+      `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}/stream`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'xi-api-key': apiKey,
+        },
+        body: JSON.stringify({
+          text: text,
+          model_id: 'eleven_monolingual_v1',
+          voice_settings: {
+            stability: settings.stability,
+            similarity_boost: settings.similarityBoost,
+            style: settings.style || 0,
+            use_speaker_boost: settings.useSpeakerBoost,
+          },
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(`ElevenLabs API error: ${JSON.stringify(error)}`);
+    }
+
+    if (!response.body) {
+      throw new Error('No response body from ElevenLabs API');
+    }
+
+    return response.body;
   } catch (error) {
-    console.error("Error generating speech:", error);
+    console.error('Error generating speech:', error);
     throw error;
   }
 }
 
 // Get available voices
 export async function getVoices(apiKey: string) {
-  const client = createElevenLabsClient(apiKey);
-  
   try {
-    const voices = await client.voices.getAll();
-    return voices.voices;
+    const response = await fetch('https://api.elevenlabs.io/v1/voices', {
+      method: 'GET',
+      headers: {
+        'xi-api-key': apiKey,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(`ElevenLabs API error: ${JSON.stringify(error)}`);
+    }
+
+    const data = await response.json();
+    return data.voices;
   } catch (error) {
-    console.error("Error fetching voices:", error);
+    console.error('Error fetching voices:', error);
     throw error;
   }
 }
 
 // Get user subscription info
 export async function getSubscriptionInfo(apiKey: string) {
-  const client = createElevenLabsClient(apiKey);
-  
   try {
-    const user = await client.user.get();
-    return user.subscription;
+    const response = await fetch('https://api.elevenlabs.io/v1/user/subscription', {
+      method: 'GET',
+      headers: {
+        'xi-api-key': apiKey,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(`ElevenLabs API error: ${JSON.stringify(error)}`);
+    }
+
+    const data = await response.json();
+    return data;
   } catch (error) {
-    console.error("Error fetching subscription info:", error);
+    console.error('Error fetching subscription info:', error);
     throw error;
   }
 }
 
-// Text to speech with streaming
+// Text to speech with streaming (same as generateSpeech)
 export async function streamSpeech(
   apiKey: string,
   text: string,
   voiceId: string = ELEVENLABS_VOICES.RACHEL,
   settings: VoiceSettings = DEFAULT_VOICE_SETTINGS
-) {
-  const client = createElevenLabsClient(apiKey);
-  
-  try {
-    const audioStream = await client.generate({
-      stream: true,
-      voice: voiceId,
-      text: text,
-      model_id: "eleven_monolingual_v1",
-      voice_settings: settings,
-    });
-    
-    return audioStream;
-  } catch (error) {
-    console.error("Error streaming speech:", error);
-    throw error;
-  }
+): Promise<ReadableStream<Uint8Array>> {
+  return generateSpeech(apiKey, text, voiceId, settings);
 }
 
 // Convert audio stream to blob for frontend playback
-export async function streamToBlob(stream: ReadableStream): Promise<Blob> {
+export async function streamToBlob(stream: ReadableStream<Uint8Array>): Promise<Blob> {
   const reader = stream.getReader();
   const chunks: Uint8Array[] = [];
 

@@ -2,15 +2,16 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import type { EventData } from '@/types/event.d';
 
 interface CreateEventModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (eventData: any) => void;
+  onSubmit: (eventData: EventData) => void;
 }
 
 export default function CreateEventModal({ isOpen, onClose, onSubmit }: CreateEventModalProps) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<EventData>({
     summary: '',
     description: '',
     startDateTime: '',
