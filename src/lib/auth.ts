@@ -46,52 +46,9 @@ export const authOptions: NextAuthOptions = {
       // Default to dashboard for external URLs
       return `${baseUrl}/dashboard`;
     },
-<<<<<<< HEAD
-    async signIn({ user, account, profile }) {
-      if (account?.provider === 'google') {
-        try {
-          await connectDB();
-          
-          // Save or update user in database
-          const updateData: any = {
-            email: user.email,
-            name: user.name,
-            image: user.image,
-            emailVerified: new Date(),
-          };
-
-          // Handle Google OAuth
-          if (account.provider === 'google') {
-            updateData.googleId = account.providerAccountId;
-            updateData.accessToken = account.access_token;
-            updateData.refreshToken = account.refresh_token;
-            updateData.tokenExpiry = account.expires_at ? new Date(account.expires_at * 1000) : undefined;
-          }
-
-          // Handle other OAuth providers if needed
-          // if (account.provider === 'notion') {
-          //   updateData.notionToken = account.access_token;
-          //   updateData.notionWorkspaceId = account.workspace_id;
-          // }
-
-          await User.findOneAndUpdate(
-            { email: user.email },
-            updateData,
-            { upsert: true, new: true }
-          );
-
-          console.log(`✅ User ${user.email} saved to database`);
-        } catch (error) {
-          console.error('Database save error during sign in:', error);
-          // Continue with sign in even if database save fails
-        }
-      }
-      return true; // Always allow sign in
-=======
     async signIn() {
       // Always allow sign in - we handle user creation/updates in the JWT callback
       return true;
->>>>>>> ce37ec3 (half-half)
     },
     async session({ session, token }) {
       // Add user ID to session from token
