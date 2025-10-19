@@ -35,17 +35,12 @@ export default function Home() {
             <p className="text-[#98CD85] mb-0">Welcome To</p>
             <p className="leading-[normal]">
               <span className="text-[#98CD85] navi-logo relative group cursor-pointer inline-block">
-                {/* SVG Background - Slides from center to right on hover */}
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out -z-10">
-                  <Image
-                    src="/assets/NaviDarkMode.svg"
-                    alt="NAVI Logo Background"
-                    width={120}
-                    height={40}
-                    className="transform translate-x-0 group-hover:translate-x-full transition-transform duration-300 ease-out"
-                  />
+                <div className="relative z-10">
+                  <span className="inline-block hover:transform hover:translate-y-[-2px] hover:scale-110 transition-all duration-200 ease-in-out">N</span>
+                  <span className="inline-block hover:transform hover:translate-y-[-2px] hover:scale-110 transition-all duration-200 ease-in-out">A</span>
+                  <span className="inline-block hover:transform hover:translate-y-[-2px] hover:scale-110 transition-all duration-200 ease-in-out">V</span>
+                  <span className="inline-block hover:transform hover:translate-y-[-2px] hover:scale-110 transition-all duration-200 ease-in-out">I</span>
                 </div>
-                <span className="relative z-10">NAVI</span>
               </span><span className="text-[#98CD85]">!</span>
             </p>
           </h1>
@@ -56,7 +51,19 @@ export default function Home() {
       <section className="min-h-screen flex items-center justify-center bg-[#26200D] relative z-10">
         <div className="text-center max-w-4xl mx-auto px-8 relative z-20">
           <h2 className="text-6xl  text-[#98CD85] mb-8 relative z-30">
-            About <span className="text-[#98CD85] navi-logo">NAVI</span>
+            About <span className="text-[#98CD85] navi-logo relative group cursor-pointer inline-block">
+              {/* SVG Background - Slides from center to right on hover */}
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out -z-10">
+                <Image
+                  src="/assets/NaviDarkMode.svg"
+                  alt="NAVI Logo Background"
+                  width={120}
+                  height={40}
+                  className="transform translate-x-0 group-hover:translate-x-full transition-transform duration-300 ease-out"
+                />
+              </div>
+              <span className="relative z-10">NAVI</span>
+            </span>
           </h2>
           <p className="text-xl  text-[#98CD85] leading-relaxed relative z-30">
             NAVI is your intelligent assistant designed to help you navigate through your digital life. 
