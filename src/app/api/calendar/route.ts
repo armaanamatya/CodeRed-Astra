@@ -37,11 +37,17 @@ export async function GET(request: NextRequest) {
     // Initialize Calendar API
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
 
+    // Get date parameters
+    const { searchParams } = new URL(request.url);
+    const startDate = searchParams.get('startDate');
+    const endDate = searchParams.get('endDate');
+
     // Get calendar events
     const events = await calendar.events.list({
       calendarId: 'primary',
-      timeMin: new Date().toISOString(),
-      maxResults: 20,
+      timeMin: startDate || new Date().toISOString(),
+      timeMax: endDate,
+      maxResults: 50,
       singleEvents: true,
       orderBy: 'startTime',
     });

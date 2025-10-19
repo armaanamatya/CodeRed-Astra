@@ -4,46 +4,91 @@ import React, { useState } from 'react';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
-import CalendarView from '@/components/calendar/CalendarView';
+import UnifiedCalendarGrid from '@/components/calendar/UnifiedCalendarGrid';
 import GmailView from '@/components/gmail/GmailView';
 import OutlookCalendarView from '@/components/outlook/OutlookCalendarView';
 import OutlookEmailView from '@/components/outlook/OutlookEmailView';
 import { TextToSpeechForm } from '@/components/elevenlabs/TextToSpeechForm';
 import { SubscriptionInfo } from '@/components/elevenlabs/SubscriptionInfo';
-import CreateEventModal from '@/components/modals/CreateEventModal';
+import UnifiedEventModal from '@/components/modals/UnifiedEventModal';
 import SendEmailModal from '@/components/modals/SendEmailModal';
-import CreateOutlookEventModal from '@/components/modals/CreateOutlookEventModal';
 import SendOutlookEmailModal from '@/components/modals/SendOutlookEmailModal';
+import NotionMCPCalendarView from '@/components/notion/NotionMCPCalendarView';
+import { UnifiedEvent } from '@/types/calendar';
+import { CalendarService } from '@/lib/calendarService';
 
 export default function DashboardPage() {
   const { session } = useAuth();
-  const [showCreateEventModal, setShowCreateEventModal] = useState(false);
+  const [showUnifiedEventModal, setShowUnifiedEventModal] = useState(false);
   const [showSendEmailModal, setShowSendEmailModal] = useState(false);
-  const [showCreateOutlookEventModal, setShowCreateOutlookEventModal] = useState(false);
   const [showSendOutlookEmailModal, setShowSendOutlookEmailModal] = useState(false);
-  const [activeTab, setActiveTab] = useState<'calendar' | 'gmail' | 'outlook' | 'elevenlabs' | 'account'>('calendar');
+  const [activeTab, setActiveTab] = useState<'unified' | 'gmail' | 'outlook' | 'notion' | 'elevenlabs' | 'account'>('unified');
   const [outlookSubTab, setOutlookSubTab] = useState<'calendar' | 'email'>('calendar');
   const [googleConnected, setGoogleConnected] = useState(false);
   const [microsoftConnected, setMicrosoftConnected] = useState(false);
   const [microsoftLoading, setMicrosoftLoading] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<UnifiedEvent | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
-  const handleCreateEvent = async (eventData: any) => {
+  const handleCreateEvent = async (eventData: Partial<UnifiedEvent>) => {
     try {
-      const response = await fetch('/api/calendar', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(eventData),
-      });
+      console.log('Creating event:', eventData);
+      
+      // Create event directly via the appropriate API based on source
+      let response;
+      if (eventData.source === 'google') {
+        response = await fetch('/api/calendar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            summary: eventData.title,
+            description: eventData.description,
+            startDateTime: eventData.start,
+            endDateTime: eventData.end
+          })
+        });
+      } else if (eventData.source === 'outlook') {
+        response = await fetch('/api/outlook/calendar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            subject: eventData.title,
+            body: eventData.description,
+            startDateTime: eventData.start,
+            endDateTime: eventData.end,
+            location: eventData.location
+          })
+        });
+      } else if (eventData.source === 'notion') {
+        response = await fetch('/api/notion-mcp/calendar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: eventData.title,
+            description: eventData.description,
+            start: eventData.start,
+            end: eventData.end,
+            location: eventData.location,
+            allDay: eventData.allDay
+          })
+        });
+      } else {
+        throw new Error('Invalid event source');
+      }
 
       const result = await response.json();
-
+      
       if (!response.ok) {
         throw new Error(result.error || 'Failed to create event');
       }
 
       alert('Event created successfully!');
+      setShowUnifiedEventModal(false);
+      
+      // Clear cache to refresh data
+      const calendarService = CalendarService.getInstance();
+      calendarService.clearCache();
+      
     } catch (error) {
       console.error('Error creating event:', error);
       alert('Failed to create event. Please try again.');
@@ -70,29 +115,6 @@ export default function DashboardPage() {
     } catch (error) {
       console.error('Error sending email:', error);
       alert('Failed to send email. Please try again.');
-    }
-  };
-
-  const handleCreateOutlookEvent = async (eventData: any) => {
-    try {
-      const response = await fetch('/api/outlook/calendar', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(eventData),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to create Outlook event');
-      }
-
-      alert('Outlook event created successfully!');
-    } catch (error) {
-      console.error('Error creating Outlook event:', error);
-      alert('Failed to create Outlook event. Please try again.');
     }
   };
 
@@ -239,14 +261,14 @@ export default function DashboardPage() {
           {/* Tab Navigation */}
           <div className="flex gap-4 mb-6 border-b">
             <button
-              onClick={() => setActiveTab('calendar')}
+              onClick={() => setActiveTab('unified')}
               className={`px-4 py-2 font-medium ${
-                activeTab === 'calendar'
+                activeTab === 'unified'
                   ? 'border-b-2 border-blue-500 text-blue-600'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              Google Calendar
+              Unified Calendar
             </button>
             <button
               onClick={() => setActiveTab('gmail')}
@@ -267,6 +289,16 @@ export default function DashboardPage() {
               }`}
             >
               Outlook
+            </button>
+            <button
+              onClick={() => setActiveTab('notion')}
+              className={`px-4 py-2 font-medium ${
+                activeTab === 'notion'
+                  ? 'border-b-2 border-blue-500 text-blue-600'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Notion
             </button>
             <button
               onClick={() => setActiveTab('elevenlabs')}
@@ -291,8 +323,22 @@ export default function DashboardPage() {
           </div>
 
           {/* Tab Content */}
-          {activeTab === 'calendar' && (
-            <CalendarView onCreateEvent={() => setShowCreateEventModal(true)} />
+          {activeTab === 'unified' && (
+            <UnifiedCalendarGrid
+              onEventClick={(event) => {
+                setSelectedEvent(event);
+                // You could show an event details modal here
+                console.log('Event clicked:', event);
+              }}
+              onCreateEvent={(date) => {
+                setSelectedDate(date || null);
+                setShowUnifiedEventModal(true);
+              }}
+              onDateClick={(date) => {
+                setSelectedDate(date);
+                setShowUnifiedEventModal(true);
+              }}
+            />
           )}
 
           {activeTab === 'gmail' && (
@@ -338,7 +384,7 @@ export default function DashboardPage() {
                   </div>
                   
                   {outlookSubTab === 'calendar' && (
-                    <OutlookCalendarView onCreateEvent={() => setShowCreateOutlookEventModal(true)} />
+                    <OutlookCalendarView onCreateEvent={() => setShowUnifiedEventModal(true)} />
                   )}
                   
                   {outlookSubTab === 'email' && (
@@ -347,6 +393,10 @@ export default function DashboardPage() {
                 </div>
               )}
             </div>
+          )}
+
+          {activeTab === 'notion' && (
+            <NotionMCPCalendarView onCreateEvent={() => setShowUnifiedEventModal(true)} />
           )}
 
           {activeTab === 'elevenlabs' && (
@@ -447,22 +497,18 @@ export default function DashboardPage() {
           )}
 
           {/* Modals */}
-          <CreateEventModal
-            isOpen={showCreateEventModal}
-            onClose={() => setShowCreateEventModal(false)}
+          <UnifiedEventModal
+            isOpen={showUnifiedEventModal}
+            onClose={() => setShowUnifiedEventModal(false)}
             onSubmit={handleCreateEvent}
+            initialData={selectedEvent || undefined}
+            targetSource={selectedEvent?.source}
           />
 
           <SendEmailModal
             isOpen={showSendEmailModal}
             onClose={() => setShowSendEmailModal(false)}
             onSubmit={handleSendEmail}
-          />
-
-          <CreateOutlookEventModal
-            isOpen={showCreateOutlookEventModal}
-            onClose={() => setShowCreateOutlookEventModal(false)}
-            onSubmit={handleCreateOutlookEvent}
           />
 
           <SendOutlookEmailModal

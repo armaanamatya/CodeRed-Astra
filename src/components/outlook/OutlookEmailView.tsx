@@ -3,13 +3,13 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 
-interface OutlookEmail {
+interface OutlookMessage {
   id: string;
   subject: string;
   from: {
     emailAddress: {
-      address: string;
       name: string;
+      address: string;
     };
   };
   receivedDateTime: string;
@@ -18,6 +18,7 @@ interface OutlookEmail {
     contentType: string;
   };
   isRead: boolean;
+  importance: string;
 }
 
 interface OutlookEmailViewProps {
@@ -25,11 +26,12 @@ interface OutlookEmailViewProps {
 }
 
 export default function OutlookEmailView({ onSendEmail }: OutlookEmailViewProps) {
-  const [emails, setEmails] = useState<OutlookEmail[]>([]);
+  const [messages, setMessages] = useState<OutlookMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedMessage, setSelectedMessage] = useState<OutlookMessage | null>(null);
 
-  const fetchEmails = async () => {
+  const fetchMessages = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -38,40 +40,47 @@ export default function OutlookEmailView({ onSendEmail }: OutlookEmailViewProps)
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to fetch Outlook emails');
+        throw new Error(data.error || 'Failed to fetch Outlook messages');
       }
 
-      setEmails(data.messages || []);
+      setMessages(data.messages || []);
     } catch (err) {
-      console.error('Error fetching Outlook emails:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch emails');
+      setError(err instanceof Error ? err.message : 'Failed to fetch messages');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchEmails();
+    fetchMessages();
   }, []);
 
-  const formatDateTime = (dateTime: string) => {
-    return new Date(dateTime).toLocaleString();
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
-  const getEmailPreview = (body: { content: string; contentType: string }) => {
-    if (body.contentType === 'text') {
-      return body.content.substring(0, 200);
-    } else {
-      // Remove HTML tags for preview
-      return body.content.replace(/<[^>]*>/g, '').substring(0, 200);
+  const getImportanceColor = (importance: string) => {
+    switch (importance.toLowerCase()) {
+      case 'high':
+        return 'text-red-600 bg-red-50';
+      case 'low':
+        return 'text-gray-600 bg-gray-50';
+      default:
+        return 'text-blue-600 bg-blue-50';
     }
+  };
+
+  const stripHtml = (html: string) => {
+    return html.replace(/<[^>]*>/g, '');
   };
 
   if (loading) {
     return (
-      <div className="p-6">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-lg">Loading Outlook emails...</div>
+      <div className="p-6 border rounded-lg">
+        <h2 className="text-xl font-semibold mb-4">Outlook Email</h2>
+        <div className="flex items-center justify-center h-32">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
         </div>
       </div>
     );
@@ -79,71 +88,124 @@ export default function OutlookEmailView({ onSendEmail }: OutlookEmailViewProps)
 
   if (error) {
     return (
-      <div className="p-6">
-        <div className="text-center">
-          <div className="text-red-600 mb-4">Error: {error}</div>
-          <Button onClick={fetchEmails} variant="outline">
-            Try Again
-          </Button>
-        </div>
+      <div className="p-6 border rounded-lg">
+        <h2 className="text-xl font-semibold mb-4">Outlook Email</h2>
+        <div className="text-red-600 mb-4">{error}</div>
+        <Button onClick={fetchMessages} variant="outline">
+          Retry
+        </Button>
       </div>
     );
   }
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Outlook Email</h2>
+    <div className="p-6 border rounded-lg">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold">Outlook Email</h2>
         <div className="flex gap-2">
-          <Button onClick={fetchEmails} variant="outline">
+          <Button onClick={fetchMessages} variant="outline" size="sm">
             Refresh
           </Button>
-          <Button onClick={onSendEmail}>
+          <Button onClick={onSendEmail} size="sm">
             Send Email
           </Button>
         </div>
       </div>
 
-      {emails.length === 0 ? (
-        <div className="text-center py-8">
-          <div className="text-gray-500 text-lg">No Outlook emails found</div>
-          <div className="text-gray-400 mt-2">Your inbox appears to be empty</div>
+      {messages.length === 0 ? (
+        <div className="text-center py-8 text-gray-500">
+          <p>No Outlook messages found.</p>
+          <p className="text-sm mt-2">Send your first email to get started!</p>
         </div>
       ) : (
-        <div className="space-y-4">
-          {emails.map((email) => (
+        <div className="space-y-4 max-h-96 overflow-y-auto">
+          {messages.map((message) => (
             <div 
-              key={email.id} 
-              className={`border rounded-lg p-4 hover:shadow-md transition-shadow ${
-                !email.isRead ? 'bg-blue-50 border-blue-200' : 'bg-white'
+              key={message.id} 
+              className={`p-4 border rounded-lg hover:bg-gray-50 cursor-pointer ${
+                !message.isRead ? 'bg-blue-50 border-blue-200' : ''
               }`}
+              onClick={() => setSelectedMessage(message)}
             >
               <div className="flex justify-between items-start">
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      {email.subject || 'No Subject'}
-                    </h3>
-                    {!email.isRead && (
-                      <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-semibold text-lg">{message.subject || 'No Subject'}</h3>
+                    {!message.isRead && (
+                      <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
                         New
                       </span>
                     )}
+                    <span className={`px-2 py-1 text-xs rounded-full ${getImportanceColor(message.importance)}`}>
+                      {message.importance}
+                    </span>
                   </div>
-                  <div className="text-sm text-gray-600 mb-2">
-                    <strong>From:</strong> {email.from.emailAddress.name || email.from.emailAddress.address}
-                  </div>
-                  <div className="text-sm text-gray-500 mb-3">
-                    {formatDateTime(email.receivedDateTime)}
-                  </div>
-                  <div className="text-gray-700">
-                    {getEmailPreview(email.body)}
-                    {getEmailPreview(email.body).length >= 200 && '...'}
-                  </div>
+                  <p className="text-sm text-gray-600 mb-2">
+                    <strong>From:</strong> {message.from.emailAddress.name || message.from.emailAddress.address}
+                  </p>
+                  <p className="text-sm text-gray-500 mb-2">
+                    <strong>Date:</strong> {formatDate(message.receivedDateTime)}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    {message.body?.content ? stripHtml(message.body.content).substring(0, 200) + '...' : 'No preview available'}
+                  </p>
                 </div>
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Message Detail Modal */}
+      {selectedMessage && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">{selectedMessage.subject || 'No Subject'}</h2>
+              <button
+                onClick={() => setSelectedMessage(null)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <strong>From:</strong> {selectedMessage.from.emailAddress.name || selectedMessage.from.emailAddress.address}
+              </div>
+              <div>
+                <strong>Date:</strong> {formatDate(selectedMessage.receivedDateTime)}
+              </div>
+              <div>
+                <strong>Importance:</strong> {selectedMessage.importance}
+              </div>
+              <div>
+                <strong>Status:</strong> {selectedMessage.isRead ? 'Read' : 'Unread'}
+              </div>
+              
+              <div className="border-t pt-4">
+                <strong>Message:</strong>
+                <div className="mt-2 p-4 bg-gray-50 rounded-lg">
+                  {selectedMessage.body?.content ? (
+                    <div dangerouslySetInnerHTML={{ __html: selectedMessage.body.content }} />
+                  ) : (
+                    <p className="text-gray-500">No message content available</p>
+                  )}
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex gap-3 pt-4">
+              <Button
+                onClick={() => setSelectedMessage(null)}
+                variant="outline"
+                className="flex-1"
+              >
+                Close
+              </Button>
+            </div>
+          </div>
         </div>
       )}
     </div>

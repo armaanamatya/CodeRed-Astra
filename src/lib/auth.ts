@@ -6,10 +6,11 @@ import connectDB from './db/mongodb';
 import User from '@/models/User';
 
 export const authOptions: NextAuthOptions = {
-  // Temporarily disable MongoDB adapter due to SSL issues and account linking conflicts
+  // Temporarily disable MongoDB adapter due to connection issues
   // adapter: MongoDBAdapter(clientPromise),
   session: {
-    strategy: "jwt",
+    strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   providers: [
     GoogleProvider({
@@ -31,7 +32,7 @@ export const authOptions: NextAuthOptions = {
           prompt: 'consent',
         },
       },
-    }),
+      }),
   ],
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
@@ -48,27 +49,55 @@ export const authOptions: NextAuthOptions = {
       return `${baseUrl}/dashboard`;
     },
     async signIn({ user, account, profile }) {
-      // Always allow sign in - we handle user creation/updates in the JWT callback
-      return true;
+      if (account?.provider === 'google') {
+        try {
+          await connectDB();
+          
+          // Save or update user in database
+          const updateData: any = {
+            email: user.email,
+            name: user.name,
+            image: user.image,
+            emailVerified: new Date(),
+          };
+
+          // Handle Google OAuth
+          if (account.provider === 'google') {
+            updateData.googleId = account.providerAccountId;
+            updateData.accessToken = account.access_token;
+            updateData.refreshToken = account.refresh_token;
+            updateData.tokenExpiry = account.expires_at ? new Date(account.expires_at * 1000) : undefined;
+          }
+
+          // Handle other OAuth providers if needed
+          // if (account.provider === 'notion') {
+          //   updateData.notionToken = account.access_token;
+          //   updateData.notionWorkspaceId = account.workspace_id;
+          // }
+
+          await User.findOneAndUpdate(
+            { email: user.email },
+            updateData,
+            { upsert: true, new: true }
+          );
+
+          console.log(`✅ User ${user.email} saved to database`);
+        } catch (error) {
+          console.error('Database save error during sign in:', error);
+          // Continue with sign in even if database save fails
+        }
+      }
+      return true; // Always allow sign in
     },
-    async session({ session, user }) {
-      // Add guard to check if user exists
-      if (!user) {
-        return session;
+    async session({ session, token }) {
+      // Add user ID to session from token
+      if (token?.id) {
+        session.user.id = token.id as string;
       }
       
-      // Add user ID to session
-      session.user.id = user.id;
-      
-      // Get fresh access token from our custom User model
-      try {
-        await connectDB();
-        const dbUser = await User.findOne({ email: session.user.email });
-        if (dbUser?.accessToken) {
-          session.accessToken = dbUser.accessToken;
-        }
-      } catch (error) {
-        console.error('Error fetching access token:', error);
+      // Add access token to session
+      if (token?.accessToken) {
+        session.accessToken = token.accessToken as string;
       }
       
       return session;
@@ -95,7 +124,7 @@ export const authOptions: NextAuthOptions = {
             { upsert: true, new: true }
           );
 
-          console.log(`✅ User ${user.email} saved to NAVI database`);
+          console.log(`✅ User ${user.email} saved to database`);
 
           return {
             ...token,

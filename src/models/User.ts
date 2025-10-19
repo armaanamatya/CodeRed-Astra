@@ -13,6 +13,8 @@ export interface IUser extends Document {
   microsoftAccessToken?: string;
   microsoftRefreshToken?: string;
   microsoftTokenExpiry?: Date;
+  notionToken?: string;
+  notionWorkspaceId?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -63,6 +65,12 @@ const userSchema = new Schema<IUser>(
     },
     microsoftTokenExpiry: {
       type: Date,
+    },
+    notionToken: {
+      type: String,
+    },
+    notionWorkspaceId: {
+      type: String,
     },
   },
   {
