@@ -2,14 +2,24 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { google } from 'googleapis';
+import { getFreshGoogleToken } from '@/lib/googleAuth';
 
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session?.user?.email || !session?.accessToken) {
+    if (!session?.user?.email) {
       return NextResponse.json(
-        { error: 'Unauthorized - No valid session or access token' },
+        { error: 'Unauthorized - No valid session' },
+        { status: 401 }
+      );
+    }
+
+    // Get fresh Google access token
+    const accessToken = await getFreshGoogleToken(session.user.email);
+    if (!accessToken) {
+      return NextResponse.json(
+        { error: 'Google account not connected or token refresh failed' },
         { status: 401 }
       );
     }
@@ -30,22 +40,28 @@ export async function POST(request: NextRequest) {
     );
 
     oauth2Client.setCredentials({
-      access_token: session.accessToken,
+      access_token: accessToken,
     });
 
     // Initialize Gmail API
     const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
 
-    // Create email message
-    const email = [
+    // Create email message with proper MIME format
+    const emailLines = [
       `To: ${to}`,
-      cc ? `Cc: ${cc}` : '',
-      bcc ? `Bcc: ${bcc}` : '',
+      cc ? `Cc: ${cc}` : null,
+      bcc ? `Bcc: ${bcc}` : null,
       `Subject: ${subject}`,
+      'MIME-Version: 1.0',
       'Content-Type: text/html; charset=utf-8',
-      '',
+      '', // Empty line between headers and body is REQUIRED
       body,
-    ].filter(line => line !== '').join('\n');
+    ];
+    
+    // Filter out null values but keep empty strings
+    const email = emailLines
+      .filter(line => line !== null)
+      .join('\r\n');
 
     // Encode email in base64url format
     const encodedEmail = Buffer.from(email)

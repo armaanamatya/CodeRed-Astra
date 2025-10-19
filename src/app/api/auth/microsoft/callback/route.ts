@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
         code: code,
         redirect_uri: process.env.MICROSOFT_REDIRECT_URI!,
         grant_type: 'authorization_code',
-        scope: 'https://graph.microsoft.com/calendars.readwrite https://graph.microsoft.com/mail.readwrite https://graph.microsoft.com/user.read',
+        scope: 'openid profile email offline_access Calendars.ReadWrite Mail.ReadWrite Mail.Send User.Read',
       }),
     });
 

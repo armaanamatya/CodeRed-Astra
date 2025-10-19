@@ -7,28 +7,39 @@ import { useAuth } from '@/hooks/useAuth';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import Image from 'next/image';
 import UnifiedCalendarGrid from '@/components/calendar/UnifiedCalendarGrid';
-import GmailView from '@/components/gmail/GmailView';
-import OutlookCalendarView from '@/components/outlook/OutlookCalendarView';
-import OutlookEmailView from '@/components/outlook/OutlookEmailView';
+import UnifiedEmailView from '@/components/email/UnifiedEmailView';
 import { TextToSpeechForm } from '@/components/elevenlabs/TextToSpeechForm';
 import { SubscriptionInfo } from '@/components/elevenlabs/SubscriptionInfo';
 import UnifiedEventModal from '@/components/modals/UnifiedEventModal';
 import SendEmailModal from '@/components/modals/SendEmailModal';
 import SendOutlookEmailModal from '@/components/modals/SendOutlookEmailModal';
-import type { EventData, EmailData, OutlookEventData, OutlookEmailData } from '@/types/event.d';
+import NotionMCPCalendarView from '@/components/notion/NotionMCPCalendarView';
+import { UnifiedEvent } from '@/types/calendar';
+import { CalendarService } from '@/lib/calendarService';
+import { ToastContainer } from '@/components/ui/toast';
+import type { ToastType } from '@/components/ui/toast';
 
 export default function DashboardPage() {
   const { session, signOut } = useAuth();
   const [showUnifiedEventModal, setShowUnifiedEventModal] = useState(false);
   const [showSendEmailModal, setShowSendEmailModal] = useState(false);
   const [showSendOutlookEmailModal, setShowSendOutlookEmailModal] = useState(false);
-  const [activeTab, setActiveTab] = useState<'unified' | 'gmail' | 'outlook' | 'notion' | 'elevenlabs' | 'account'>('unified');
-  const [outlookSubTab, setOutlookSubTab] = useState<'calendar' | 'email'>('calendar');
+  const [activeTab, setActiveTab] = useState<'calendar' | 'emails' | 'notion' | 'elevenlabs' | 'account'>('calendar');
   const [googleConnected, setGoogleConnected] = useState(false);
   const [microsoftConnected, setMicrosoftConnected] = useState(false);
   const [microsoftLoading, setMicrosoftLoading] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<UnifiedEvent | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [toasts, setToasts] = useState<Array<{ id: string; message: string; type: ToastType }>>([]);
+
+  const showToast = (message: string, type: ToastType) => {
+    const id = Math.random().toString(36).substring(7);
+    setToasts((prev) => [...prev, { id, message, type }]);
+  };
+
+  const removeToast = (id: string) => {
+    setToasts((prev) => prev.filter((toast) => toast.id !== id));
+  };
 
   const handleCreateEvent = async (eventData: EventData) => {
     try {
@@ -82,7 +93,7 @@ export default function DashboardPage() {
         throw new Error(result.error || 'Failed to create event');
       }
 
-      alert('Event created successfully!');
+      showToast('Event created successfully!', 'success');
       setShowUnifiedEventModal(false);
       
       // Clear cache to refresh data
@@ -91,7 +102,7 @@ export default function DashboardPage() {
       
     } catch (error) {
       console.error('Error creating event:', error);
-      alert('Failed to create event. Please try again.');
+      showToast('Failed to create event. Please try again.', 'error');
     }
   };
 
@@ -111,13 +122,15 @@ export default function DashboardPage() {
         throw new Error(result.error || 'Failed to send email');
       }
 
-      alert('Email sent successfully!');
+      showToast('Email sent successfully!', 'success');
+      setShowSendEmailModal(false);
     } catch (error) {
       console.error('Error sending email:', error);
-      alert('Failed to send email. Please try again.');
+      showToast('Failed to send email. Please try again.', 'error');
     }
   };
 
+<<<<<<< HEAD
   const handleCreateOutlookEvent = async (eventData: OutlookEventData) => {
     try {
       const response = await fetch('/api/outlook/calendar', {
@@ -150,19 +163,32 @@ export default function DashboardPage() {
         },
         body: JSON.stringify(emailData),
       });
+=======
+  // Temporarily disabled - Microsoft Graph permission issues
+  // const handleSendOutlookEmail = async (emailData: any) => {
+  //   try {
+  //     const response = await fetch('/api/outlook/email', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify(emailData),
+  //     });
+>>>>>>> 23f982b (fixing send email and gmail and outlook logos)
 
-      const result = await response.json();
+  //     const result = await response.json();
 
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to send Outlook email');
-      }
+  //     if (!response.ok) {
+  //       throw new Error(result.error || 'Failed to send Outlook email');
+  //     }
 
-      alert('Outlook email sent successfully!');
-    } catch (error) {
-      console.error('Error sending Outlook email:', error);
-      alert('Failed to send Outlook email. Please try again.');
-    }
-  };
+  //     showToast('Outlook email sent successfully!', 'success');
+  //     setShowSendOutlookEmailModal(false);
+  //   } catch (error) {
+  //     console.error('Error sending Outlook email:', error);
+  //     showToast('Failed to send Outlook email. Please try again.', 'error');
+  //   }
+  // };
 
   const handleMicrosoftConnect = async () => {
     try {
@@ -176,14 +202,14 @@ export default function DashboardPage() {
 
       if (data.connected) {
         setMicrosoftConnected(true);
-        alert('Microsoft account is already connected!');
+        showToast('Microsoft account is already connected!', 'info');
       } else {
         // Redirect to Microsoft OAuth
         window.location.href = data.authUrl;
       }
     } catch (error) {
       console.error('Error connecting to Microsoft:', error);
-      alert('Failed to connect to Microsoft. Please try again.');
+      showToast('Failed to connect to Microsoft. Please try again.', 'error');
     } finally {
       setMicrosoftLoading(false);
     }
@@ -215,7 +241,35 @@ export default function DashboardPage() {
       window.location.href = data.authUrl;
     } catch (error) {
       console.error('Error reconnecting to Microsoft:', error);
-      alert('Failed to reconnect to Microsoft. Please try again.');
+      showToast('Failed to reconnect to Microsoft. Please try again.', 'error');
+    } finally {
+      setMicrosoftLoading(false);
+    }
+  };
+
+  const handleMicrosoftDisconnect = async () => {
+    try {
+      const confirmed = window.confirm('Are you sure you want to disconnect your Microsoft account? You will need to reconnect to use Outlook features.');
+      
+      if (!confirmed) return;
+
+      setMicrosoftLoading(true);
+      
+      const response = await fetch('/api/microsoft/disconnect', {
+        method: 'POST',
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to disconnect Microsoft account');
+      }
+
+      setMicrosoftConnected(false);
+      showToast('Microsoft account disconnected successfully', 'success');
+    } catch (error) {
+      console.error('Error disconnecting Microsoft:', error);
+      showToast('Failed to disconnect Microsoft account', 'error');
     } finally {
       setMicrosoftLoading(false);
     }
@@ -326,34 +380,24 @@ export default function DashboardPage() {
           {/* Tab Navigation */}
           <div className="flex gap-4 mb-6 border-b border-theme-border">
             <button
-              onClick={() => setActiveTab('unified')}
-              className={`px-4 py-2 font-medium transition-colors ${
-                activeTab === 'unified'
-                  ? 'border-b-2 border-theme-border text-theme-foreground'
-                  : 'text-theme-foreground hover:text-theme-accent'
+              onClick={() => setActiveTab('calendar')}
+              className={`px-4 py-2 font-medium ${
+                activeTab === 'calendar'
+                  ? 'border-b-2 border-blue-500 text-blue-600'
+                  : 'text-gray-500 hover:text-gray-700'
               }`}
             >
               Unified Calendar
             </button>
             <button
-              onClick={() => setActiveTab('gmail')}
-              className={`px-4 py-2 font-medium transition-colors ${
-                activeTab === 'gmail'
-                  ? 'border-b-2 border-theme-border text-theme-foreground'
-                  : 'text-theme-foreground hover:text-theme-accent'
+              onClick={() => setActiveTab('emails')}
+              className={`px-4 py-2 font-medium ${
+                activeTab === 'emails'
+                  ? 'border-b-2 border-blue-500 text-blue-600'
+                  : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              Gmail
-            </button>
-            <button
-              onClick={() => setActiveTab('outlook')}
-              className={`px-4 py-2 font-medium transition-colors ${
-                activeTab === 'outlook'
-                  ? 'border-b-2 border-theme-border text-theme-foreground'
-                  : 'text-theme-foreground hover:text-theme-accent'
-              }`}
-            >
-              Outlook
+              Unified Emails
             </button>
             <button
               onClick={() => setActiveTab('notion')}
@@ -388,7 +432,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Tab Content */}
-          {activeTab === 'unified' && (
+          {activeTab === 'calendar' && (
             <UnifiedCalendarGrid
               onEventClick={(event) => {
                 setSelectedEvent(event);
@@ -406,11 +450,15 @@ export default function DashboardPage() {
             />
           )}
 
-          {activeTab === 'gmail' && (
-            <GmailView onSendEmail={() => setShowSendEmailModal(true)} />
+          {activeTab === 'emails' && (
+            <UnifiedEmailView 
+              onSendGmailEmail={() => setShowSendEmailModal(true)}
+              onSendOutlookEmail={() => {}} // Disabled - permission issues
+            />
           )}
 
-          {activeTab === 'outlook' && (
+<<<<<<< HEAD
+          {activeTab === 'outlook-calendar' && (
             <div className="space-y-6">
               {!microsoftConnected ? (
                 <div className="text-center py-8">
@@ -424,42 +472,13 @@ export default function DashboardPage() {
                   </Button>
                 </div>
               ) : (
-                <div className="space-y-6">
-                  <div className="flex gap-4">
-                    <button
-                      onClick={() => setOutlookSubTab('calendar')}
-                      className={`px-4 py-2 font-medium rounded-lg transition-colors ${
-                        outlookSubTab === 'calendar'
-                          ? 'bg-theme-primary text-theme-primary-foreground'
-                          : 'bg-theme-background text-theme-foreground hover:bg-theme-accent hover:text-theme-primary-foreground border border-theme-border'
-                      }`}
-                    >
-                      Calendar
-                    </button>
-                    <button
-                      onClick={() => setOutlookSubTab('email')}
-                      className={`px-4 py-2 font-medium rounded-lg transition-colors ${
-                        outlookSubTab === 'email'
-                          ? 'bg-theme-primary text-theme-primary-foreground'
-                          : 'bg-theme-background text-theme-foreground hover:bg-theme-accent hover:text-theme-primary-foreground border border-theme-border'
-                      }`}
-                    >
-                      Email
-                    </button>
-                  </div>
-                  
-                  {outlookSubTab === 'calendar' && (
-                    <OutlookCalendarView onCreateEvent={() => setShowUnifiedEventModal(true)} />
-                  )}
-                  
-                  {outlookSubTab === 'email' && (
-                    <OutlookEmailView onSendEmail={() => setShowSendOutlookEmailModal(true)} />
-                  )}
-                </div>
+                <OutlookCalendarView onCreateEvent={() => setShowUnifiedEventModal(true)} />
               )}
             </div>
           )}
 
+=======
+>>>>>>> 23f982b (fixing send email and gmail and outlook logos)
           {activeTab === 'notion' && (
             <NotionMCPCalendarView onCreateEvent={() => setShowUnifiedEventModal(true)} />
           )}
@@ -498,9 +517,38 @@ export default function DashboardPage() {
                   <p className="text-theme-foreground"><strong>User ID:</strong> {session?.user?.id || 'Not available'}</p>
                 </div>
                 
+<<<<<<< HEAD
                 <div className="border-t border-theme-border pt-4">
                   <h3 className="text-lg font-medium mb-2 text-theme-foreground">Connected Services</h3>
                   <div className="space-y-2">
+=======
+                  <div className="border-t pt-4">
+                    <h3 className="text-lg font-medium mb-2">Connected Services</h3>
+                    {microsoftConnected && (
+                      <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded">
+                        <Button 
+                          onClick={async () => {
+                            try {
+                              const response = await fetch('/api/microsoft/token-info');
+                              const data = await response.json();
+                              const info = JSON.stringify(data, null, 2);
+                              alert(`Microsoft Token Info:\n\n${info}`);
+                              console.log('Microsoft Token Info:', data);
+                            } catch (error) {
+                              console.error('Error fetching token info:', error);
+                              showToast('Failed to fetch token info', 'error');
+                            }
+                          }}
+                          size="sm"
+                          variant="outline"
+                          className="w-full"
+                        >
+                          🔍 Debug: Check Token Permissions
+                        </Button>
+                      </div>
+                    )}
+                    <div className="space-y-2">
+>>>>>>> 23f982b (fixing send email and gmail and outlook logos)
                     <div className="flex items-center justify-between">
                       <span className="text-theme-foreground"><strong>Google:</strong> {googleConnected ? '✅ Connected' : '❌ Not connected'}</span>
                       {googleConnected && (
@@ -537,6 +585,15 @@ export default function DashboardPage() {
                               className="text-orange-600 border-orange-300 hover:bg-orange-50"
                             >
                               Reconnect
+                            </Button>
+                            <Button 
+                              onClick={handleMicrosoftDisconnect}
+                              size="sm"
+                              variant="outline"
+                              className="text-red-600 border-red-300 hover:bg-red-50"
+                              disabled={microsoftLoading}
+                            >
+                              Disconnect
                             </Button>
                           </div>
                         )}
@@ -576,12 +633,15 @@ export default function DashboardPage() {
             onSubmit={handleSendEmail}
           />
 
-          <SendOutlookEmailModal
+          {/* Outlook send temporarily disabled - permission issues */}
+          {/* <SendOutlookEmailModal
             isOpen={showSendOutlookEmailModal}
             onClose={() => setShowSendOutlookEmailModal(false)}
             onSubmit={handleSendOutlookEmail}
-          />
-          </div>
+          /> */}
+
+          {/* Toast Notifications */}
+          <ToastContainer toasts={toasts} removeToast={removeToast} />
         </div>
       </main>
     </ProtectedRoute>

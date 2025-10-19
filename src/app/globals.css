@@ -136,7 +136,66 @@ h1, h2, h3, h4, h5, h6, p, span, div, button, a, input, textarea {
   background-color: var(--color-accent);
 }
 
-/* Smooth transitions for theme changes */
-* {
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+.light .bg-\[#463F3A\] {
+  background-color: #F2ECD9 !important;
+}
+
+.light .text-\[#98CD85\].font-bold {
+  color: #1F5C0A !important;
+}
+
+/* Target feature boxes specifically */
+.light .bg-\[#26200D\].border-2 {
+  background-color: #F2ECD9 !important;
+  border-color: #1F5C0A !important;
+}
+
+/* Email content styles */
+.email-content {
+  /* Constrain all content to container width */
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.email-content * {
+  /* Prevent any element from breaking the layout */
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.email-content img {
+  /* Make images responsive */
+  max-width: 100% !important;
+  height: auto !important;
+  display: block;
+  margin: 0.5rem 0;
+}
+
+.email-content table {
+  /* Constrain tables */
+  max-width: 100% !important;
+  table-layout: auto !important;
+  overflow-x: auto;
+  display: block;
+}
+
+.email-content p {
+  /* Proper paragraph spacing */
+  margin-bottom: 0.75rem;
+  line-height: 1.6;
+}
+
+.email-content a {
+  /* Style links */
+  color: #2563eb;
+  text-decoration: underline;
+  word-break: break-word;
+}
+
+.email-content div,
+.email-content span {
+  /* Prevent horizontal overflow */
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }

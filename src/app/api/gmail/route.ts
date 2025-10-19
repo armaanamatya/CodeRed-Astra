@@ -40,20 +40,23 @@ export async function GET(request: NextRequest) {
     // Get query parameters
     const { searchParams } = new URL(request.url);
     const maxResults = parseInt(searchParams.get('maxResults') || '10');
+    const pageToken = searchParams.get('pageToken') || undefined;
     const q = searchParams.get('q') || 'in:inbox';
 
-    // Get messages list
+    // Get messages list with pagination
     const messagesResponse = await gmail.users.messages.list({
       userId: 'me',
       maxResults,
+      pageToken,
       q,
     });
 
     const messages = messagesResponse.data.messages || [];
+    const nextPageToken = messagesResponse.data.nextPageToken;
 
     // Get detailed message data for each message
     const detailedMessages = await Promise.all(
-      messages.slice(0, 5).map(async (message) => {
+      messages.map(async (message) => {
         const messageDetails = await gmail.users.messages.get({
           userId: 'me',
           id: message.id!,
@@ -70,11 +73,16 @@ export async function GET(request: NextRequest) {
         if (messageDetails.data.payload?.body?.data) {
           body = Buffer.from(messageDetails.data.payload.body.data, 'base64').toString();
         } else if (messageDetails.data.payload?.parts) {
+          // Look for text/html first, then text/plain
+          const htmlPart = messageDetails.data.payload.parts.find(
+            part => part.mimeType === 'text/html'
+          );
           const textPart = messageDetails.data.payload.parts.find(
             part => part.mimeType === 'text/plain'
           );
-          if (textPart?.body?.data) {
-            body = Buffer.from(textPart.body.data, 'base64').toString();
+          const preferredPart = htmlPart || textPart;
+          if (preferredPart?.body?.data) {
+            body = Buffer.from(preferredPart.body.data, 'base64').toString();
           }
         }
 
@@ -83,7 +91,7 @@ export async function GET(request: NextRequest) {
           subject,
           from,
           date,
-          body: body.substring(0, 500), // Truncate for preview
+          body,
           snippet: messageDetails.data.snippet,
         };
       })
@@ -93,6 +101,8 @@ export async function GET(request: NextRequest) {
       success: true,
       messages: detailedMessages,
       totalMessages: messagesResponse.data.resultSizeEstimate,
+      nextPageToken,
+      hasMore: !!nextPageToken,
     });
 
   } catch (error) {
