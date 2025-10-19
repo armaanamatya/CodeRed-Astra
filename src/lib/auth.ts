@@ -6,8 +6,7 @@ import connectDB from './db/mongodb';
 import User from '@/models/User';
 
 export const authOptions: NextAuthOptions = {
-  // Temporarily disable adapter to prevent conflicts
-  // adapter: MongoDBAdapter(clientPromise),
+  adapter: MongoDBAdapter(clientPromise),
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -32,10 +31,22 @@ export const authOptions: NextAuthOptions = {
   ],
   secret: process.env.NEXTAUTH_SECRET,
   session: {
-    strategy: 'jwt',
+    strategy: 'database',
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      // If redirecting after sign in and no specific URL, go to dashboard
+      if (url === baseUrl || url === `${baseUrl}/` || url === `${baseUrl}/auth/signin`) {
+        return `${baseUrl}/dashboard`;
+      }
+      // If the URL is within our domain, allow it
+      if (url.startsWith(baseUrl)) {
+        return url;
+      }
+      // Default to dashboard for external URLs
+      return `${baseUrl}/dashboard`;
+    },
     async signIn({ user, account, profile }) {
       if (account?.provider === 'google') {
         try {
@@ -82,11 +93,14 @@ export const authOptions: NextAuthOptions = {
       }
       return true; // Always allow sign in
     },
-    async session({ session, token }) {
-      // Add user ID to session
-      if (token.sub) {
-        session.user.id = token.sub;
+    async session({ session, user }) {
+      // Add guard to check if user exists
+      if (!user) {
+        return session;
       }
+      
+      // Add user ID to session
+      session.user.id = user.id;
       
       // Get fresh access token from our custom User model
       try {

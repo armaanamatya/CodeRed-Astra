@@ -8,6 +8,8 @@ import CalendarView from '@/components/calendar/CalendarView';
 import GmailView from '@/components/gmail/GmailView';
 import OutlookCalendarView from '@/components/outlook/OutlookCalendarView';
 import OutlookEmailView from '@/components/outlook/OutlookEmailView';
+import { TextToSpeechForm } from '@/components/elevenlabs/TextToSpeechForm';
+import { SubscriptionInfo } from '@/components/elevenlabs/SubscriptionInfo';
 import CreateEventModal from '@/components/modals/CreateEventModal';
 import SendEmailModal from '@/components/modals/SendEmailModal';
 import CreateOutlookEventModal from '@/components/modals/CreateOutlookEventModal';
@@ -19,7 +21,7 @@ export default function DashboardPage() {
   const [showSendEmailModal, setShowSendEmailModal] = useState(false);
   const [showCreateOutlookEventModal, setShowCreateOutlookEventModal] = useState(false);
   const [showSendOutlookEmailModal, setShowSendOutlookEmailModal] = useState(false);
-  const [activeTab, setActiveTab] = useState<'calendar' | 'gmail' | 'outlook' | 'account'>('calendar');
+  const [activeTab, setActiveTab] = useState<'calendar' | 'gmail' | 'outlook' | 'elevenlabs' | 'account'>('calendar');
   const [outlookSubTab, setOutlookSubTab] = useState<'calendar' | 'email'>('calendar');
   const [microsoftConnected, setMicrosoftConnected] = useState(false);
   const [microsoftLoading, setMicrosoftLoading] = useState(false);
@@ -233,6 +235,16 @@ export default function DashboardPage() {
               Outlook
             </button>
             <button
+              onClick={() => setActiveTab('elevenlabs')}
+              className={`px-4 py-2 font-medium ${
+                activeTab === 'elevenlabs'
+                  ? 'border-b-2 border-blue-500 text-blue-600'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              ElevenLabs AI
+            </button>
+            <button
               onClick={() => setActiveTab('account')}
               className={`px-4 py-2 font-medium ${
                 activeTab === 'account'
@@ -300,6 +312,30 @@ export default function DashboardPage() {
                   )}
                 </div>
               )}
+            </div>
+          )}
+
+          {activeTab === 'elevenlabs' && (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <div className="bg-white rounded-lg border">
+                  <TextToSpeechForm />
+                </div>
+              </div>
+              <div className="space-y-4">
+                <div className="bg-white rounded-lg border">
+                  <SubscriptionInfo />
+                </div>
+                <div className="bg-white rounded-lg border p-4">
+                  <h3 className="font-semibold mb-2">ElevenLabs Features</h3>
+                  <div className="text-sm text-gray-600 space-y-1">
+                    <p>• AI-powered text-to-speech</p>
+                    <p>• Multiple voice options</p>
+                    <p>• Adjustable voice settings</p>
+                    <p>• Download MP3 files</p>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 

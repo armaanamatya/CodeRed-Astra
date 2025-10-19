@@ -1,12 +1,23 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { useEffect } from 'react';
 import { AuthButton } from '@/components/auth/AuthButton';
 
 export default function SignInPage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const { data: session, status } = useSession();
   const error = searchParams?.get('error');
   const callbackUrl = searchParams?.get('callbackUrl');
+
+  // Redirect to dashboard if already authenticated
+  useEffect(() => {
+    if (status === 'authenticated' && session?.user) {
+      router.push('/dashboard');
+    }
+  }, [status, session, router]);
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24">
