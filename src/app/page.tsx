@@ -12,7 +12,7 @@ export default function Home() {
       {/* Main Content with exact positioning and styling from Figma */}
       <div className="flex min-h-screen items-center justify-center pt-32 relative z-10">
         <div className="text-center relative z-20">
-          <h1 className="text-[107px] font-['Kavoon',_sans-serif] leading-[normal] text-center relative z-30">
+          <h1 className="text-[107px]  leading-[normal] text-center relative z-30">
             <p className="text-[#98CD85] mb-0">WELCOME TO</p>
             <p className="leading-[normal]">
               <span className="text-[#98CD85]">NAVI</span><span className="text-[#98CD85]">!</span>
@@ -24,10 +24,10 @@ export default function Home() {
       {/* Additional content sections for testing scroll */}
       <section className="min-h-screen flex items-center justify-center bg-[#26200D] relative z-10">
         <div className="text-center max-w-4xl mx-auto px-8 relative z-20">
-          <h2 className="text-6xl font-['Kavoon',_sans-serif] text-[#98CD85] mb-8 relative z-30">
+          <h2 className="text-6xl  text-[#98CD85] mb-8 relative z-30">
             About NAVI
           </h2>
-          <p className="text-xl text-[#98CD85] leading-relaxed relative z-30">
+          <p className="text-xl  text-[#98CD85] leading-relaxed relative z-30">
             NAVI is your intelligent assistant designed to help you navigate through your digital life. 
             With seamless integration of Gmail and Calendar features, NAVI makes managing your daily tasks 
             and communications effortless and intuitive.
@@ -37,19 +37,19 @@ export default function Home() {
 
       <section className="min-h-screen flex items-center justify-center bg-[#26200D] relative z-10">
         <div className="text-center max-w-4xl mx-auto px-8 relative z-20">  
-          <h2 className="text-6xl font-['Kavoon',_sans-serif] text-[#98CD85] mb-8 relative z-30">
+          <h2 className="text-6xl  text-[#98CD85] mb-8 relative z-30">
             Features
           </h2>
           <div className="grid md:grid-cols-2 gap-8 relative z-30">
-            <div className="bg-[#8a817c] bg-opacity-30 p-6 rounded-lg">
-              <h3 className="text-2xl font-['Kenia',_sans-serif] text-[#98CD85] mb-4">Gmail Integration</h3>
-              <p className="text-[#98CD85]">
+            <div className="bg-[#26200D] border-2 border-[#98CD85] p-6 rounded-lg">
+              <h3 className="text-2xl  text-[#98CD85] mb-4">Gmail Integration</h3>
+              <p className="text-[#98CD85] ">
                 Seamlessly manage your emails with intelligent organization and quick access to your most important messages.
               </p>
             </div>
-            <div className="bg-[#8a817c] bg-opacity-30 p-6 rounded-lg">
-              <h3 className="text-2xl font-['Kenia',_sans-serif] text-[#98CD85] mb-4">Calendar Management</h3>
-              <p className="text-[#98CD85]">
+            <div className="bg-[#26200D] border-2 border-[#98CD85] p-6 rounded-lg">
+              <h3 className="text-2xl  text-[#98CD85] mb-4">Calendar Management</h3>
+              <p className="text-[#98CD85] ">
                 Keep track of your schedule with an intuitive calendar interface that syncs with your Google Calendar.
               </p>
             </div>
@@ -59,14 +59,14 @@ export default function Home() {
 
       <section className="min-h-screen flex items-center justify-center bg-[#26200D] relative z-10">
         <div className="text-center max-w-4xl mx-auto px-8 relative z-20">
-          <h2 className="text-6xl font-['Kavoon',_sans-serif] text-[#98CD85] mb-8 relative z-30">
+          <h2 className="text-6xl  text-[#98CD85] mb-8 relative z-30">
             Get Started
           </h2>
-          <p className="text-xl text-[#98CD85] leading-relaxed mb-8 relative z-30">
+          <p className="text-xl  text-[#98CD85] leading-relaxed mb-8 relative z-30">
             Ready to experience the future of digital assistance? Sign in to NAVI and discover how it can 
             transform the way you manage your digital life.
           </p>
-          <div className="text-lg text-[#98CD85] relative z-30">
+          <div className="text-lg  text-[#98CD85] relative z-30">
             Scroll up to see the navigation bar in action!
           </div>
         </div>

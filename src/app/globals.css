@@ -46,10 +46,72 @@
 }
 
 * {
-  border-color: hsl(var(--border));
+  /*border-color: hsl(var(--border));*/
 }
 
 body {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
+  font-family: 'Kenia', sans-serif;
+}
+
+/* Override all font specifications to use Kenia globally */
+*, *::before, *::after {
+  font-family: 'Kenia', sans-serif !important;
+}
+
+/* Additional specific overrides for common elements */
+h1, h2, h3, h4, h5, h6, p, span, div, button, a, input, textarea {
+  font-family: 'Kenia', sans-serif !important;
+}
+
+/* Light mode styles */
+.light {
+  --background: 0 0% 100%;
+  --foreground: 0 0% 3.9%;
+}
+
+.light body {
+  background-color: #F2ECD9 !important;
+  color: #1F5C0A !important;
+}
+
+.light main {
+  background-color: #F2ECD9 !important;
+}
+
+/* Target the absolute positioned background div */
+.light main .absolute.inset-0 {
+  background-color: #F2ECD9 !important;
+}
+
+/* Target all sections */
+.light section {
+  background-color: #F2ECD9 !important;
+}
+
+.light .bg-\[#26200D\] {
+  background-color: #F2ECD9 !important;
+}
+
+.light .text-\[#98CD85\] {
+  color: #1F5C0A !important;
+}
+
+.light .border-\[#98CD85\] {
+  border-color: #1F5C0A !important;
+}
+
+.light .bg-\[#463F3A\] {
+  background-color: #F2ECD9 !important;
+}
+
+.light .text-\[#98CD85\].font-bold {
+  color: #1F5C0A !important;
+}
+
+/* Target feature boxes specifically */
+.light .bg-\[#26200D\].border-2 {
+  background-color: #F2ECD9 !important;
+  border-color: #1F5C0A !important;
 }

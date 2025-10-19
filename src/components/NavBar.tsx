@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { AuthButton } from '@/components/auth/AuthButton';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 export default function NavBar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -18,11 +19,11 @@ export default function NavBar() {
 
   return (
     <header 
-      className={`fixed top-4 left-4 right-4 z-50 transition-all duration-300 ${
+      className={`fixed top-4 left-4 right-4 z-50 transition-all duration-300 border-2 border-[#98CD85] ${
         isScrolled 
-          ? 'bg-[#26200D] shadow-[0px_10px_4px_0px_rgba(0,0,0,0.25)] opacity-95' 
-          : 'bg-[#26200D] shadow-[0px_10px_4px_0px_rgba(0,0,0,0.25)] opacity-82'
-      } h-[100px] rounded-[60px]`}
+          ? 'bg-[#463F3A] shadow-[0px_10px_4px_0px_rgba(0,0,0,0.25)] opacity-95' 
+          : 'bg-[#463F3A] shadow-[0px_10px_4px_0px_rgba(0,0,0,0.25)] opacity-82'
+      } h-[60px] rounded-[30px]`}
     >
       <div className="flex justify-between items-center h-full px-8">
         {/* Animated NAVI Logo */}
@@ -33,8 +34,9 @@ export default function NavBar() {
           <span className="inline-block hover:transform hover:translate-y-[-2px] hover:scale-110 transition-all duration-200 ease-in-out cursor-pointer">I</span>
         </div>
         
-        {/* Auth Button */}
-        <div>
+        {/* Right side buttons */}
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
           <AuthButton />
         </div>
       </div>
