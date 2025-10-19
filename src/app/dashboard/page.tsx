@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
@@ -18,6 +18,36 @@ import { UnifiedEvent } from '@/types/calendar';
 import { CalendarService } from '@/lib/calendarService';
 import { ToastContainer } from '@/components/ui/toast';
 import type { ToastType } from '@/components/ui/toast';
+
+type EventData = {
+  title: string;
+  description: string;
+  start: string;
+  end: string;
+  location?: string;
+  allDay?: boolean;
+  source: 'google' | 'outlook' | 'notion';
+};
+
+type EmailData = {
+  to: string;
+  subject: string;
+  body: string;
+};
+
+type OutlookEventData = {
+  subject: string;
+  body: string;
+  startDateTime: string;
+  endDateTime: string;
+  location?: string;
+};
+
+type OutlookEmailData = {
+  toRecipients: Array<{ emailAddress: { address: string } }>;
+  subject: string;
+  body: string;
+};
 
 export default function DashboardPage() {
   const { session, signOut } = useAuth();
@@ -41,7 +71,7 @@ export default function DashboardPage() {
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
   };
 
-  const handleCreateEvent = async (eventData: EventData) => {
+  const handleCreateEvent = async (eventData: Partial<UnifiedEvent>) => {
     try {
       console.log('Creating event:', eventData);
       
@@ -130,7 +160,6 @@ export default function DashboardPage() {
     }
   };
 
-<<<<<<< HEAD
   const handleCreateOutlookEvent = async (eventData: OutlookEventData) => {
     try {
       const response = await fetch('/api/outlook/calendar', {
@@ -154,16 +183,6 @@ export default function DashboardPage() {
     }
   };
 
-  const handleSendOutlookEmail = async (emailData: OutlookEmailData) => {
-    try {
-      const response = await fetch('/api/outlook/email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(emailData),
-      });
-=======
   // Temporarily disabled - Microsoft Graph permission issues
   // const handleSendOutlookEmail = async (emailData: any) => {
   //   try {
@@ -174,7 +193,6 @@ export default function DashboardPage() {
   //       },
   //       body: JSON.stringify(emailData),
   //     });
->>>>>>> 23f982b (fixing send email and gmail and outlook logos)
 
   //     const result = await response.json();
 
@@ -457,28 +475,6 @@ export default function DashboardPage() {
             />
           )}
 
-<<<<<<< HEAD
-          {activeTab === 'outlook-calendar' && (
-            <div className="space-y-6">
-              {!microsoftConnected ? (
-                <div className="text-center py-8">
-                  <div className="text-theme-foreground text-lg mb-4">Microsoft account not connected</div>
-                  <Button 
-                    onClick={handleMicrosoftConnect}
-                    disabled={microsoftLoading}
-                    className="bg-theme-primary hover:bg-theme-accent text-theme-primary-foreground border border-theme-border"
-                  >
-                    {microsoftLoading ? 'Connecting...' : 'Connect to Microsoft'}
-                  </Button>
-                </div>
-              ) : (
-                <OutlookCalendarView onCreateEvent={() => setShowUnifiedEventModal(true)} />
-              )}
-            </div>
-          )}
-
-=======
->>>>>>> 23f982b (fixing send email and gmail and outlook logos)
           {activeTab === 'notion' && (
             <NotionMCPCalendarView onCreateEvent={() => setShowUnifiedEventModal(true)} />
           )}
@@ -517,38 +513,32 @@ export default function DashboardPage() {
                   <p className="text-theme-foreground"><strong>User ID:</strong> {session?.user?.id || 'Not available'}</p>
                 </div>
                 
-<<<<<<< HEAD
                 <div className="border-t border-theme-border pt-4">
                   <h3 className="text-lg font-medium mb-2 text-theme-foreground">Connected Services</h3>
+                  {microsoftConnected && (
+                    <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded">
+                      <Button 
+                        onClick={async () => {
+                          try {
+                            const response = await fetch('/api/microsoft/token-info');
+                            const data = await response.json();
+                            const info = JSON.stringify(data, null, 2);
+                            alert(`Microsoft Token Info:\n\n${info}`);
+                            console.log('Microsoft Token Info:', data);
+                          } catch (error) {
+                            console.error('Error fetching token info:', error);
+                            showToast('Failed to fetch token info', 'error');
+                          }
+                        }}
+                        size="sm"
+                        variant="outline"
+                        className="w-full"
+                      >
+                        🔍 Debug: Check Token Permissions
+                      </Button>
+                    </div>
+                  )}
                   <div className="space-y-2">
-=======
-                  <div className="border-t pt-4">
-                    <h3 className="text-lg font-medium mb-2">Connected Services</h3>
-                    {microsoftConnected && (
-                      <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded">
-                        <Button 
-                          onClick={async () => {
-                            try {
-                              const response = await fetch('/api/microsoft/token-info');
-                              const data = await response.json();
-                              const info = JSON.stringify(data, null, 2);
-                              alert(`Microsoft Token Info:\n\n${info}`);
-                              console.log('Microsoft Token Info:', data);
-                            } catch (error) {
-                              console.error('Error fetching token info:', error);
-                              showToast('Failed to fetch token info', 'error');
-                            }
-                          }}
-                          size="sm"
-                          variant="outline"
-                          className="w-full"
-                        >
-                          🔍 Debug: Check Token Permissions
-                        </Button>
-                      </div>
-                    )}
-                    <div className="space-y-2">
->>>>>>> 23f982b (fixing send email and gmail and outlook logos)
                     <div className="flex items-center justify-between">
                       <span className="text-theme-foreground"><strong>Google:</strong> {googleConnected ? '✅ Connected' : '❌ Not connected'}</span>
                       {googleConnected && (
@@ -642,6 +632,7 @@ export default function DashboardPage() {
 
           {/* Toast Notifications */}
           <ToastContainer toasts={toasts} removeToast={removeToast} />
+          </div>
         </div>
       </main>
     </ProtectedRoute>
