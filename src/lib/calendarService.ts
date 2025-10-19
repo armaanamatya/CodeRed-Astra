@@ -1,4 +1,46 @@
-import { CalendarEvent, UnifiedEvent } from '@/types/calendar';
+import { UnifiedEvent } from '@/types/calendar';
+
+interface GoogleCalendarEvent {
+  id: string;
+  summary?: string;
+  description?: string;
+  start?: { dateTime: string; date: string };
+  end?: { dateTime: string; date: string };
+  location?: string;
+  attendees?: Array<{ email: string }>;
+  [key: string]: unknown;
+}
+
+interface OutlookCalendarEvent {
+  id: string;
+  subject?: string;
+  bodyPreview?: string;
+  start?: { dateTime: string };
+  end?: { dateTime: string };
+  location?: { displayName: string };
+  attendees?: Array<{ emailAddress: { address: string } }>;
+  [key: string]: unknown;
+}
+
+interface NotionCalendarEvent {
+  id: string;
+  properties?: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
+interface GoogleAttendee {
+  email?: string;
+  displayName?: string;
+  [key: string]: unknown;
+}
+
+interface OutlookAttendee {
+  emailAddress?: {
+    name?: string;
+    address?: string;
+  };
+  [key: string]: unknown;
+}
 
 export class CalendarService {
   private static instance: CalendarService;
@@ -84,7 +126,7 @@ export class CalendarService {
         return []; // Return empty array instead of throwing
       }
 
-      const events = (data.events || []).map((event: any) => this.transformGoogleEvent(event));
+      const events = (data.events || []).map((event: GoogleCalendarEvent) => this.transformGoogleEvent(event));
       
       // Cache the result
       this.serviceCache.set(cacheKey, { data: events, timestamp: Date.now() });
@@ -116,7 +158,7 @@ export class CalendarService {
         return []; // Return empty array instead of throwing
       }
 
-      const events = (data.events || []).map((event: any) => this.transformOutlookEvent(event));
+      const events = (data.events || []).map((event: OutlookCalendarEvent) => this.transformOutlookEvent(event));
       
       // Cache the result
       this.serviceCache.set(cacheKey, { data: events, timestamp: Date.now() });
@@ -148,7 +190,7 @@ export class CalendarService {
         return []; // Return empty array instead of throwing
       }
 
-      const events = (data.events || []).map((event: any) => this.transformNotionEvent(event));
+      const events = (data.events || []).map((event: NotionCalendarEvent) => this.transformNotionEvent(event));
       
       // Cache the result
       this.serviceCache.set(cacheKey, { data: events, timestamp: Date.now() });
@@ -160,7 +202,7 @@ export class CalendarService {
     }
   }
 
-  private transformGoogleEvent(event: any): UnifiedEvent {
+  private transformGoogleEvent(event: GoogleCalendarEvent): UnifiedEvent {
     return {
       id: event.id,
       title: event.summary || 'No Title',
@@ -169,7 +211,7 @@ export class CalendarService {
       end: event.end.dateTime || event.end.date,
       allDay: !event.start.dateTime,
       location: event.location || '',
-      attendees: event.attendees?.map((a: any) => a.displayName || a.email) || [],
+      attendees: event.attendees?.map((a: GoogleAttendee) => a.displayName || a.email) || [],
       source: 'google',
       sourceId: event.id,
       url: event.htmlLink || '',
@@ -178,16 +220,16 @@ export class CalendarService {
     };
   }
 
-  private transformOutlookEvent(event: any): UnifiedEvent {
+  private transformOutlookEvent(event: OutlookCalendarEvent): UnifiedEvent {
     return {
       id: event.id,
       title: event.subject || 'No Title',
-      description: event.body?.content?.replace(/<[^>]*>/g, '') || '',
+      description: event.bodyPreview || '',
       start: event.start.dateTime,
       end: event.end.dateTime,
       allDay: false, // Outlook events typically have time
       location: event.location?.displayName || '',
-      attendees: event.attendees?.map((a: any) => a.emailAddress.name || a.emailAddress.address) || [],
+      attendees: event.attendees?.map((a: OutlookAttendee) => a.emailAddress?.name || a.emailAddress?.address) || [],
       source: 'outlook',
       sourceId: event.id,
       url: event.webLink || '',
@@ -196,21 +238,21 @@ export class CalendarService {
     };
   }
 
-  private transformNotionEvent(event: any): UnifiedEvent {
+  private transformNotionEvent(event: NotionCalendarEvent): UnifiedEvent {
     return {
       id: event.id,
-      title: event.title || 'No Title',
-      description: event.description || '',
-      start: event.start,
-      end: event.end || event.start,
-      allDay: event.allDay || false,
-      location: event.location || '',
-      attendees: event.attendees || [],
+      title: event.properties?.title || 'No Title',
+      description: event.properties?.description || '',
+      start: event.properties?.start || '',
+      end: event.properties?.end || event.properties?.start || '',
+      allDay: event.properties?.allDay || false,
+      location: event.properties?.location || '',
+      attendees: event.properties?.attendees || [],
       source: 'notion',
       sourceId: event.id,
-      url: event.url || '',
+      url: event.properties?.url || '',
       color: '#000000', // Notion black
-      status: event.status || 'confirmed'
+      status: event.properties?.status || 'confirmed'
     };
   }
 
@@ -224,10 +266,10 @@ export class CalendarService {
         return await this.createNotionEvent(eventData);
       } else {
         // Try to create in the first available source
-        const sources = ['google', 'outlook', 'notion'];
+        const sources: Array<'google' | 'outlook' | 'notion'> = ['google', 'outlook', 'notion'];
         for (const source of sources) {
           try {
-            const success = await this.createEvent(eventData, source as any);
+            const success = await this.createEvent(eventData, source);
             if (success) return true;
           } catch (error) {
             console.error(`Failed to create event in ${source}:`, error);

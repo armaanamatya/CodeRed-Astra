@@ -22,13 +22,19 @@ interface NotionMCPCalendarViewProps {
   onCreateEvent: () => void;
 }
 
+interface NotionDatabase {
+  id: string;
+  name: string;
+  [key: string]: unknown;
+}
+
 export default function NotionMCPCalendarView({ onCreateEvent }: NotionMCPCalendarViewProps) {
   const [events, setEvents] = useState<NotionEvent[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<boolean>(false);
   const [checkingConnection, setCheckingConnection] = useState<boolean>(true);
-  const [availableDatabases, setAvailableDatabases] = useState<any[]>([]);
+  const [availableDatabases, setAvailableDatabases] = useState<NotionDatabase[]>([]);
   const [selectedDatabaseId, setSelectedDatabaseId] = useState<string>('');
   const [userApiKey, setUserApiKey] = useState<string>('');
 
@@ -194,7 +200,7 @@ Your integration will need access to your databases.
             </p>
             <div className="text-xs text-purple-600">
               <p>• OAuth: Automatic, secure, no manual setup</p>
-              <p>• Manual: Use integration token if OAuth isn't available</p>
+              <p>• Manual: Use integration token if OAuth isn&apos;t available</p>
             </div>
           </div>
 

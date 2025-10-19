@@ -47,34 +47,50 @@ export async function GET(request: NextRequest) {
 
     try {
       // Build filter for date range if provided
-      let filter: any = {};
-      if (startDate || endDate) {
-        filter.and = [];
-        
-        if (startDate) {
-          filter.and.push({
-            property: 'Date',
-            date: {
-              on_or_after: startDate
-            }
-          });
-        }
-
-        if (endDate) {
-          filter.and.push({
-            property: 'Date',
-            date: {
-              on_or_before: endDate
-            }
-          });
-        }
+      interface DateFilter {
+        property: string;
+        date: {
+          on_or_after?: string;
+          on_or_before?: string;
+        };
       }
 
+      interface QueryFilter {
+        and?: DateFilter[];
+      }
+
+      const filterArray: DateFilter[] = [];
+      
+      if (startDate) {
+        filterArray.push({
+          property: 'Date',
+          date: {
+            on_or_after: startDate
+          }
+        });
+      }
+
+      if (endDate) {
+        filterArray.push({
+          property: 'Date',
+          date: {
+            on_or_before: endDate
+          }
+        });
+      }
+
+      const filter: QueryFilter = filterArray.length > 0 ? { and: filterArray } : {};
+
       // Query the database
+      interface NotionPage {
+        id: string;
+        properties: Record<string, unknown>;
+      }
+
       const results = await mcpClient.queryDatabase(databaseId, filter);
       
       // Transform results to calendar events format
-      const events = results.map((page: any) => {
+      const events = results.map((page: NotionPage) => {
         const properties = page.properties || {};
         
         return {
@@ -168,7 +184,19 @@ export async function POST(request: NextRequest) {
 
     try {
       // Prepare properties for the new page
-      const properties: any = {
+      interface PropertyValue {
+        [key: string]: unknown;
+      }
+
+      interface NotionPageProperties {
+        Title: PropertyValue;
+        Date: PropertyValue;
+        AllDay: PropertyValue;
+        Description?: PropertyValue;
+        Location?: PropertyValue;
+      }
+
+      const properties: NotionPageProperties = {
         Title: {
           title: [
             {

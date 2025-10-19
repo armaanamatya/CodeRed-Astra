@@ -8,6 +8,7 @@ import UnifiedCalendarGrid from '@/components/calendar/UnifiedCalendarGrid';
 import GmailView from '@/components/gmail/GmailView';
 import OutlookCalendarView from '@/components/outlook/OutlookCalendarView';
 import OutlookEmailView from '@/components/outlook/OutlookEmailView';
+import NotionMCPCalendarView from '@/components/notion/NotionMCPCalendarView';
 import { TextToSpeechForm } from '@/components/elevenlabs/TextToSpeechForm';
 import { SubscriptionInfo } from '@/components/elevenlabs/SubscriptionInfo';
 import UnifiedEventModal from '@/components/modals/UnifiedEventModal';
@@ -26,7 +27,6 @@ export default function DashboardPage() {
   const [microsoftConnected, setMicrosoftConnected] = useState(false);
   const [microsoftLoading, setMicrosoftLoading] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<UnifiedEvent | null>(null);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   const handleCreateEvent = async (eventData: EventData) => {
     try {
@@ -113,29 +113,6 @@ export default function DashboardPage() {
     } catch (error) {
       console.error('Error sending email:', error);
       alert('Failed to send email. Please try again.');
-    }
-  };
-
-  const handleCreateOutlookEvent = async (eventData: OutlookEventData) => {
-    try {
-      const response = await fetch('/api/outlook/calendar', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(eventData),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to create Outlook event');
-      }
-
-      alert('Outlook event created successfully!');
-    } catch (error) {
-      console.error('Error creating Outlook event:', error);
-      alert('Failed to create Outlook event. Please try again.');
     }
   };
 
@@ -352,11 +329,9 @@ export default function DashboardPage() {
                 console.log('Event clicked:', event);
               }}
               onCreateEvent={(date) => {
-                setSelectedDate(date || null);
                 setShowUnifiedEventModal(true);
               }}
               onDateClick={(date) => {
-                setSelectedDate(date);
                 setShowUnifiedEventModal(true);
               }}
             />

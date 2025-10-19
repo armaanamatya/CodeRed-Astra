@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
+interface NotionDatabase {
+  id: string;
+  title?: Array<{text?: {content?: string}}>;
+  url: string;
+  properties?: Record<string, unknown>;
+}
+
 const NOTION_API_URL = 'https://api.notion.com/v1';
 
 export async function GET(request: NextRequest) {
@@ -83,7 +90,7 @@ export async function GET(request: NextRequest) {
           name: userData.name,
           type: userData.type
         },
-        databases: databasesData.results.map((db: any) => ({
+        databases: databasesData.results.map((db: NotionDatabase) => ({
           id: db.id,
           title: db.title?.[0]?.text?.content || 'Untitled Database',
           url: db.url,

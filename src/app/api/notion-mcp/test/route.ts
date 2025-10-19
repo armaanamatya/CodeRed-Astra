@@ -5,6 +5,13 @@ import connectDB from '@/lib/db/mongodb';
 import User from '@/models/User';
 import { getNotionMCPClient } from '@/lib/notion-mcp';
 
+interface NotionDatabase {
+  id: string;
+  title?: Array<{text?: {content?: string}}>;
+  url?: string;
+  [key: string]: unknown;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -57,7 +64,7 @@ export async function GET(request: NextRequest) {
           name: userData.name,
           type: userData.type
         },
-        databases: databases.slice(0, 3).map((db: any) => ({
+        databases: databases.slice(0, 3).map((db: NotionDatabase) => ({
           id: db.id,
           title: db.title?.[0]?.text?.content || 'Untitled Database',
           url: db.url

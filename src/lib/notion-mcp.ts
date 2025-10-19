@@ -1,4 +1,18 @@
 // Notion MCP Client with OAuth integration
+interface NotionDatabase {
+  id: string;
+  title?: Array<{text?: {content?: string}}>;
+  url?: string;
+  [key: string]: unknown;
+}
+
+interface NotionPage {
+  id: string;
+  properties?: Record<string, unknown>;
+  url?: string;
+  [key: string]: unknown;
+}
+
 export class NotionMCPClient {
   private notionApiKey: string = '';
   private baseUrl: string = 'https://api.notion.com/v1';
@@ -61,7 +75,7 @@ export class NotionMCPClient {
     console.log('✅ Notion API client disconnected');
   }
 
-  async listDatabases(): Promise<any[]> {
+  async listDatabases(): Promise<NotionDatabase[]> {
     if (!this.notionApiKey) {
       throw new Error('Notion API key not set');
     }
@@ -95,7 +109,7 @@ export class NotionMCPClient {
     }
   }
 
-  async queryDatabase(databaseId: string, filter?: any): Promise<any[]> {
+  async queryDatabase(databaseId: string, filter?: Record<string, unknown>): Promise<NotionPage[]> {
     if (!this.notionApiKey) {
       throw new Error('Notion API key not set');
     }
@@ -132,7 +146,7 @@ export class NotionMCPClient {
     }
   }
 
-  async createPage(databaseId: string, properties: any): Promise<any> {
+  async createPage(databaseId: string, properties: Record<string, unknown>): Promise<NotionPage> {
     if (!this.notionApiKey) {
       throw new Error('Notion API key not set');
     }
@@ -166,7 +180,7 @@ export class NotionMCPClient {
     }
   }
 
-  async updatePage(pageId: string, properties: any): Promise<any> {
+  async updatePage(pageId: string, properties: Record<string, unknown>): Promise<NotionPage> {
     if (!this.notionApiKey) {
       throw new Error('Notion API key not set');
     }
@@ -197,7 +211,7 @@ export class NotionMCPClient {
     }
   }
 
-  async getPage(pageId: string): Promise<any> {
+  async getPage(pageId: string): Promise<NotionPage> {
     if (!this.notionApiKey) {
       throw new Error('Notion API key not set');
     }
@@ -224,7 +238,7 @@ export class NotionMCPClient {
     }
   }
 
-  async searchPages(query: string): Promise<any[]> {
+  async searchPages(query: string): Promise<NotionPage[]> {
     if (!this.notionApiKey) {
       throw new Error('Notion API key not set');
     }

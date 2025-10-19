@@ -3,10 +3,21 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 
+interface NotionEventData {
+  databaseId: string;
+  title: string;
+  description: string;
+  startDate: string;
+  endDate?: string;
+  allDay: boolean;
+  location: string;
+  attendees: string[];
+}
+
 interface CreateNotionEventModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (eventData: any) => void;
+  onSubmit: (eventData: NotionEventData) => void;
 }
 
 export default function CreateNotionEventModal({ 
@@ -32,7 +43,7 @@ export default function CreateNotionEventModal({
     setLoading(true);
 
     try {
-      const eventData = {
+      const eventData: NotionEventData = {
         ...formData,
         attendees: formData.attendees.split(',').map(email => email.trim()).filter(Boolean),
         endDate: formData.endDate || undefined,

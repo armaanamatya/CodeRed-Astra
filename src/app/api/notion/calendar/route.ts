@@ -7,6 +7,25 @@ import User from '@/models/User';
 // Notion API client
 const NOTION_API_URL = 'https://api.notion.com/v1';
 
+interface NotionDatabase {
+  id: string;
+  title?: Array<{text?: {content?: string}}>;
+  url: string;
+  [key: string]: unknown;
+}
+
+interface DateFilter {
+  property: string;
+  date: {
+    on_or_after?: string;
+    on_or_before?: string;
+  };
+}
+
+interface QueryFilter {
+  and?: DateFilter[];
+}
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -50,7 +69,7 @@ export async function GET(request: NextRequest) {
             success: false,
             error: 'No specific database selected',
             message: 'Please select a database from the list below',
-            availableDatabases: databasesData.results.map((db: any) => ({
+            availableDatabases: databasesData.results.map((db: NotionDatabase) => ({
               id: db.id,
               title: db.title?.[0]?.text?.content || 'Untitled Database',
               url: db.url
@@ -72,29 +91,26 @@ export async function GET(request: NextRequest) {
     }
 
     // Build filter for date range if provided
-    let filter: any = undefined;
+    let filter: QueryFilter | undefined = undefined;
     if (startDate || endDate) {
-      filter = {
-        and: []
-      };
-
+      const filters: DateFilter[] = [];
       if (startDate) {
-        filter.and.push({
-          property: 'Date', // Adjust property name as needed
+        filters.push({
+          property: 'Date',
           date: {
             on_or_after: startDate
           }
         });
       }
-
       if (endDate) {
-        filter.and.push({
-          property: 'Date', // Adjust property name as needed
+        filters.push({
+          property: 'Date',
           date: {
             on_or_before: endDate
           }
         });
       }
+      filter = { and: filters };
     }
 
     console.log('Querying Notion database:', {

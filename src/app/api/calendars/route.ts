@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
+
+interface CalendarEvent {
+  id: string;
+  title: string;
+  start: string;
+  end: string;
+  source: 'google' | 'outlook' | 'notion';
+  [key: string]: unknown;
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -18,7 +27,7 @@ export async function GET(request: NextRequest) {
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
 
-    const events = [];
+    const events: CalendarEvent[] = [];
 
     // Fetch from Google Calendar if requested
     if (source === 'all' || source === 'google') {
@@ -35,7 +44,7 @@ export async function GET(request: NextRequest) {
         if (googleResponse.ok) {
           const googleData = await googleResponse.json();
           if (googleData.success) {
-            events.push(...googleData.events.map((event: any) => ({
+            events.push(...googleData.events.map((event: CalendarEvent) => ({
               ...event,
               source: 'google'
             })));
@@ -61,7 +70,7 @@ export async function GET(request: NextRequest) {
         if (notionResponse.ok) {
           const notionData = await notionResponse.json();
           if (notionData.success) {
-            events.push(...notionData.events.map((event: any) => ({
+            events.push(...notionData.events.map((event: CalendarEvent) => ({
               ...event,
               source: 'notion'
             })));
