@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
       }
 
       try {
-        const { refreshMicrosoftToken } = await import('@/lib/microsoftGraphSimple');
+        const { refreshMicrosoftToken } = await import('@/lib/microsoftGraph');
         const refreshedTokens = await refreshMicrosoftToken(user.microsoftRefreshToken);
         
         // Update user with new tokens
@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
       }
 
       try {
-        const { refreshMicrosoftToken } = await import('@/lib/microsoftGraphSimple');
+        const { refreshMicrosoftToken } = await import('@/lib/microsoftGraph');
         const refreshedTokens = await refreshMicrosoftToken(user.microsoftRefreshToken);
         
         // Update user with new tokens
