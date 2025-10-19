@@ -61,9 +61,14 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Get calendar events
+    // Get date parameters
+    const { searchParams } = new URL(request.url);
+    const startDate = searchParams.get('startDate');
+    const endDate = searchParams.get('endDate');
+
+    // Get calendar events with date filtering
     const microsoftService = new MicrosoftGraphService(accessToken);
-    const events = await microsoftService.getCalendarEvents();
+    const events = await microsoftService.getCalendarEvents(startDate, endDate);
 
     return NextResponse.json({
       success: true,

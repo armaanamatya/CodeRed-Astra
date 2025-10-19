@@ -26,17 +26,29 @@ export class MicrosoftGraphService {
   }
 
   // Get Outlook calendar events
-  async getCalendarEvents() {
+  async getCalendarEvents(startDate?: string, endDate?: string) {
     try {
-      const response = await this.makeRequest(
-        '/me/events?$select=subject,start,end,body,location,attendees&$orderby=start/dateTime&$top=20'
-      );
+      // Use the calendar view endpoint which automatically expands recurring events
+      let query = '/me/calendarView';
+      
+      // Add required parameters
+      const params = new URLSearchParams();
+      if (startDate) params.append('startDateTime', startDate);
+      if (endDate) params.append('endDateTime', endDate);
+      params.append('$select', 'subject,start,end,body,location,attendees');
+      params.append('$orderby', 'start/dateTime');
+      params.append('$top', '100');
+      
+      query += `?${params.toString()}`;
+      
+      const response = await this.makeRequest(query);
       return response.value || [];
     } catch (error) {
       console.error('Error fetching calendar events:', error);
       throw error;
     }
   }
+
 
   // Create a calendar event
   async createCalendarEvent(eventData: {

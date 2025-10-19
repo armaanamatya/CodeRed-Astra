@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { MicrosoftGraphService } from '@/lib/microsoftGraphSimple';
-import connectDB from '@/lib/db/mongodb';
-import User from '@/models/User';
+import { Client } from '@microsoft/microsoft-graph-client';
+import { getAccessToken } from '@/lib/microsoftGraph';
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,70 +15,45 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get user from database to check Microsoft token
-    await connectDB();
-    const user = await User.findOne({ email: session.user.email });
-    
-    if (!user?.microsoftAccessToken) {
+    // Get Microsoft access token
+    const accessToken = await getAccessToken(session.user.email);
+    if (!accessToken) {
       return NextResponse.json(
-        { error: 'Microsoft account not connected' },
-        { status: 400 }
+        { error: 'Microsoft account not connected or token refresh failed' },
+        { status: 401 }
       );
     }
 
-    // Check if token is expired and refresh if needed
-    let accessToken = user.microsoftAccessToken;
-    if (user.microsoftTokenExpiry && new Date() >= user.microsoftTokenExpiry) {
-      if (!user.microsoftRefreshToken) {
-        return NextResponse.json(
-          { error: 'Microsoft token expired and no refresh token available' },
-          { status: 401 }
-        );
+    // Create Graph client
+    const graphClient = Client.init({
+      authProvider: (done) => {
+        done(null, accessToken);
       }
+    });
 
-      try {
-        const { refreshMicrosoftToken } = await import('@/lib/microsoftGraph');
-        const refreshedTokens = await refreshMicrosoftToken(user.microsoftRefreshToken);
-        
-        // Update user with new tokens
-        await User.findOneAndUpdate(
-          { email: session.user.email },
-          {
-            microsoftAccessToken: refreshedTokens.access_token,
-            microsoftRefreshToken: refreshedTokens.refresh_token,
-            microsoftTokenExpiry: new Date(Date.now() + refreshedTokens.expires_in * 1000),
-          }
-        );
-        
-        accessToken = refreshedTokens.access_token;
-      } catch (error) {
-        console.error('Error refreshing Microsoft token:', error);
-        return NextResponse.json(
-          { error: 'Failed to refresh Microsoft token' },
-          { status: 401 }
-        );
-      }
-    }
-
-    // Get query parameters
-    const { searchParams } = new URL(request.url);
-    const maxResults = parseInt(searchParams.get('maxResults') || '10');
-    const query = searchParams.get('q') || '';
-
-    // Get emails
-    const microsoftService = new MicrosoftGraphService(accessToken);
-    const messages = await microsoftService.getEmails(maxResults, query);
+    // Get messages from inbox
+    const messages = await graphClient
+      .me
+      .mailFolders('inbox')
+      .messages
+      .get({
+        queryParameters: {
+          $top: 20,
+          $orderby: 'receivedDateTime desc',
+          $select: 'id,subject,from,receivedDateTime,body,isRead,importance'
+        }
+      });
 
     return NextResponse.json({
       success: true,
-      messages: messages,
+      messages: messages.value || [],
     });
 
   } catch (error) {
     console.error('Outlook Email API error:', error);
     return NextResponse.json(
       { 
-        error: 'Failed to fetch Outlook emails',
+        error: 'Failed to fetch Outlook messages',
         details: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }
@@ -98,7 +72,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { to, subject, body } = await request.json();
+    const { to, subject, body, importance = 'normal' } = await request.json();
 
     if (!to || !subject || !body) {
       return NextResponse.json(
@@ -107,65 +81,46 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get user from database to check Microsoft token
-    await connectDB();
-    const user = await User.findOne({ email: session.user.email });
-    
-    if (!user?.microsoftAccessToken) {
+    // Get Microsoft access token
+    const accessToken = await getAccessToken(session.user.email);
+    if (!accessToken) {
       return NextResponse.json(
-        { error: 'Microsoft account not connected' },
-        { status: 400 }
+        { error: 'Microsoft account not connected or token refresh failed' },
+        { status: 401 }
       );
     }
 
-    // Check if token is expired and refresh if needed
-    let accessToken = user.microsoftAccessToken;
-    if (user.microsoftTokenExpiry && new Date() >= user.microsoftTokenExpiry) {
-      if (!user.microsoftRefreshToken) {
-        return NextResponse.json(
-          { error: 'Microsoft token expired and no refresh token available' },
-          { status: 401 }
-        );
+    // Create Graph client
+    const graphClient = Client.init({
+      authProvider: (done) => {
+        done(null, accessToken);
       }
-
-      try {
-        const { refreshMicrosoftToken } = await import('@/lib/microsoftGraph');
-        const refreshedTokens = await refreshMicrosoftToken(user.microsoftRefreshToken);
-        
-        // Update user with new tokens
-        await User.findOneAndUpdate(
-          { email: session.user.email },
-          {
-            microsoftAccessToken: refreshedTokens.access_token,
-            microsoftRefreshToken: refreshedTokens.refresh_token,
-            microsoftTokenExpiry: new Date(Date.now() + refreshedTokens.expires_in * 1000),
-          }
-        );
-        
-        accessToken = refreshedTokens.access_token;
-      } catch (error) {
-        console.error('Error refreshing Microsoft token:', error);
-        return NextResponse.json(
-          { error: 'Failed to refresh Microsoft token' },
-          { status: 401 }
-        );
-      }
-    }
-
-    // Send email
-    const microsoftService = new MicrosoftGraphService(accessToken);
-    const result = await microsoftService.sendEmail({
-      toRecipients: [{ emailAddress: { address: to } }],
-      subject,
-      body: {
-        content: body,
-        contentType: 'text',
-      },
     });
+
+    // Create message
+    const message = {
+      subject: subject,
+      body: {
+        contentType: 'HTML',
+        content: body
+      },
+      toRecipients: Array.isArray(to) ? to.map(email => ({
+        emailAddress: { address: email }
+      })) : [{
+        emailAddress: { address: to }
+      }],
+      importance: importance
+    };
+
+    // Send message
+    const result = await graphClient
+      .me
+      .sendMail
+      .post({ message });
 
     return NextResponse.json({
       success: true,
-      result: result,
+      messageId: result.id,
     });
 
   } catch (error) {
