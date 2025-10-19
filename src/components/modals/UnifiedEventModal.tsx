@@ -106,11 +106,11 @@ export default function UnifiedEventModal({
     }
   };
 
-  const handleInputChange = (field: string, value: Record<string, unknown>) => {
+  const handleInputChange = (field: string, value: string | boolean) => {
     if (field === 'allDay') {
       // When toggling all-day, reformat the start and end dates
       setFormData(prev => {
-        const newAllDay = value;
+        const newAllDay = value as boolean;
         return {
           ...prev,
           allDay: newAllDay,

@@ -21,8 +21,21 @@ interface TestResult {
   duration?: number;
 }
 
+interface ServiceFunction {
+  name: string;
+  description: string;
+  parameters?: Record<string, unknown>;
+}
+
+interface Service {
+  name: string;
+  description: string;
+  functions: ServiceFunction[];
+  functionCount: number;
+}
+
 export default function MCPTestPage() {
-  const [services, setServices] = useState<Record<string, unknown>[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
   const [selectedService, setSelectedService] = useState('');
   const [selectedFunction, setSelectedFunction] = useState('');
   const [parameters, setParameters] = useState('{}');
@@ -417,7 +430,7 @@ export default function MCPTestPage() {
                       disabled={!selectedService}
                     >
                       <option value="">Select a function...</option>
-                      {selectedServiceFunctions.map((func: Record<string, unknown>) => (
+                      {selectedServiceFunctions.map((func) => (
                         <option key={func.name} value={func.name}>
                           {func.name} - {func.description}
                         </option>
