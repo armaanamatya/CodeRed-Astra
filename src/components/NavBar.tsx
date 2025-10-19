@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { AuthButton } from '@/components/auth/AuthButton';
 
 export default function NavBar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -20,18 +20,22 @@ export default function NavBar() {
     <header 
       className={`fixed top-4 left-4 right-4 z-50 transition-all duration-300 ${
         isScrolled 
-          ? 'bg-[#463f3a] shadow-[0px_10px_4px_0px_rgba(0,0,0,0.25)] opacity-95' 
-          : 'bg-[#463f3a] shadow-[0px_10px_4px_0px_rgba(0,0,0,0.25)] opacity-82'
+          ? 'bg-[#BCB8B1] shadow-[0px_10px_4px_0px_rgba(0,0,0,0.25)] opacity-95' 
+          : 'bg-[#BCB8B1] shadow-[0px_10px_4px_0px_rgba(0,0,0,0.25)] opacity-82'
       } h-[100px] rounded-[60px]`}
     >
-      <div className="flex justify-end items-center h-full px-8">
-        <div className="flex gap-6 md:gap-8">
-          <Link 
-            href="/auth/signin" 
-            className="text-[#f4f3ee] text-[18px] md:text-[20px] font-['Kenia',_sans-serif] hover:opacity-80 transition-opacity"
-          >
-            Sign In
-          </Link>
+      <div className="flex justify-between items-center h-full px-8">
+        {/* Animated NAVI Logo */}
+        <div className="text-[#463f3a] font-bold text-2xl">
+          <span className="inline-block hover:transform hover:translate-y-[-2px] hover:scale-110 transition-all duration-200 ease-in-out cursor-pointer">N</span>
+          <span className="inline-block hover:transform hover:translate-y-[-2px] hover:scale-110 transition-all duration-200 ease-in-out cursor-pointer">A</span>
+          <span className="inline-block hover:transform hover:translate-y-[-2px] hover:scale-110 transition-all duration-200 ease-in-out cursor-pointer">V</span>
+          <span className="inline-block hover:transform hover:translate-y-[-2px] hover:scale-110 transition-all duration-200 ease-in-out cursor-pointer">I</span>
+        </div>
+        
+        {/* Auth Button */}
+        <div>
+          <AuthButton />
         </div>
       </div>
     </header>
