@@ -9,10 +9,6 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import Image from 'next/image';
 import UnifiedCalendarGrid from '@/components/calendar/UnifiedCalendarGrid';
 import UnifiedEmailView from '@/components/email/UnifiedEmailView';
-<<<<<<< HEAD
-=======
-import OutlookCalendarView from '@/components/outlook/OutlookCalendarView';
->>>>>>> b05d43c (unified email section with gmail and outlook, search filtering for emails, inbox/sent/drafts, pagination)
 import { TextToSpeechForm } from '@/components/elevenlabs/TextToSpeechForm';
 import { SubscriptionInfo } from '@/components/elevenlabs/SubscriptionInfo';
 import UnifiedEventModal from '@/components/modals/UnifiedEventModal';
@@ -23,7 +19,6 @@ import { UnifiedEvent } from '@/types/calendar';
 import { CalendarService } from '@/lib/calendarService';
 import { ToastContainer } from '@/components/ui/toast';
 import type { ToastType } from '@/components/ui/toast';
-<<<<<<< HEAD
 
 type EventData = {
   title: string;
@@ -54,23 +49,17 @@ type OutlookEmailData = {
   subject: string;
   body: string;
 };
-=======
->>>>>>> b05d43c (unified email section with gmail and outlook, search filtering for emails, inbox/sent/drafts, pagination)
 
 export default function DashboardPage() {
   const { session, signOut } = useAuth();
   const [showUnifiedEventModal, setShowUnifiedEventModal] = useState(false);
   const [showSendEmailModal, setShowSendEmailModal] = useState(false);
   const [showSendOutlookEmailModal, setShowSendOutlookEmailModal] = useState(false);
-<<<<<<< HEAD
-  const [activeTab, setActiveTab] = useState<'calendar' | 'emails' | 'notion' | 'elevenlabs'>('calendar');
-  const [showAccountDropdown, setShowAccountDropdown] = useState(false);
-=======
-  const [activeTab, setActiveTab] = useState<'calendar' | 'emails' | 'outlook-calendar' | 'notion' | 'elevenlabs' | 'account'>('calendar');
+  const [activeTab, setActiveTab] = useState<'calendar' | 'emails' | 'notion' | 'elevenlabs' | 'account'>('calendar');
   const [googleConnected, setGoogleConnected] = useState(false);
   const [microsoftConnected, setMicrosoftConnected] = useState(false);
   const [microsoftLoading, setMicrosoftLoading] = useState(false);
->>>>>>> b05d43c (unified email section with gmail and outlook, search filtering for emails, inbox/sent/drafts, pagination)
+  const [showAccountDropdown, setShowAccountDropdown] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<UnifiedEvent | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [toasts, setToasts] = useState<Array<{ id: string; message: string; type: ToastType }>>([]);
@@ -87,7 +76,6 @@ export default function DashboardPage() {
   const handleCreateEvent = async (eventData: Partial<UnifiedEvent>) => {
     try {
       console.log('Creating event:', eventData);
-      console.log('Event data source:', eventData.source);
       
       // Create event directly via the appropriate API based on source
       let response;
@@ -99,8 +87,7 @@ export default function DashboardPage() {
             summary: eventData.title,
             description: eventData.description,
             startDateTime: eventData.start,
-            endDateTime: eventData.end,
-            allDay: eventData.allDay
+            endDateTime: eventData.end
           })
         });
       } else if (eventData.source === 'outlook') {
@@ -109,7 +96,7 @@ export default function DashboardPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             subject: eventData.title,
-            description: eventData.description,
+            body: eventData.description,
             startDateTime: eventData.start,
             endDateTime: eventData.end,
             location: eventData.location
@@ -122,8 +109,8 @@ export default function DashboardPage() {
           body: JSON.stringify({
             title: eventData.title,
             description: eventData.description,
-            startDate: eventData.start,
-            endDate: eventData.end,
+            start: eventData.start,
+            end: eventData.end,
             location: eventData.location,
             allDay: eventData.allDay
           })
@@ -133,11 +120,8 @@ export default function DashboardPage() {
       }
 
       const result = await response.json();
-      console.log('API response:', result);
-      console.log('Response status:', response.status);
       
       if (!response.ok) {
-        console.error('API error:', result);
         throw new Error(result.error || 'Failed to create event');
       }
 
@@ -194,39 +178,27 @@ export default function DashboardPage() {
         throw new Error(result.error || 'Failed to create Outlook event');
       }
 
-<<<<<<< HEAD
-      alert('Outlook event created successfully!');
-    } catch (error) {
-      console.error('Error creating Outlook event:', error);
-      alert('Failed to create Outlook event. Please try again.');
-=======
       showToast('Outlook email sent successfully!', 'success');
       setShowSendOutlookEmailModal(false);
+      alert('Outlook event created successfully!');
     } catch (error) {
       console.error('Error sending Outlook email:', error);
       showToast('Failed to send Outlook email. Please try again.', 'error');
->>>>>>> b05d43c (unified email section with gmail and outlook, search filtering for emails, inbox/sent/drafts, pagination)
+      console.error('Error creating Outlook event:', error);
+      alert('Failed to create Outlook event. Please try again.');
     }
   };
 
-  // Temporarily disabled - Microsoft Graph permission issues
-  // const handleSendOutlookEmail = async (emailData: any) => {
-  //   try {
-  //     const response = await fetch('/api/outlook/email', {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify(emailData),
-  //     });
+  const handleMicrosoftConnect = async () => {
+    try {
+      setMicrosoftLoading(true);
+      const response = await fetch('/api/microsoft/auth');
+      const data = await response.json();
 
-  //     const result = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to get Microsoft auth URL');
+      }
 
-<<<<<<< HEAD
-  //     if (!response.ok) {
-  //       throw new Error(result.error || 'Failed to send Outlook email');
-  //     }
-=======
       if (data.connected) {
         setMicrosoftConnected(true);
         showToast('Microsoft account is already connected!', 'info');
@@ -241,19 +213,19 @@ export default function DashboardPage() {
       setMicrosoftLoading(false);
     }
   };
->>>>>>> b05d43c (unified email section with gmail and outlook, search filtering for emails, inbox/sent/drafts, pagination)
 
-  //     showToast('Outlook email sent successfully!', 'success');
-  //     setShowSendOutlookEmailModal(false);
-  //   } catch (error) {
-  //     console.error('Error sending Outlook email:', error);
-  //     showToast('Failed to send Outlook email. Please try again.', 'error');
-  //   }
-  // };
+  const refreshMicrosoftStatus = async () => {
+    try {
+      const response = await fetch('/api/microsoft/auth');
+      const data = await response.json();
+      if (response.ok) {
+        setMicrosoftConnected(data.connected);
+      }
+    } catch (error) {
+      console.error('Error checking Microsoft status:', error);
+    }
+  };
 
-<<<<<<< HEAD
-  // Check for Microsoft connection success in URL params
-=======
   const handleMicrosoftReconnect = async () => {
     try {
       setMicrosoftLoading(true);
@@ -274,8 +246,32 @@ export default function DashboardPage() {
     }
   };
 
-  // Check connection status on component mount
->>>>>>> b05d43c (unified email section with gmail and outlook, search filtering for emails, inbox/sent/drafts, pagination)
+  // Temporarily disabled - Microsoft Graph permission issues
+  // const handleSendOutlookEmail = async (emailData: any) => {
+  //   try {
+  //     const response = await fetch('/api/outlook/email', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify(emailData),
+  //     });
+
+  //     const result = await response.json();
+
+  //     if (!response.ok) {
+  //       throw new Error(result.error || 'Failed to send Outlook email');
+  //     }
+
+  //     showToast('Outlook email sent successfully!', 'success');
+  //     setShowSendOutlookEmailModal(false);
+  //   } catch (error) {
+  //     console.error('Error sending Outlook email:', error);
+  //     showToast('Failed to send Outlook email. Please try again.', 'error');
+  //   }
+  // };
+
+  // Check for Microsoft connection success in URL params
   React.useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('microsoft_connected') === 'true') {
@@ -374,19 +370,6 @@ export default function DashboardPage() {
               }`}
             >
               Unified Emails
-<<<<<<< HEAD
-=======
-            </button>
-            <button
-              onClick={() => setActiveTab('outlook-calendar')}
-              className={`px-4 py-2 font-medium ${
-                activeTab === 'outlook-calendar'
-                  ? 'border-b-2 border-blue-500 text-blue-600'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              Outlook Calendar
->>>>>>> b05d43c (unified email section with gmail and outlook, search filtering for emails, inbox/sent/drafts, pagination)
             </button>
             <button
               onClick={() => setActiveTab('notion')}
@@ -432,32 +415,8 @@ export default function DashboardPage() {
           {activeTab === 'emails' && (
             <UnifiedEmailView 
               onSendGmailEmail={() => setShowSendEmailModal(true)}
-<<<<<<< HEAD
-              onSendOutlookEmail={() => {}} // Disabled - permission issues
-            />
-=======
               onSendOutlookEmail={() => setShowSendOutlookEmailModal(true)}
             />
-          )}
-
-          {activeTab === 'outlook-calendar' && (
-            <div className="space-y-6">
-              {!microsoftConnected ? (
-                <div className="text-center py-8">
-                  <div className="text-gray-500 text-lg mb-4">Microsoft account not connected</div>
-                  <Button 
-                    onClick={handleMicrosoftConnect}
-                    disabled={microsoftLoading}
-                    className="bg-blue-600 hover:bg-blue-700"
-                  >
-                    {microsoftLoading ? 'Connecting...' : 'Connect to Microsoft'}
-                  </Button>
-                </div>
-              ) : (
-                <OutlookCalendarView onCreateEvent={() => setShowUnifiedEventModal(true)} />
-              )}
-            </div>
->>>>>>> b05d43c (unified email section with gmail and outlook, search filtering for emails, inbox/sent/drafts, pagination)
           )}
 
           {activeTab === 'notion' && (
@@ -509,18 +468,11 @@ export default function DashboardPage() {
             isOpen={showSendOutlookEmailModal}
             onClose={() => setShowSendOutlookEmailModal(false)}
             onSubmit={handleSendOutlookEmail}
-<<<<<<< HEAD
           /> */}
 
           {/* Toast Notifications */}
           <ToastContainer toasts={toasts} removeToast={removeToast} />
           </div>
-=======
-          />
-
-          {/* Toast Notifications */}
-          <ToastContainer toasts={toasts} removeToast={removeToast} />
->>>>>>> b05d43c (unified email section with gmail and outlook, search filtering for emails, inbox/sent/drafts, pagination)
         </div>
 
         {/* Account Dropdown */}

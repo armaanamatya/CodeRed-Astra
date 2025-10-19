@@ -403,7 +403,7 @@ export default function UnifiedEmailView({ onSendGmailEmail, onSendOutlookEmail 
   if (loading) {
     return (
       <div className="p-6 border rounded-lg">
-        <h2 className="text-xl font-semibold mb-4">Unified Email</h2>
+        <h2 className="text-xl font-semibold mb-4">Unified Emails</h2>
         <div className="flex items-center justify-center h-32">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
         </div>
@@ -414,7 +414,7 @@ export default function UnifiedEmailView({ onSendGmailEmail, onSendOutlookEmail 
   if (error) {
     return (
       <div className="p-6 border rounded-lg">
-        <h2 className="text-xl font-semibold mb-4">Unified Email</h2>
+        <h2 className="text-xl font-semibold mb-4">Unified Emails</h2>
         <div className="text-red-600 mb-4">{error}</div>
         <Button onClick={() => fetchMessages(currentPage)} variant="outline">
           Retry
@@ -435,9 +435,10 @@ export default function UnifiedEmailView({ onSendGmailEmail, onSendOutlookEmail 
             <Button onClick={onSendGmailEmail} size="sm" className="bg-blue-600 hover:bg-blue-700">
               Send Gmail
             </Button>
-            <Button onClick={onSendOutlookEmail} size="sm" className="bg-orange-600 hover:bg-orange-700">
+            {/* Outlook send temporarily disabled - permission issues */}
+            {/* <Button onClick={onSendOutlookEmail} size="sm" className="bg-orange-600 hover:bg-orange-700">
               Send Outlook
-            </Button>
+            </Button> */}
           </div>
         </div>
         
@@ -542,8 +543,8 @@ export default function UnifiedEmailView({ onSendGmailEmail, onSendOutlookEmail 
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M24 12.011C24 5.948 19.05 1 12.987 1S2 5.948 2 12.011c0 5.361 3.834 9.82 8.906 10.785v-7.563H8.141v-3.222h2.765V9.869c0-2.73 1.626-4.24 4.116-4.24 1.193 0 2.44.213 2.44.213v2.683h-1.375c-1.354 0-1.777.841-1.777 1.703v2.044h3.023l-.483 3.222h-2.54v7.563C20.164 21.831 24 17.372 24 12.011z"/>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 16c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/>
             </svg>
             Outlook
           </button>
@@ -613,12 +614,20 @@ export default function UnifiedEmailView({ onSendGmailEmail, onSendOutlookEmail 
                       <h4 className="font-semibold text-sm truncate">
                         {getMessageSubject(message)}
                       </h4>
-                      <span className={`px-2 py-0.5 text-xs rounded-full flex-shrink-0 ${
+                      <span className={`p-1 rounded flex-shrink-0 ${
                         message.source === 'gmail'
-                          ? 'bg-blue-100 text-blue-800'
-                          : 'bg-orange-100 text-orange-800'
+                          ? 'bg-blue-100 text-blue-600'
+                          : 'bg-orange-100 text-orange-600'
                       }`}>
-                        {message.source === 'gmail' ? 'G' : 'O'}
+                        {message.source === 'gmail' ? (
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z"/>
+                          </svg>
+                        ) : (
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 16c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/>
+                          </svg>
+                        )}
                       </span>
                     </div>
                     <p className="text-gray-600 text-xs truncate">{getMessageFrom(message)}</p>
