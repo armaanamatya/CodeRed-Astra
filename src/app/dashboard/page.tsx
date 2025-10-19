@@ -362,7 +362,7 @@ export default function DashboardPage() {
                   : 'text-theme-foreground hover:text-theme-accent'
               }`}
             >
-              Unified Calendar
+              Home
             </button>
             <button
               onClick={() => setActiveTab('emails')}
@@ -372,7 +372,7 @@ export default function DashboardPage() {
                   : 'text-theme-foreground hover:text-theme-accent'
               }`}
             >
-              Unified Emails
+              Messages
             </button>
             {/* <button
               onClick={() => setActiveTab('notion')}
