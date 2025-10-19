@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Mic, MicOff, Copy, Trash2 } from 'lucide-react';
 
 export function SpeechToTextForm() {
   const [isListening, setIsListening] = useState(false);
@@ -141,9 +140,9 @@ export function SpeechToTextForm() {
             className="rounded-full w-24 h-24 p-0"
           >
             {isListening ? (
-              <MicOff className="h-10 w-10" />
+              <span className="text-4xl">🔇</span>
             ) : (
-              <Mic className="h-10 w-10" />
+              <span className="text-4xl">🎤</span>
             )}
           </Button>
         </div>
@@ -177,8 +176,7 @@ export function SpeechToTextForm() {
                 size="sm"
                 disabled={!transcript && !interimTranscript}
               >
-                <Copy className="h-4 w-4 mr-1" />
-                Copy
+                📋 Copy
               </Button>
               <Button
                 onClick={clearTranscript}
@@ -186,8 +184,7 @@ export function SpeechToTextForm() {
                 size="sm"
                 disabled={!transcript && !interimTranscript}
               >
-                <Trash2 className="h-4 w-4 mr-1" />
-                Clear
+                🗑️ Clear
               </Button>
             </div>
           </div>
