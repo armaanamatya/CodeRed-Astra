@@ -8,7 +8,6 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import Image from 'next/image';
 import UnifiedCalendarGrid from '@/components/calendar/UnifiedCalendarGrid';
 import UnifiedEmailView from '@/components/email/UnifiedEmailView';
-import OutlookCalendarView from '@/components/outlook/OutlookCalendarView';
 import { TextToSpeechForm } from '@/components/elevenlabs/TextToSpeechForm';
 import { SubscriptionInfo } from '@/components/elevenlabs/SubscriptionInfo';
 import UnifiedEventModal from '@/components/modals/UnifiedEventModal';
@@ -25,7 +24,7 @@ export default function DashboardPage() {
   const [showUnifiedEventModal, setShowUnifiedEventModal] = useState(false);
   const [showSendEmailModal, setShowSendEmailModal] = useState(false);
   const [showSendOutlookEmailModal, setShowSendOutlookEmailModal] = useState(false);
-  const [activeTab, setActiveTab] = useState<'calendar' | 'emails' | 'outlook-calendar' | 'notion' | 'elevenlabs' | 'account'>('calendar');
+  const [activeTab, setActiveTab] = useState<'calendar' | 'emails' | 'notion' | 'elevenlabs' | 'account'>('calendar');
   const [googleConnected, setGoogleConnected] = useState(false);
   const [microsoftConnected, setMicrosoftConnected] = useState(false);
   const [microsoftLoading, setMicrosoftLoading] = useState(false);
@@ -131,6 +130,7 @@ export default function DashboardPage() {
     }
   };
 
+<<<<<<< HEAD
   const handleCreateOutlookEvent = async (eventData: OutlookEventData) => {
     try {
       const response = await fetch('/api/outlook/calendar', {
@@ -163,20 +163,32 @@ export default function DashboardPage() {
         },
         body: JSON.stringify(emailData),
       });
+=======
+  // Temporarily disabled - Microsoft Graph permission issues
+  // const handleSendOutlookEmail = async (emailData: any) => {
+  //   try {
+  //     const response = await fetch('/api/outlook/email', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify(emailData),
+  //     });
+>>>>>>> 23f982b (fixing send email and gmail and outlook logos)
 
-      const result = await response.json();
+  //     const result = await response.json();
 
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to send Outlook email');
-      }
+  //     if (!response.ok) {
+  //       throw new Error(result.error || 'Failed to send Outlook email');
+  //     }
 
-      showToast('Outlook email sent successfully!', 'success');
-      setShowSendOutlookEmailModal(false);
-    } catch (error) {
-      console.error('Error sending Outlook email:', error);
-      showToast('Failed to send Outlook email. Please try again.', 'error');
-    }
-  };
+  //     showToast('Outlook email sent successfully!', 'success');
+  //     setShowSendOutlookEmailModal(false);
+  //   } catch (error) {
+  //     console.error('Error sending Outlook email:', error);
+  //     showToast('Failed to send Outlook email. Please try again.', 'error');
+  //   }
+  // };
 
   const handleMicrosoftConnect = async () => {
     try {
@@ -230,6 +242,34 @@ export default function DashboardPage() {
     } catch (error) {
       console.error('Error reconnecting to Microsoft:', error);
       showToast('Failed to reconnect to Microsoft. Please try again.', 'error');
+    } finally {
+      setMicrosoftLoading(false);
+    }
+  };
+
+  const handleMicrosoftDisconnect = async () => {
+    try {
+      const confirmed = window.confirm('Are you sure you want to disconnect your Microsoft account? You will need to reconnect to use Outlook features.');
+      
+      if (!confirmed) return;
+
+      setMicrosoftLoading(true);
+      
+      const response = await fetch('/api/microsoft/disconnect', {
+        method: 'POST',
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to disconnect Microsoft account');
+      }
+
+      setMicrosoftConnected(false);
+      showToast('Microsoft account disconnected successfully', 'success');
+    } catch (error) {
+      console.error('Error disconnecting Microsoft:', error);
+      showToast('Failed to disconnect Microsoft account', 'error');
     } finally {
       setMicrosoftLoading(false);
     }
@@ -360,16 +400,6 @@ export default function DashboardPage() {
               Unified Emails
             </button>
             <button
-              onClick={() => setActiveTab('outlook-calendar')}
-              className={`px-4 py-2 font-medium ${
-                activeTab === 'outlook-calendar'
-                  ? 'border-b-2 border-blue-500 text-blue-600'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              Outlook Calendar
-            </button>
-            <button
               onClick={() => setActiveTab('notion')}
               className={`px-4 py-2 font-medium transition-colors ${
                 activeTab === 'notion'
@@ -423,10 +453,11 @@ export default function DashboardPage() {
           {activeTab === 'emails' && (
             <UnifiedEmailView 
               onSendGmailEmail={() => setShowSendEmailModal(true)}
-              onSendOutlookEmail={() => setShowSendOutlookEmailModal(true)}
+              onSendOutlookEmail={() => {}} // Disabled - permission issues
             />
           )}
 
+<<<<<<< HEAD
           {activeTab === 'outlook-calendar' && (
             <div className="space-y-6">
               {!microsoftConnected ? (
@@ -446,6 +477,8 @@ export default function DashboardPage() {
             </div>
           )}
 
+=======
+>>>>>>> 23f982b (fixing send email and gmail and outlook logos)
           {activeTab === 'notion' && (
             <NotionMCPCalendarView onCreateEvent={() => setShowUnifiedEventModal(true)} />
           )}
@@ -484,9 +517,38 @@ export default function DashboardPage() {
                   <p className="text-theme-foreground"><strong>User ID:</strong> {session?.user?.id || 'Not available'}</p>
                 </div>
                 
+<<<<<<< HEAD
                 <div className="border-t border-theme-border pt-4">
                   <h3 className="text-lg font-medium mb-2 text-theme-foreground">Connected Services</h3>
                   <div className="space-y-2">
+=======
+                  <div className="border-t pt-4">
+                    <h3 className="text-lg font-medium mb-2">Connected Services</h3>
+                    {microsoftConnected && (
+                      <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded">
+                        <Button 
+                          onClick={async () => {
+                            try {
+                              const response = await fetch('/api/microsoft/token-info');
+                              const data = await response.json();
+                              const info = JSON.stringify(data, null, 2);
+                              alert(`Microsoft Token Info:\n\n${info}`);
+                              console.log('Microsoft Token Info:', data);
+                            } catch (error) {
+                              console.error('Error fetching token info:', error);
+                              showToast('Failed to fetch token info', 'error');
+                            }
+                          }}
+                          size="sm"
+                          variant="outline"
+                          className="w-full"
+                        >
+                          🔍 Debug: Check Token Permissions
+                        </Button>
+                      </div>
+                    )}
+                    <div className="space-y-2">
+>>>>>>> 23f982b (fixing send email and gmail and outlook logos)
                     <div className="flex items-center justify-between">
                       <span className="text-theme-foreground"><strong>Google:</strong> {googleConnected ? '✅ Connected' : '❌ Not connected'}</span>
                       {googleConnected && (
@@ -523,6 +585,15 @@ export default function DashboardPage() {
                               className="text-orange-600 border-orange-300 hover:bg-orange-50"
                             >
                               Reconnect
+                            </Button>
+                            <Button 
+                              onClick={handleMicrosoftDisconnect}
+                              size="sm"
+                              variant="outline"
+                              className="text-red-600 border-red-300 hover:bg-red-50"
+                              disabled={microsoftLoading}
+                            >
+                              Disconnect
                             </Button>
                           </div>
                         )}
@@ -562,11 +633,12 @@ export default function DashboardPage() {
             onSubmit={handleSendEmail}
           />
 
-          <SendOutlookEmailModal
+          {/* Outlook send temporarily disabled - permission issues */}
+          {/* <SendOutlookEmailModal
             isOpen={showSendOutlookEmailModal}
             onClose={() => setShowSendOutlookEmailModal(false)}
             onSubmit={handleSendOutlookEmail}
-          />
+          /> */}
 
           {/* Toast Notifications */}
           <ToastContainer toasts={toasts} removeToast={removeToast} />

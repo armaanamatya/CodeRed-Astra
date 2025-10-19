@@ -105,6 +105,12 @@ export class MicrosoftGraphService {
         importance: messageData.importance || 'normal'
       };
 
+      console.log('Attempting to send email via Microsoft Graph:', {
+        to: messageData.to,
+        subject: messageData.subject,
+        endpoint: '/me/sendMail'
+      });
+
       const response = await this.makeRequest('/me/sendMail', {
         method: 'POST',
         headers: {
@@ -116,6 +122,7 @@ export class MicrosoftGraphService {
         })
       });
 
+      console.log('Email sent successfully via Microsoft Graph');
       return response;
     } catch (error) {
       console.error('Error sending message:', error);

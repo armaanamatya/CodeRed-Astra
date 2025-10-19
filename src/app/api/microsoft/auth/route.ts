@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
     microsoftAuthUrl.searchParams.set('client_id', clientId);
     microsoftAuthUrl.searchParams.set('response_type', 'code');
     microsoftAuthUrl.searchParams.set('redirect_uri', redirectUri);
-    microsoftAuthUrl.searchParams.set('scope', 'https://graph.microsoft.com/calendars.readwrite https://graph.microsoft.com/mail.readwrite https://graph.microsoft.com/user.read');
+    microsoftAuthUrl.searchParams.set('scope', 'openid profile email offline_access Calendars.ReadWrite Mail.ReadWrite Mail.Send User.Read');
     microsoftAuthUrl.searchParams.set('response_mode', 'query');
     microsoftAuthUrl.searchParams.set('state', 'microsoft-connect');
 
