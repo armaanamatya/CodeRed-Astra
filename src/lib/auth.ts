@@ -6,10 +6,11 @@ import connectDB from './db/mongodb';
 import User from '@/models/User';
 
 export const authOptions: NextAuthOptions = {
-  // Temporarily disable MongoDB adapter due to SSL issues and account linking conflicts
+  // Temporarily disable MongoDB adapter due to connection issues
   // adapter: MongoDBAdapter(clientPromise),
   session: {
-    strategy: "jwt",
+    strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   providers: [
     GoogleProvider({
@@ -48,10 +49,6 @@ export const authOptions: NextAuthOptions = {
       return `${baseUrl}/dashboard`;
     },
     async signIn({ user, account, profile }) {
-<<<<<<< HEAD
-      // Always allow sign in - we handle user creation/updates in the JWT callback
-      return true;
-=======
       if (account?.provider === 'google') {
         try {
           await connectDB();
@@ -91,26 +88,16 @@ export const authOptions: NextAuthOptions = {
         }
       }
       return true; // Always allow sign in
->>>>>>> bb97474 (Notion Cal tab)
     },
-    async session({ session, user }) {
-      // Add guard to check if user exists
-      if (!user) {
-        return session;
+    async session({ session, token }) {
+      // Add user ID to session from token
+      if (token?.id) {
+        session.user.id = token.id as string;
       }
       
-      // Add user ID to session
-      session.user.id = user.id;
-      
-      // Get fresh access token from our custom User model
-      try {
-        await connectDB();
-        const dbUser = await User.findOne({ email: session.user.email });
-        if (dbUser?.accessToken) {
-          session.accessToken = dbUser.accessToken;
-        }
-      } catch (error) {
-        console.error('Error fetching access token:', error);
+      // Add access token to session
+      if (token?.accessToken) {
+        session.accessToken = token.accessToken as string;
       }
       
       return session;
@@ -137,7 +124,7 @@ export const authOptions: NextAuthOptions = {
             { upsert: true, new: true }
           );
 
-          console.log(`✅ User ${user.email} saved to NAVI database`);
+          console.log(`✅ User ${user.email} saved to database`);
 
           return {
             ...token,
