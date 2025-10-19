@@ -6,8 +6,8 @@ import connectDB from './db/mongodb';
 import User from '@/models/User';
 
 export const authOptions: NextAuthOptions = {
-  adapter: MongoDBAdapter(clientPromise),
-  trustHost: true,
+  // Temporarily disable adapter to prevent conflicts
+  // adapter: MongoDBAdapter(clientPromise),
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -18,9 +18,11 @@ export const authOptions: NextAuthOptions = {
             'openid',
             'email',
             'profile',
-            'https://www.googleapis.com/auth/gmail.modify', // Read and write emails
-            'https://www.googleapis.com/auth/gmail.send', // Send emails
-            'https://www.googleapis.com/auth/calendar', // Full calendar access
+            'https://www.googleapis.com/auth/gmail.readonly',
+            'https://www.googleapis.com/auth/gmail.send',
+            'https://www.googleapis.com/auth/calendar',
+            'https://www.googleapis.com/auth/userinfo.email',
+            'https://www.googleapis.com/auth/userinfo.profile',
           ].join(' '),
           access_type: 'offline',
           prompt: 'consent',
@@ -30,7 +32,7 @@ export const authOptions: NextAuthOptions = {
   ],
   secret: process.env.NEXTAUTH_SECRET,
   session: {
-    strategy: 'database',
+    strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
@@ -39,34 +41,52 @@ export const authOptions: NextAuthOptions = {
         try {
           await connectDB();
           
-          // Save or update user with OAuth tokens in our custom User model
-          await User.findOneAndUpdate(
-            { email: user.email },
-            {
-              email: user.email,
-              name: user.name,
-              image: user.image,
-              googleId: account.providerAccountId,
-              accessToken: account.access_token,
-              refreshToken: account.refresh_token,
-              tokenExpiry: account.expires_at ? new Date(account.expires_at * 1000) : undefined,
-              emailVerified: new Date(),
-            },
-            { upsert: true, new: true }
-          );
+          // Check if user exists with different googleId
+          const existingUser = await User.findOne({ email: user.email });
           
-          console.log(`✅ User ${user.email} saved to NAVI database`);
-          return true;
+          if (existingUser && existingUser.googleId && existingUser.googleId !== account.providerAccountId) {
+            // Update the existing user with new Google ID
+            await User.findOneAndUpdate(
+              { email: user.email },
+              {
+                googleId: account.providerAccountId,
+                accessToken: account.access_token,
+                refreshToken: account.refresh_token,
+                tokenExpiry: account.expires_at ? new Date(account.expires_at * 1000) : undefined,
+                emailVerified: new Date(),
+              }
+            );
+            console.log(`✅ Updated existing user ${user.email} with new Google ID`);
+          } else {
+            // Create or update user
+            await User.findOneAndUpdate(
+              { email: user.email },
+              {
+                email: user.email,
+                name: user.name,
+                image: user.image,
+                googleId: account.providerAccountId,
+                accessToken: account.access_token,
+                refreshToken: account.refresh_token,
+                tokenExpiry: account.expires_at ? new Date(account.expires_at * 1000) : undefined,
+                emailVerified: new Date(),
+              },
+              { upsert: true, new: true }
+            );
+            console.log(`✅ User ${user.email} saved to NAVI database`);
+          }
         } catch (error) {
           console.error('Database save error during sign in:', error);
-          return true; // Still allow sign in even if database save fails
+          // Continue with sign in even if database save fails
         }
       }
-      return true;
+      return true; // Always allow sign in
     },
-    async session({ session, user }) {
+    async session({ session, token }) {
       // Add user ID to session
-      session.user.id = user.id;
+      if (token.sub) {
+        session.user.id = token.sub;
+      }
       
       // Get fresh access token from our custom User model
       try {
@@ -80,6 +100,17 @@ export const authOptions: NextAuthOptions = {
       }
       
       return session;
+    },
+    async jwt({ token, user, account }) {
+      // Persist the OAuth access_token to the token right after signin
+      if (account && user) {
+        return {
+          ...token,
+          accessToken: account.access_token,
+          refreshToken: account.refresh_token,
+        };
+      }
+      return token;
     },
   },
   pages: {
