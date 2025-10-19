@@ -517,19 +517,43 @@ export default function UnifiedCalendarGrid({
         </div>
         
         <div className="flex items-center gap-2">
-          <Button onClick={() => navigateView('prev')} variant="outline" size="sm">
+          <Button 
+            onClick={() => navigateView('prev')} 
+            variant="outline" 
+            size="sm"
+            className="hover:bg-theme-hover hover:border-theme-hover hover:text-theme-foreground transition-all duration-200 hover:shadow-md"
+          >
             ←
           </Button>
-          <Button onClick={goToToday} variant="outline" size="sm">
+          <Button 
+            onClick={goToToday} 
+            variant="outline" 
+            size="sm"
+            className="hover:bg-theme-hover hover:border-theme-hover hover:text-theme-foreground transition-all duration-200 hover:shadow-md"
+          >
             Today
           </Button>
-          <Button onClick={() => navigateView('next')} variant="outline" size="sm">
+          <Button 
+            onClick={() => navigateView('next')} 
+            variant="outline" 
+            size="sm"
+            className="hover:bg-theme-hover hover:border-theme-hover hover:text-theme-foreground transition-all duration-200 hover:shadow-md"
+          >
             →
           </Button>
-          <Button onClick={fetchEvents} variant="outline" size="sm">
+          <Button 
+            onClick={fetchEvents} 
+            variant="outline" 
+            size="sm"
+            className="hover:bg-theme-hover hover:border-theme-hover hover:text-theme-foreground transition-all duration-200 hover:shadow-md"
+          >
             Refresh
           </Button>
-          <Button onClick={() => onCreateEvent()} size="sm">
+          <Button 
+            onClick={() => onCreateEvent()} 
+            size="sm"
+            className="bg-theme-primary hover:bg-theme-accent text-theme-primary-foreground hover:text-theme-accent-foreground transition-all duration-200 hover:shadow-lg"
+          >
             Create Event
           </Button>
         </div>

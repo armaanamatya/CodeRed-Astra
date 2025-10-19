@@ -24,21 +24,42 @@ export default function UnifiedEventModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Helper function to format date for input fields
+  const formatDateForInput = (dateString: string, isAllDay: boolean) => {
+    if (!dateString) return '';
+    
+    try {
+      const date = new Date(dateString);
+      if (isAllDay) {
+        // For all-day events, return just the date part
+        return date.toISOString().split('T')[0];
+      } else {
+        // For timed events, return datetime-local format
+        return date.toISOString().slice(0, 16);
+      }
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return '';
+    }
+  };
+
   useEffect(() => {
     if (isOpen) {
       if (initialData) {
+        // Edit mode - populate form with existing event data
+        const isAllDay = initialData.allDay || false;
         setFormData({
           title: initialData.title || '',
           description: initialData.description || '',
-          start: initialData.start || '',
-          end: initialData.end || '',
-          allDay: initialData.allDay || false,
+          start: formatDateForInput(initialData.start || '', isAllDay),
+          end: formatDateForInput(initialData.end || '', isAllDay),
+          allDay: isAllDay,
           location: initialData.location || '',
           attendees: initialData.attendees?.join(', ') || '',
           source: targetSource || initialData.source || 'google'
         });
       } else {
-        // Reset form for new event
+        // Create mode - reset form for new event
         const now = new Date();
         const startTime = new Date(now.getTime() + 60 * 60 * 1000); // 1 hour from now
         const endTime = new Date(startTime.getTime() + 60 * 60 * 1000); // 1 hour duration
@@ -54,6 +75,8 @@ export default function UnifiedEventModal({
           source: targetSource || 'google'
         });
       }
+      // Clear any previous errors
+      setError(null);
     }
   }, [isOpen, initialData, targetSource]);
 
@@ -71,7 +94,7 @@ export default function UnifiedEventModal({
         allDay: formData.allDay,
         location: formData.location,
         attendees: formData.attendees.split(',').map(email => email.trim()).filter(email => email),
-        source: formData.source as 'google' | 'outlook' | 'notion'
+        source: formData.source as 'google' | 'outlook' // | 'notion'
       };
 
       await onSubmit(eventData);
@@ -84,7 +107,20 @@ export default function UnifiedEventModal({
   };
 
   const handleInputChange = (field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    if (field === 'allDay') {
+      // When toggling all-day, reformat the start and end dates
+      setFormData(prev => {
+        const newAllDay = value;
+        return {
+          ...prev,
+          allDay: newAllDay,
+          start: formatDateForInput(prev.start, newAllDay),
+          end: formatDateForInput(prev.end, newAllDay)
+        };
+      });
+    } else {
+      setFormData(prev => ({ ...prev, [field]: value }));
+    }
   };
 
   const formatDateTime = (dateTime: string) => {
@@ -96,46 +132,46 @@ export default function UnifiedEventModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">
-            {initialData ? 'Edit Event' : 'Create Event'}
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100] pt-20">
+      <div className="bg-theme-background border-theme-border border rounded-xl p-6 w-full max-w-lg mx-4 shadow-2xl backdrop-blur-sm">
+        <div className="flex justify-between items-center mb-4 pt-2">
+          <h2 className="text-xl font-semibold text-theme-foreground">
+            {initialData ? 'Edit Event' : 'Create New Event'}
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-theme-muted-foreground hover:text-theme-foreground transition-colors duration-200"
           >
             ✕
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3">
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-red-600 text-sm">
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 text-red-600 dark:text-red-400 text-sm">
               {error}
             </div>
           )}
 
           {/* Source Selection */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-theme-foreground mb-1">
               Create in:
             </label>
             <select
               value={formData.source}
               onChange={(e) => handleInputChange('source', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border-theme-border border rounded-md bg-theme-background text-theme-foreground focus:outline-none focus:ring-2 focus:ring-theme-primary focus:border-transparent transition-all duration-200"
             >
               <option value="google">Google Calendar</option>
               <option value="outlook">Outlook Calendar</option>
-              <option value="notion">Notion Database</option>
+              {/* <option value="notion">Notion Database</option> */}
             </select>
           </div>
 
           {/* Title */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-theme-foreground mb-1">
               Title *
             </label>
             <input
@@ -143,21 +179,21 @@ export default function UnifiedEventModal({
               value={formData.title}
               onChange={(e) => handleInputChange('title', e.target.value)}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border-theme-border border rounded-md bg-theme-background text-theme-foreground placeholder-theme-muted-foreground focus:outline-none focus:ring-2 focus:ring-theme-primary focus:border-transparent transition-all duration-200"
               placeholder="Event title"
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-theme-foreground mb-1">
               Description
             </label>
             <textarea
               value={formData.description}
               onChange={(e) => handleInputChange('description', e.target.value)}
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              rows={2}
+              className="w-full px-3 py-2 border-theme-border border rounded-md bg-theme-background text-theme-foreground placeholder-theme-muted-foreground focus:outline-none focus:ring-2 focus:ring-theme-primary focus:border-transparent transition-all duration-200 resize-none"
               placeholder="Event description"
             />
           </div>
@@ -169,111 +205,111 @@ export default function UnifiedEventModal({
               id="allDay"
               checked={formData.allDay}
               onChange={(e) => handleInputChange('allDay', e.target.checked)}
-              className="rounded"
+              className="rounded border-theme-border text-theme-primary focus:ring-theme-primary"
             />
-            <label htmlFor="allDay" className="text-sm font-medium text-gray-700">
+            <label htmlFor="allDay" className="text-sm font-medium text-theme-foreground">
               All day event
             </label>
           </div>
 
           {/* Start Date/Time */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-theme-foreground mb-1">
               Start {formData.allDay ? 'Date' : 'Date & Time'} *
             </label>
             <input
               type={formData.allDay ? 'date' : 'datetime-local'}
-              value={formData.allDay ? formData.start.split('T')[0] : formData.start}
+              value={formData.start}
               onChange={(e) => handleInputChange('start', e.target.value)}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border-theme-border border rounded-md bg-theme-background text-theme-foreground focus:outline-none focus:ring-2 focus:ring-theme-primary focus:border-transparent transition-all duration-200"
             />
           </div>
 
           {/* End Date/Time */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-theme-foreground mb-1">
               End {formData.allDay ? 'Date' : 'Date & Time'} *
             </label>
             <input
               type={formData.allDay ? 'date' : 'datetime-local'}
-              value={formData.allDay ? formData.end.split('T')[0] : formData.end}
+              value={formData.end}
               onChange={(e) => handleInputChange('end', e.target.value)}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border-theme-border border rounded-md bg-theme-background text-theme-foreground focus:outline-none focus:ring-2 focus:ring-theme-primary focus:border-transparent transition-all duration-200"
             />
           </div>
 
           {/* Location */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-theme-foreground mb-1">
               Location
             </label>
             <input
               type="text"
               value={formData.location}
               onChange={(e) => handleInputChange('location', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border-theme-border border rounded-md bg-theme-background text-theme-foreground placeholder-theme-muted-foreground focus:outline-none focus:ring-2 focus:ring-theme-primary focus:border-transparent transition-all duration-200"
               placeholder="Event location"
             />
           </div>
 
           {/* Attendees */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-theme-foreground mb-1">
               Attendees
             </label>
             <input
               type="text"
               value={formData.attendees}
               onChange={(e) => handleInputChange('attendees', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border-theme-border border rounded-md bg-theme-background text-theme-foreground placeholder-theme-muted-foreground focus:outline-none focus:ring-2 focus:ring-theme-primary focus:border-transparent transition-all duration-200"
               placeholder="email1@example.com, email2@example.com"
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-theme-muted-foreground mt-1">
               Separate multiple email addresses with commas
             </p>
           </div>
 
           {/* Source-specific info */}
-          {formData.source === 'notion' && (
-            <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
-              <p className="text-sm text-purple-700">
+          {/* {formData.source === 'notion' && (
+            <div className="bg-theme-secondary border border-theme-border rounded-lg p-2">
+              <p className="text-xs text-theme-foreground">
                 <strong>Notion:</strong> Event will be created in your connected Notion database.
               </p>
             </div>
-          )}
+          )} */}
 
           {formData.source === 'outlook' && (
-            <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
-              <p className="text-sm text-orange-700">
+            <div className="bg-theme-secondary border border-theme-border rounded-lg p-2">
+              <p className="text-xs text-theme-foreground">
                 <strong>Outlook:</strong> Event will be created in your Outlook calendar.
               </p>
             </div>
           )}
 
           {formData.source === 'google' && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-              <p className="text-sm text-blue-700">
+            <div className="bg-theme-secondary border border-theme-border rounded-lg p-2">
+              <p className="text-xs text-theme-foreground">
                 <strong>Google Calendar:</strong> Event will be created in your Google Calendar.
               </p>
             </div>
           )}
 
           {/* Action Buttons */}
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-3 pt-3">
             <Button
               type="button"
               onClick={onClose}
               variant="outline"
-              className="flex-1"
+              className="flex-1 hover:bg-theme-hover hover:border-theme-hover hover:text-theme-foreground transition-all duration-200 hover:shadow-md"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={loading || !formData.title || !formData.start || !formData.end}
-              className="flex-1"
+              className="flex-1 bg-theme-primary hover:bg-theme-accent text-theme-primary-foreground hover:text-theme-accent-foreground transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Creating...' : initialData ? 'Update Event' : 'Create Event'}
             </Button>

@@ -51,13 +51,13 @@ export default function SendEmailModal({ isOpen, onClose, onSubmit }: SendEmailM
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-        <h2 className="text-xl font-semibold mb-4">Send Email</h2>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100] pt-20">
+      <div className="bg-theme-background border-theme-border border rounded-xl p-6 w-full max-w-md mx-4 max-h-[80vh] overflow-y-auto shadow-2xl backdrop-blur-sm">
+        <h2 className="text-xl font-semibold mb-4 text-theme-foreground">Send Email</h2>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="to" className="block text-sm font-medium mb-1">
+            <label htmlFor="to" className="block text-sm font-medium mb-1 text-theme-foreground">
               To *
             </label>
             <input
@@ -67,13 +67,13 @@ export default function SendEmailModal({ isOpen, onClose, onSubmit }: SendEmailM
               value={formData.to}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border-theme-border border rounded-md bg-theme-background text-theme-foreground placeholder-theme-muted-foreground focus:outline-none focus:ring-2 focus:ring-theme-primary focus:border-transparent transition-all duration-200"
               placeholder="recipient@example.com"
             />
           </div>
 
           <div>
-            <label htmlFor="cc" className="block text-sm font-medium mb-1">
+            <label htmlFor="cc" className="block text-sm font-medium mb-1 text-theme-foreground">
               CC
             </label>
             <input
@@ -82,13 +82,13 @@ export default function SendEmailModal({ isOpen, onClose, onSubmit }: SendEmailM
               name="cc"
               value={formData.cc}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border-theme-border border rounded-md bg-theme-background text-theme-foreground placeholder-theme-muted-foreground focus:outline-none focus:ring-2 focus:ring-theme-primary focus:border-transparent transition-all duration-200"
               placeholder="cc@example.com"
             />
           </div>
 
           <div>
-            <label htmlFor="bcc" className="block text-sm font-medium mb-1">
+            <label htmlFor="bcc" className="block text-sm font-medium mb-1 text-theme-foreground">
               BCC
             </label>
             <input
@@ -97,13 +97,13 @@ export default function SendEmailModal({ isOpen, onClose, onSubmit }: SendEmailM
               name="bcc"
               value={formData.bcc}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border-theme-border border rounded-md bg-theme-background text-theme-foreground placeholder-theme-muted-foreground focus:outline-none focus:ring-2 focus:ring-theme-primary focus:border-transparent transition-all duration-200"
               placeholder="bcc@example.com"
             />
           </div>
 
           <div>
-            <label htmlFor="subject" className="block text-sm font-medium mb-1">
+            <label htmlFor="subject" className="block text-sm font-medium mb-1 text-theme-foreground">
               Subject *
             </label>
             <input
@@ -113,13 +113,13 @@ export default function SendEmailModal({ isOpen, onClose, onSubmit }: SendEmailM
               value={formData.subject}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border-theme-border border rounded-md bg-theme-background text-theme-foreground placeholder-theme-muted-foreground focus:outline-none focus:ring-2 focus:ring-theme-primary focus:border-transparent transition-all duration-200"
               placeholder="Enter email subject"
             />
           </div>
 
           <div>
-            <label htmlFor="body" className="block text-sm font-medium mb-1">
+            <label htmlFor="body" className="block text-sm font-medium mb-1 text-theme-foreground">
               Message *
             </label>
             <textarea
@@ -129,16 +129,25 @@ export default function SendEmailModal({ isOpen, onClose, onSubmit }: SendEmailM
               onChange={handleChange}
               rows={6}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border-theme-border border rounded-md bg-theme-background text-theme-foreground placeholder-theme-muted-foreground focus:outline-none focus:ring-2 focus:ring-theme-primary focus:border-transparent transition-all duration-200 resize-none"
               placeholder="Enter your message"
             />
           </div>
 
           <div className="flex justify-end gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={onClose}
+              className="hover:bg-theme-hover hover:border-theme-hover hover:text-theme-foreground transition-all duration-200 hover:shadow-md"
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button 
+              type="submit" 
+              disabled={loading}
+              className="bg-theme-primary hover:bg-theme-accent text-theme-primary-foreground hover:text-theme-accent-foreground transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               {loading ? 'Sending...' : 'Send Email'}
             </Button>
           </div>

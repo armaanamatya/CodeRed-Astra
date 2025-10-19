@@ -429,10 +429,19 @@ export default function UnifiedEmailView({ onSendGmailEmail, onSendOutlookEmail 
         <div className="flex justify-between items-center mb-2">
           <h2 className="text-2xl font-bold text-theme-foreground">Unified Email</h2>
           <div className="flex gap-2">
-            <Button onClick={() => fetchMessages(currentPage)} variant="outline" size="sm">
+            <Button 
+              onClick={() => fetchMessages(currentPage)} 
+              variant="outline" 
+              size="sm"
+              className="hover:bg-theme-hover hover:border-theme-hover hover:text-theme-foreground transition-all duration-200 hover:shadow-md"
+            >
               Refresh
             </Button>
-            <Button onClick={onSendGmailEmail} size="sm" className="bg-theme-primary hover:bg-theme-accent text-theme-primary-foreground">
+            <Button 
+              onClick={onSendGmailEmail} 
+              size="sm" 
+              className="bg-theme-primary hover:bg-theme-accent text-theme-primary-foreground hover:text-theme-accent-foreground transition-all duration-200 hover:shadow-lg"
+            >
               Send Gmail
             </Button>
             {/* Outlook send temporarily disabled - permission issues */}
@@ -453,6 +462,7 @@ export default function UnifiedEmailView({ onSendGmailEmail, onSendOutlookEmail 
               disabled={!hasPrevPage}
               variant="outline"
               size="sm"
+              className="hover:bg-theme-hover hover:border-theme-hover hover:text-theme-foreground transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:shadow-none"
             >
               ← Previous
             </Button>
@@ -464,6 +474,7 @@ export default function UnifiedEmailView({ onSendGmailEmail, onSendOutlookEmail 
               disabled={!hasNextPage}
               variant="outline"
               size="sm"
+              className="hover:bg-theme-hover hover:border-theme-hover hover:text-theme-foreground transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:shadow-none"
             >
               Next →
             </Button>

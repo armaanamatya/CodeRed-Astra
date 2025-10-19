@@ -27,10 +27,10 @@ export function Toast({ message, type, onClose, duration = 3000 }: ToastProps) {
     return () => clearTimeout(timer);
   }, [duration, onClose]);
 
-  const bgColor = {
-    success: 'bg-green-500',
-    error: 'bg-red-500',
-    info: 'bg-blue-500',
+  const toastClass = {
+    success: 'toast-success',
+    error: 'toast-error',
+    info: 'toast-info',
   }[type];
 
   const icon = {
@@ -41,19 +41,19 @@ export function Toast({ message, type, onClose, duration = 3000 }: ToastProps) {
 
   return (
     <div
-      className={`fixed top-4 right-4 z-[100] transition-all duration-300 transform ${
+      className={`fixed top-20 right-4 z-[100] transition-all duration-300 transform ${
         isVisible ? 'translate-y-0 opacity-100' : '-translate-y-2 opacity-0'
       }`}
     >
-      <div className={`${bgColor} text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 min-w-[300px] max-w-[500px]`}>
+      <div className={`${toastClass} border px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 min-w-[300px] max-w-[500px] backdrop-blur-sm`}>
         <span className="text-2xl font-bold">{icon}</span>
-        <span className="flex-1">{message}</span>
+        <span className="flex-1 font-medium">{message}</span>
         <button
           onClick={() => {
             setIsVisible(false);
             setTimeout(onClose, 300);
           }}
-          className="text-white hover:text-gray-200 text-xl font-bold"
+          className="hover:opacity-70 text-xl font-bold transition-opacity duration-200"
         >
           ×
         </button>
@@ -69,7 +69,7 @@ interface ToastContainerProps {
 
 export function ToastContainer({ toasts, removeToast }: ToastContainerProps) {
   return (
-    <div className="fixed top-4 right-4 z-[100] space-y-2">
+    <div className="fixed top-20 right-4 z-[100] space-y-2">
       {toasts.map((toast) => (
         <Toast
           key={toast.id}

@@ -15,7 +15,7 @@ import { SubscriptionInfo } from '@/components/elevenlabs/SubscriptionInfo';
 import UnifiedEventModal from '@/components/modals/UnifiedEventModal';
 import SendEmailModal from '@/components/modals/SendEmailModal';
 import SendOutlookEmailModal from '@/components/modals/SendOutlookEmailModal';
-import NotionMCPCalendarView from '@/components/notion/NotionMCPCalendarView';
+// import NotionMCPCalendarView from '@/components/notion/NotionMCPCalendarView';
 import { UnifiedEvent } from '@/types/calendar';
 import { CalendarService } from '@/lib/calendarService';
 import { ToastContainer } from '@/components/ui/toast';
@@ -28,7 +28,7 @@ type EventData = {
   end: string;
   location?: string;
   allDay?: boolean;
-  source: 'google' | 'outlook' | 'notion';
+  source: 'google' | 'outlook'; // | 'notion';
 };
 
 type EmailData = {
@@ -56,7 +56,7 @@ export default function DashboardPage() {
   const [showUnifiedEventModal, setShowUnifiedEventModal] = useState(false);
   const [showSendEmailModal, setShowSendEmailModal] = useState(false);
   const [showSendOutlookEmailModal, setShowSendOutlookEmailModal] = useState(false);
-  const [activeTab, setActiveTab] = useState<'calendar' | 'emails' | 'notion' | 'elevenlabs' | 'account'>('calendar');
+  const [activeTab, setActiveTab] = useState<'calendar' | 'emails' | 'elevenlabs' | 'account'>('calendar'); // removed 'notion'
   const [elevenLabsTab, setElevenLabsTab] = useState<'tts' | 'stt'>('tts');
   const [googleConnected, setGoogleConnected] = useState(false);
   const [microsoftConnected, setMicrosoftConnected] = useState(false);
@@ -89,7 +89,8 @@ export default function DashboardPage() {
             summary: eventData.title,
             description: eventData.description,
             startDateTime: eventData.start,
-            endDateTime: eventData.end
+            endDateTime: eventData.end,
+            allDay: eventData.allDay
           })
         });
       } else if (eventData.source === 'outlook') {
@@ -104,19 +105,19 @@ export default function DashboardPage() {
             location: eventData.location
           })
         });
-      } else if (eventData.source === 'notion') {
-        response = await fetch('/api/notion-mcp/calendar', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            title: eventData.title,
-            description: eventData.description,
-            start: eventData.start,
-            end: eventData.end,
-            location: eventData.location,
-            allDay: eventData.allDay
-          })
-        });
+      // } else if (eventData.source === 'notion') {
+      //   response = await fetch('/api/notion-mcp/calendar', {
+      //     method: 'POST',
+      //     headers: { 'Content-Type': 'application/json' },
+      //     body: JSON.stringify({
+      //       title: eventData.title,
+      //       description: eventData.description,
+      //       start: eventData.start,
+      //       end: eventData.end,
+      //       location: eventData.location,
+      //       allDay: eventData.allDay
+      //     })
+      //   });
       } else {
         throw new Error('Invalid event source');
       }
@@ -373,7 +374,7 @@ export default function DashboardPage() {
             >
               Unified Emails
             </button>
-            <button
+            {/* <button
               onClick={() => setActiveTab('notion')}
               className={`px-4 py-2 font-medium transition-colors ${
                 activeTab === 'notion'
@@ -382,7 +383,7 @@ export default function DashboardPage() {
               }`}
             >
               Notion
-            </button>
+            </button> */}
             <button
               onClick={() => setActiveTab('elevenlabs')}
               className={`px-4 py-2 font-medium transition-colors ${
@@ -400,15 +401,17 @@ export default function DashboardPage() {
             <UnifiedCalendarGrid
               onEventClick={(event) => {
                 setSelectedEvent(event);
-                // You could show an event details modal here
+                setShowUnifiedEventModal(true); // Open modal in edit mode when clicking on event
                 console.log('Event clicked:', event);
               }}
               onCreateEvent={(date) => {
                 setSelectedDate(date || null);
+                setSelectedEvent(null); // Clear selected event for new event creation
                 setShowUnifiedEventModal(true);
               }}
               onDateClick={(date) => {
                 setSelectedDate(date);
+                setSelectedEvent(null); // Clear selected event for new event creation
                 setShowUnifiedEventModal(true);
               }}
             />
@@ -421,9 +424,12 @@ export default function DashboardPage() {
             />
           )}
 
-          {activeTab === 'notion' && (
-            <NotionMCPCalendarView onCreateEvent={() => setShowUnifiedEventModal(true)} />
-          )}
+          {/* {activeTab === 'notion' && (
+            <NotionMCPCalendarView onCreateEvent={() => {
+              setSelectedEvent(null); // Clear selected event for new event creation
+              setShowUnifiedEventModal(true);
+            }} />
+          )} */}
 
           {activeTab === 'elevenlabs' && (
             <div>
@@ -491,8 +497,12 @@ export default function DashboardPage() {
 
           {/* Modals */}
           <UnifiedEventModal
+            key={selectedEvent?.id || 'new-event'} // Force re-render when switching between create/edit
             isOpen={showUnifiedEventModal}
-            onClose={() => setShowUnifiedEventModal(false)}
+            onClose={() => {
+              setShowUnifiedEventModal(false);
+              setSelectedEvent(null); // Clear selected event when closing modal
+            }}
             onSubmit={handleCreateEvent}
             initialData={selectedEvent || undefined}
             targetSource={selectedEvent?.source}

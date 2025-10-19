@@ -123,21 +123,32 @@ export async function POST(request: NextRequest) {
     // Handle all-day events vs timed events
     const eventBody: any = {
       summary,
-      description,
+      description: description || '',
     };
     
-    if (allDay) {
+    // Determine if this is an all-day event based on the date format
+    const isAllDayEvent = allDay || (!startDateTime.includes('T') && !startDateTime.includes(':'));
+    
+    if (isAllDayEvent) {
       // For all-day events, use date instead of dateTime
-      eventBody.start = { date: startDateTime };
-      eventBody.end = { date: endDateTime };
+      // Ensure we have just the date part (YYYY-MM-DD)
+      const startDate = startDateTime.split('T')[0];
+      const endDate = endDateTime.split('T')[0];
+      
+      eventBody.start = { date: startDate };
+      eventBody.end = { date: endDate };
     } else {
       // For timed events, use dateTime with timezone
+      // Ensure we have a proper ISO datetime string
+      const startDateTimeFormatted = startDateTime.includes('T') ? startDateTime : `${startDateTime}T00:00:00`;
+      const endDateTimeFormatted = endDateTime.includes('T') ? endDateTime : `${endDateTime}T00:00:00`;
+      
       eventBody.start = {
-        dateTime: startDateTime,
+        dateTime: startDateTimeFormatted,
         timeZone: 'UTC',
       };
       eventBody.end = {
-        dateTime: endDateTime,
+        dateTime: endDateTimeFormatted,
         timeZone: 'UTC',
       };
     }
