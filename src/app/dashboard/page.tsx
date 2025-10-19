@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import CalendarView from '@/components/calendar/CalendarView';
 import GmailView from '@/components/gmail/GmailView';
-<<<<<<< HEAD
 import OutlookCalendarView from '@/components/outlook/OutlookCalendarView';
 import OutlookEmailView from '@/components/outlook/OutlookEmailView';
 import { TextToSpeechForm } from '@/components/elevenlabs/TextToSpeechForm';
@@ -15,29 +14,21 @@ import CreateEventModal from '@/components/modals/CreateEventModal';
 import SendEmailModal from '@/components/modals/SendEmailModal';
 import CreateOutlookEventModal from '@/components/modals/CreateOutlookEventModal';
 import SendOutlookEmailModal from '@/components/modals/SendOutlookEmailModal';
-=======
-import NotionCalendarView from '@/components/notion/NotionCalendarView';
-import CreateEventModal from '@/components/modals/CreateEventModal';
-import SendEmailModal from '@/components/modals/SendEmailModal';
+import NotionMCPCalendarView from '@/components/notion/NotionMCPCalendarView';
 import CreateNotionEventModal from '@/components/modals/CreateNotionEventModal';
->>>>>>> 72027ab (Notion Cal tab)
 
 export default function DashboardPage() {
   const { session } = useAuth();
   const [showCreateEventModal, setShowCreateEventModal] = useState(false);
   const [showSendEmailModal, setShowSendEmailModal] = useState(false);
-<<<<<<< HEAD
   const [showCreateOutlookEventModal, setShowCreateOutlookEventModal] = useState(false);
   const [showSendOutlookEmailModal, setShowSendOutlookEmailModal] = useState(false);
-  const [activeTab, setActiveTab] = useState<'calendar' | 'gmail' | 'outlook' | 'elevenlabs' | 'account'>('calendar');
+  const [showCreateNotionEventModal, setShowCreateNotionEventModal] = useState(false);
+  const [activeTab, setActiveTab] = useState<'calendar' | 'gmail' | 'outlook' | 'notion' | 'elevenlabs' | 'account'>('calendar');
   const [outlookSubTab, setOutlookSubTab] = useState<'calendar' | 'email'>('calendar');
   const [googleConnected, setGoogleConnected] = useState(false);
   const [microsoftConnected, setMicrosoftConnected] = useState(false);
   const [microsoftLoading, setMicrosoftLoading] = useState(false);
-=======
-  const [showCreateNotionEventModal, setShowCreateNotionEventModal] = useState(false);
-  const [activeTab, setActiveTab] = useState<'calendar' | 'gmail' | 'notion' | 'account'>('calendar');
->>>>>>> 72027ab (Notion Cal tab)
 
   const handleCreateEvent = async (eventData: any) => {
     try {
@@ -85,15 +76,9 @@ export default function DashboardPage() {
     }
   };
 
-<<<<<<< HEAD
   const handleCreateOutlookEvent = async (eventData: any) => {
     try {
       const response = await fetch('/api/outlook/calendar', {
-=======
-  const handleCreateNotionEvent = async (eventData: any) => {
-    try {
-      const response = await fetch('/api/notion/calendar', {
->>>>>>> 72027ab (Notion Cal tab)
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -104,7 +89,6 @@ export default function DashboardPage() {
       const result = await response.json();
 
       if (!response.ok) {
-<<<<<<< HEAD
         throw new Error(result.error || 'Failed to create Outlook event');
       }
 
@@ -135,6 +119,29 @@ export default function DashboardPage() {
     } catch (error) {
       console.error('Error sending Outlook email:', error);
       alert('Failed to send Outlook email. Please try again.');
+    }
+  };
+
+  const handleCreateNotionEvent = async (eventData: any) => {
+    try {
+      const response = await fetch('/api/notion-mcp/calendar', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(eventData),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to create Notion event via MCP');
+      }
+
+      alert('Notion event created successfully via MCP!');
+    } catch (error) {
+      console.error('Error creating Notion event via MCP:', error);
+      alert('Failed to create Notion event via MCP. Please try again.');
     }
   };
 
@@ -235,18 +242,6 @@ export default function DashboardPage() {
     }
   }, []);
 
-=======
-        throw new Error(result.error || 'Failed to create Notion event');
-      }
-
-      alert('Notion event created successfully!');
-    } catch (error) {
-      console.error('Error creating Notion event:', error);
-      alert('Failed to create Notion event. Please try again.');
-    }
-  };
-
->>>>>>> 72027ab (Notion Cal tab)
   return (
     <ProtectedRoute>
       <main className="min-h-screen p-8">
@@ -290,7 +285,6 @@ export default function DashboardPage() {
               Gmail
             </button>
             <button
-<<<<<<< HEAD
               onClick={() => setActiveTab('outlook')}
               className={`px-4 py-2 font-medium ${
                 activeTab === 'outlook'
@@ -299,16 +293,16 @@ export default function DashboardPage() {
               }`}
             >
               Outlook
-=======
+            </button>
+            <button
               onClick={() => setActiveTab('notion')}
               className={`px-4 py-2 font-medium ${
                 activeTab === 'notion'
-                  ? 'border-b-2 border-purple-500 text-purple-600'
+                  ? 'border-b-2 border-blue-500 text-blue-600'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              Notion Calendar
->>>>>>> 72027ab (Notion Cal tab)
+              Notion
             </button>
             <button
               onClick={() => setActiveTab('elevenlabs')}
@@ -341,7 +335,6 @@ export default function DashboardPage() {
             <GmailView onSendEmail={() => setShowSendEmailModal(true)} />
           )}
 
-<<<<<<< HEAD
           {activeTab === 'outlook' && (
             <div className="space-y-6">
               {!microsoftConnected ? (
@@ -390,10 +383,10 @@ export default function DashboardPage() {
                 </div>
               )}
             </div>
-=======
+          )}
+
           {activeTab === 'notion' && (
-            <NotionCalendarView onCreateEvent={() => setShowCreateNotionEventModal(true)} />
->>>>>>> 72027ab (Notion Cal tab)
+            <NotionMCPCalendarView onCreateEvent={() => setShowCreateNotionEventModal(true)} />
           )}
 
           {activeTab === 'elevenlabs' && (
@@ -506,7 +499,6 @@ export default function DashboardPage() {
             onSubmit={handleSendEmail}
           />
 
-<<<<<<< HEAD
           <CreateOutlookEventModal
             isOpen={showCreateOutlookEventModal}
             onClose={() => setShowCreateOutlookEventModal(false)}
@@ -517,12 +509,12 @@ export default function DashboardPage() {
             isOpen={showSendOutlookEmailModal}
             onClose={() => setShowSendOutlookEmailModal(false)}
             onSubmit={handleSendOutlookEmail}
-=======
+          />
+
           <CreateNotionEventModal
             isOpen={showCreateNotionEventModal}
             onClose={() => setShowCreateNotionEventModal(false)}
             onSubmit={handleCreateNotionEvent}
->>>>>>> 72027ab (Notion Cal tab)
           />
         </div>
       </main>

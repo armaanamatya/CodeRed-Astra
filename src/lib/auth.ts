@@ -4,7 +4,6 @@ import { MongoDBAdapter } from '@auth/mongodb-adapter';
 import clientPromise from './db/mongodb-adapter';
 import connectDB from './db/mongodb';
 import User from '@/models/User';
-import NotionProvider from './notion-oauth';
 
 export const authOptions: NextAuthOptions = {
   // Temporarily disable MongoDB adapter due to SSL issues and account linking conflicts
@@ -32,11 +31,7 @@ export const authOptions: NextAuthOptions = {
           prompt: 'consent',
         },
       },
-    }),
-    NotionProvider({
-      clientId: process.env.NOTION_CLIENT_ID!,
-      clientSecret: process.env.NOTION_CLIENT_SECRET!,
-    }),
+      }),
   ],
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
@@ -77,25 +72,19 @@ export const authOptions: NextAuthOptions = {
             updateData.tokenExpiry = account.expires_at ? new Date(account.expires_at * 1000) : undefined;
           }
 
-          // Handle Notion OAuth
-          if (account.provider === 'notion') {
-            updateData.notionToken = account.access_token;
-            updateData.notionWorkspaceId = account.workspace_id;
-          }
+          // Handle other OAuth providers if needed
+          // if (account.provider === 'notion') {
+          //   updateData.notionToken = account.access_token;
+          //   updateData.notionWorkspaceId = account.workspace_id;
+          // }
 
-          const updatedUser = await User.findOneAndUpdate(
+          await User.findOneAndUpdate(
             { email: user.email },
             updateData,
             { upsert: true, new: true }
           );
 
-          return {
-            ...token,
-            accessToken: account.access_token,
-            refreshToken: account.refresh_token,
-            expiresAt: account.expires_at,
-            id: updatedUser._id.toString(),
-          };
+          console.log(`✅ User ${user.email} saved to database`);
         } catch (error) {
           console.error('Database save error during sign in:', error);
           // Continue with sign in even if database save fails

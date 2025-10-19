@@ -14,6 +14,8 @@
     "@azure/msal-node": "^3.8.0",
     "@elevenlabs/elevenlabs-js": "^2.19.0",
     "@microsoft/microsoft-graph-client": "^3.0.7",
+    "@modelcontextprotocol/sdk": "^1.20.1",
+    "@notionhq/notion-mcp-server": "^1.9.0",
     "@radix-ui/react-slot": "^1.2.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

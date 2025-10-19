@@ -10,14 +10,11 @@ export interface IUser extends Document {
   accessToken?: string;
   refreshToken?: string;
   tokenExpiry?: Date;
-<<<<<<< HEAD
   microsoftAccessToken?: string;
   microsoftRefreshToken?: string;
   microsoftTokenExpiry?: Date;
-=======
   notionToken?: string;
   notionWorkspaceId?: string;
->>>>>>> 72027ab (Notion Cal tab)
   createdAt: Date;
   updatedAt: Date;
 }
@@ -60,7 +57,6 @@ const userSchema = new Schema<IUser>(
     tokenExpiry: {
       type: Date,
     },
-<<<<<<< HEAD
     microsoftAccessToken: {
       type: String,
     },
@@ -70,14 +66,12 @@ const userSchema = new Schema<IUser>(
     microsoftTokenExpiry: {
       type: Date,
     },
-=======
     notionToken: {
       type: String,
     },
     notionWorkspaceId: {
       type: String,
     },
->>>>>>> 72027ab (Notion Cal tab)
   },
   {
     timestamps: true,
