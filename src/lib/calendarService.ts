@@ -77,14 +77,25 @@ export class CalendarService {
       if (startDate) params.append('startDate', startDate);
       if (endDate) params.append('endDate', endDate);
 
+      console.log('Fetching Google events:', `/api/calendar?${params.toString()}`);
       const response = await fetch(`/api/calendar?${params.toString()}`);
       const data = await response.json();
 
-      if (!response.ok || !data.success) {
+      if (!response.ok) {
+        console.error('Google Calendar API error:', response.status, data);
+        if (response.status === 401) {
+          console.error('Google Calendar: Authentication failed - user may need to reconnect');
+        }
         return []; // Return empty array instead of throwing
       }
 
+      if (!data.success) {
+        console.error('Google Calendar API returned error:', data);
+        return [];
+      }
+
       const events = (data.events || []).map((event: any) => this.transformGoogleEvent(event));
+      console.log('Google events fetched:', events.length);
       
       // Cache the result
       this.serviceCache.set(cacheKey, { data: events, timestamp: Date.now() });
@@ -141,14 +152,25 @@ export class CalendarService {
       if (startDate) params.append('startDate', startDate);
       if (endDate) params.append('endDate', endDate);
 
+      console.log('Fetching Notion events:', `/api/notion-mcp/calendar?${params.toString()}`);
       const response = await fetch(`/api/notion-mcp/calendar?${params.toString()}`);
       const data = await response.json();
 
-      if (!response.ok || !data.success) {
+      if (!response.ok) {
+        console.error('Notion Calendar API error:', response.status, data);
+        if (response.status === 401) {
+          console.error('Notion Calendar: Authentication failed - user may need to reconnect or provide database ID');
+        }
         return []; // Return empty array instead of throwing
       }
 
+      if (!data.success) {
+        console.error('Notion Calendar API returned error:', data);
+        return [];
+      }
+
       const events = (data.events || []).map((event: any) => this.transformNotionEvent(event));
+      console.log('Notion events fetched:', events.length);
       
       // Cache the result
       this.serviceCache.set(cacheKey, { data: events, timestamp: Date.now() });

@@ -14,6 +14,8 @@
   --color-muted-foreground: rgba(152, 205, 133, 0.8);
   --color-border: #98CD85;
   --color-input: #98CD85;
+  --color-hover: #3A4A2A;
+  --color-hover-border: #7AB370;
   
   /* Shadcn UI defaults for dark mode */
   --background: 38 100% 8%;
@@ -52,6 +54,8 @@
   --color-muted-foreground: #2A7A0F;
   --color-border: #1F5C0A;
   --color-input: #1F5C0A;
+  --color-hover: #E8DCC0;
+  --color-hover-border: #164507;
   
   /* Shadcn UI light mode */
   --background: 48 42% 90%;
@@ -136,6 +140,22 @@ h1, h2, h3, h4, h5, h6, p, span, div, button, a, input, textarea {
   background-color: var(--color-accent);
 }
 
+.bg-theme-hover {
+  background-color: var(--color-hover);
+}
+
+.border-theme-hover {
+  border-color: var(--color-hover-border);
+}
+
+.hover\:bg-theme-hover:hover {
+  background-color: var(--color-hover);
+}
+
+.hover\:border-theme-hover:hover {
+  border-color: var(--color-hover-border);
+}
+
 .light .bg-\[#463F3A\] {
   background-color: #F2ECD9 !important;
 }
@@ -198,4 +218,34 @@ h1, h2, h3, h4, h5, h6, p, span, div, button, a, input, textarea {
   max-width: 100%;
   overflow-wrap: break-word;
   word-wrap: break-word;
+}
+
+/* Custom scrollbar styling */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-primary) var(--color-secondary);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: var(--color-secondary);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent);
+}
+
+.custom-scrollbar::-webkit-scrollbar-corner {
+  background: var(--color-secondary);
 }

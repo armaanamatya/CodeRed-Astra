@@ -355,20 +355,20 @@ export default function DashboardPage() {
           <div className="flex gap-4 mb-6 border-b border-theme-border">
             <button
               onClick={() => setActiveTab('calendar')}
-              className={`px-4 py-2 font-medium ${
+              className={`px-4 py-2 font-medium transition-colors ${
                 activeTab === 'calendar'
-                  ? 'border-b-2 border-blue-500 text-blue-600'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'border-b-2 border-theme-border text-theme-foreground'
+                  : 'text-theme-foreground hover:text-theme-accent'
               }`}
             >
               Unified Calendar
             </button>
             <button
               onClick={() => setActiveTab('emails')}
-              className={`px-4 py-2 font-medium ${
+              className={`px-4 py-2 font-medium transition-colors ${
                 activeTab === 'emails'
-                  ? 'border-b-2 border-blue-500 text-blue-600'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'border-b-2 border-theme-border text-theme-foreground'
+                  : 'text-theme-foreground hover:text-theme-accent'
               }`}
             >
               Unified Emails

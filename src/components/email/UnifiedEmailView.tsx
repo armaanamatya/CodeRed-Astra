@@ -302,7 +302,7 @@ export default function UnifiedEmailView({ onSendGmailEmail, onSendOutlookEmail 
   const renderMessageDetail = () => {
     if (!selectedMessage) {
       return (
-        <div className="text-center text-gray-500 py-8">
+        <div className="text-center text-theme-muted-foreground py-8">
           <p>Select a message to view its content</p>
         </div>
       );
@@ -314,18 +314,18 @@ export default function UnifiedEmailView({ onSendGmailEmail, onSendOutlookEmail 
       return (
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+            <span className="px-2 py-1 text-xs bg-theme-primary text-theme-primary-foreground rounded-full">
               Gmail
             </span>
           </div>
-          <h3 className="font-semibold text-lg mb-2">{selectedMessage.subject}</h3>
-          <div className="text-sm text-gray-600 mb-4">
+          <h3 className="font-semibold text-lg mb-2 text-theme-foreground">{selectedMessage.subject}</h3>
+          <div className="text-sm text-theme-muted-foreground mb-4">
             <p><strong>From:</strong> {selectedMessage.from}</p>
             <p><strong>Date:</strong> {formatDate(selectedMessage.date)}</p>
           </div>
-          <div className="border-t pt-4">
-            <h4 className="font-medium mb-2">Message Content:</h4>
-            <div className="text-sm text-gray-700 max-h-96 overflow-y-auto bg-white p-4 rounded border">
+          <div className="border-t border-theme-border pt-4">
+            <h4 className="font-medium mb-2 text-theme-foreground">Message Content:</h4>
+            <div className="text-sm text-theme-foreground max-h-96 overflow-y-auto bg-theme-secondary p-4 rounded border border-theme-border custom-scrollbar">
               {isHtml ? (
                 <div 
                   className="email-content overflow-hidden"
@@ -349,22 +349,22 @@ export default function UnifiedEmailView({ onSendGmailEmail, onSendOutlookEmail 
       const getImportanceColor = (importance: string) => {
         switch (importance.toLowerCase()) {
           case 'high':
-            return 'text-red-600 bg-red-50';
+            return 'text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400';
           case 'low':
-            return 'text-gray-600 bg-gray-50';
+            return 'text-theme-muted-foreground bg-theme-secondary';
           default:
-            return 'text-blue-600 bg-blue-50';
+            return 'text-theme-primary bg-theme-accent';
         }
       };
 
       return (
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-2 py-1 text-xs bg-orange-100 text-orange-800 rounded-full">
+            <span className="px-2 py-1 text-xs bg-theme-accent text-theme-accent-foreground rounded-full">
               Outlook
             </span>
             {!selectedMessage.isRead && (
-              <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+              <span className="px-2 py-1 text-xs bg-theme-primary text-theme-primary-foreground rounded-full">
                 New
               </span>
             )}
@@ -372,14 +372,14 @@ export default function UnifiedEmailView({ onSendGmailEmail, onSendOutlookEmail 
               {selectedMessage.importance}
             </span>
           </div>
-          <h3 className="font-semibold text-lg mb-2">{selectedMessage.subject || 'No Subject'}</h3>
-          <div className="text-sm text-gray-600 mb-4">
+          <h3 className="font-semibold text-lg mb-2 text-theme-foreground">{selectedMessage.subject || 'No Subject'}</h3>
+          <div className="text-sm text-theme-muted-foreground mb-4">
             <p><strong>From:</strong> {getMessageFrom(selectedMessage)}</p>
             <p><strong>Date:</strong> {formatDate(selectedMessage.receivedDateTime)}</p>
           </div>
-          <div className="border-t pt-4">
-            <h4 className="font-medium mb-2">Message Content:</h4>
-            <div className="text-sm text-gray-700 max-h-96 overflow-y-auto bg-white p-4 rounded border">
+          <div className="border-t border-theme-border pt-4">
+            <h4 className="font-medium mb-2 text-theme-foreground">Message Content:</h4>
+            <div className="text-sm text-theme-foreground max-h-96 overflow-y-auto bg-theme-secondary p-4 rounded border border-theme-border custom-scrollbar">
               {selectedMessage.body?.content ? (
                 <div 
                   className="email-content overflow-hidden"
@@ -391,7 +391,7 @@ export default function UnifiedEmailView({ onSendGmailEmail, onSendOutlookEmail 
                   }}
                 />
               ) : (
-                <p className="text-gray-500">No message content available</p>
+                <p className="text-theme-muted-foreground">No message content available</p>
               )}
             </div>
           </div>
@@ -402,10 +402,10 @@ export default function UnifiedEmailView({ onSendGmailEmail, onSendOutlookEmail 
 
   if (loading) {
     return (
-      <div className="p-6 border rounded-lg">
-        <h2 className="text-xl font-semibold mb-4">Unified Emails</h2>
+      <div className="p-6 border-theme-border border rounded-lg bg-theme-background">
+        <h2 className="text-xl font-semibold mb-4 text-theme-foreground">Unified Emails</h2>
         <div className="flex items-center justify-center h-32">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-theme-primary"></div>
         </div>
       </div>
     );
@@ -413,8 +413,8 @@ export default function UnifiedEmailView({ onSendGmailEmail, onSendOutlookEmail 
 
   if (error) {
     return (
-      <div className="p-6 border rounded-lg">
-        <h2 className="text-xl font-semibold mb-4">Unified Emails</h2>
+      <div className="p-6 border-theme-border border rounded-lg bg-theme-background">
+        <h2 className="text-xl font-semibold mb-4 text-theme-foreground">Unified Emails</h2>
         <div className="text-red-600 mb-4">{error}</div>
         <Button onClick={() => fetchMessages(currentPage)} variant="outline">
           Retry
@@ -424,15 +424,15 @@ export default function UnifiedEmailView({ onSendGmailEmail, onSendOutlookEmail 
   }
 
   return (
-    <div className="p-6 border rounded-lg">
+    <div className="p-6 border-theme-border border rounded-lg bg-theme-background">
       <div className="mb-4">
         <div className="flex justify-between items-center mb-2">
-          <h2 className="text-2xl font-bold">Unified Email</h2>
+          <h2 className="text-2xl font-bold text-theme-foreground">Unified Email</h2>
           <div className="flex gap-2">
             <Button onClick={() => fetchMessages(currentPage)} variant="outline" size="sm">
               Refresh
             </Button>
-            <Button onClick={onSendGmailEmail} size="sm" className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={onSendGmailEmail} size="sm" className="bg-theme-primary hover:bg-theme-accent text-theme-primary-foreground">
               Send Gmail
             </Button>
             {/* Outlook send temporarily disabled - permission issues */}
@@ -443,7 +443,7 @@ export default function UnifiedEmailView({ onSendGmailEmail, onSendOutlookEmail 
         </div>
         
         {/* Pagination Info */}
-        <div className="flex justify-between items-center text-sm text-gray-600">
+        <div className="flex justify-between items-center text-sm text-theme-muted-foreground">
           <span>
             Page {currentPage} • Showing {filteredMessages.length} emails
           </span>
@@ -456,7 +456,7 @@ export default function UnifiedEmailView({ onSendGmailEmail, onSendOutlookEmail 
             >
               ← Previous
             </Button>
-            <span className="px-3 py-1 bg-gray-100 rounded flex items-center">
+            <span className="px-3 py-1 bg-theme-secondary rounded flex items-center text-theme-foreground">
               {currentPage}
             </span>
             <Button
@@ -472,36 +472,45 @@ export default function UnifiedEmailView({ onSendGmailEmail, onSendOutlookEmail 
       </div>
 
       {/* Mailbox Type Selector */}
-      <div className="mb-4 flex gap-2 border-b pb-2">
+      <div className="mb-4 flex gap-2 border-b border-theme-border pb-2">
         <button
           onClick={() => setFilters({ ...filters, mailboxType: 'inbox' })}
-          className={`px-4 py-2 text-sm font-medium rounded-t-lg ${
+          className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-all duration-200 ${
             filters.mailboxType === 'inbox'
-              ? 'bg-blue-500 text-white'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              ? 'bg-theme-primary text-theme-primary-foreground'
+              : 'bg-theme-secondary text-theme-foreground hover:bg-theme-hover hover:border-theme-hover hover:text-theme-foreground'
           }`}
         >
-          📥 Inbox
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+          </svg>
+          Inbox
         </button>
         <button
           onClick={() => setFilters({ ...filters, mailboxType: 'sent' })}
-          className={`px-4 py-2 text-sm font-medium rounded-t-lg ${
+          className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-all duration-200 ${
             filters.mailboxType === 'sent'
-              ? 'bg-blue-500 text-white'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              ? 'bg-theme-primary text-theme-primary-foreground'
+              : 'bg-theme-secondary text-theme-foreground hover:bg-theme-hover hover:border-theme-hover hover:text-theme-foreground'
           }`}
         >
-          📤 Sent
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+          </svg>
+          Sent
         </button>
         <button
           onClick={() => setFilters({ ...filters, mailboxType: 'drafts' })}
-          className={`px-4 py-2 text-sm font-medium rounded-t-lg ${
+          className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-all duration-200 ${
             filters.mailboxType === 'drafts'
-              ? 'bg-blue-500 text-white'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              ? 'bg-theme-primary text-theme-primary-foreground'
+              : 'bg-theme-secondary text-theme-foreground hover:bg-theme-hover hover:border-theme-hover hover:text-theme-foreground'
           }`}
         >
-          📝 Drafts
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+          Drafts
         </button>
       </div>
 
@@ -509,7 +518,7 @@ export default function UnifiedEmailView({ onSendGmailEmail, onSendOutlookEmail 
       <div className="mb-4 space-y-3">
         {/* Email Inbox Filters */}
         <div className="flex gap-2 items-center">
-          <label className="text-sm font-medium">Inboxes:</label>
+          <label className="text-sm font-medium text-theme-foreground">Inboxes:</label>
           <button
             onClick={() => {
               if (filters.sources.includes('gmail')) {
@@ -518,10 +527,10 @@ export default function UnifiedEmailView({ onSendGmailEmail, onSendOutlookEmail 
                 setFilters({ ...filters, sources: [...filters.sources, 'gmail'] });
               }
             }}
-            className={`px-3 py-2 text-sm font-medium rounded-lg flex items-center gap-2 ${
+            className={`px-3 py-2 text-sm font-medium rounded-lg flex items-center gap-2 transition-all duration-200 ${
               filters.sources.includes('gmail')
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-theme-primary text-theme-primary-foreground shadow-md'
+                : 'bg-theme-secondary text-theme-foreground hover:bg-theme-hover hover:border-theme-hover hover:text-theme-foreground hover:shadow-md'
             }`}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
@@ -537,10 +546,10 @@ export default function UnifiedEmailView({ onSendGmailEmail, onSendOutlookEmail 
                 setFilters({ ...filters, sources: [...filters.sources, 'outlook'] });
               }
             }}
-            className={`px-3 py-2 text-sm font-medium rounded-lg flex items-center gap-2 ${
+            className={`px-3 py-2 text-sm font-medium rounded-lg flex items-center gap-2 transition-all duration-200 ${
               filters.sources.includes('outlook')
-                ? 'bg-orange-500 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-theme-primary text-theme-primary-foreground shadow-md'
+                : 'bg-theme-secondary text-theme-foreground hover:bg-theme-hover hover:border-theme-hover hover:text-theme-foreground hover:shadow-md'
             }`}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
@@ -552,22 +561,50 @@ export default function UnifiedEmailView({ onSendGmailEmail, onSendOutlookEmail 
 
         {/* Search with Categories */}
         <div className="flex gap-2 items-center">
-          <label className="text-sm font-medium">Search:</label>
+          <label className="text-sm font-medium text-theme-foreground">Search:</label>
           <div className="flex gap-1">
             {(['all', 'mail', 'people', 'files'] as const).map((category) => (
               <button
                 key={category}
                 onClick={() => setFilters({ ...filters, searchCategory: category })}
-                className={`px-3 py-1 text-xs font-medium rounded ${
+                className={`px-3 py-1 text-xs font-medium rounded transition-all duration-200 ${
                   filters.searchCategory === category
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? 'bg-theme-primary text-theme-primary-foreground'
+                    : 'bg-theme-secondary text-theme-foreground hover:bg-theme-hover hover:border-theme-hover hover:text-theme-foreground'
                 }`}
               >
-                {category === 'all' && '🔍 All'}
-                {category === 'mail' && '✉️ Mail'}
-                {category === 'people' && '👥 People'}
-                {category === 'files' && '📎 Files'}
+                {category === 'all' && (
+                  <>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    All
+                  </>
+                )}
+                {category === 'mail' && (
+                  <>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    Mail
+                  </>
+                )}
+                {category === 'people' && (
+                  <>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                    </svg>
+                    People
+                  </>
+                )}
+                {category === 'files' && (
+                  <>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                    </svg>
+                    Files
+                  </>
+                )}
               </button>
             ))}
           </div>
@@ -576,13 +613,13 @@ export default function UnifiedEmailView({ onSendGmailEmail, onSendOutlookEmail 
             placeholder={`Search ${filters.searchCategory}...`}
             value={filters.searchQuery}
             onChange={(e) => setFilters({ ...filters, searchQuery: e.target.value })}
-            className="px-3 py-1 border rounded text-sm flex-1 max-w-xs"
+            className="px-3 py-1 border-theme-border border rounded text-sm flex-1 max-w-xs bg-theme-background text-theme-foreground placeholder-theme-muted-foreground focus:outline-none focus:ring-2 focus:ring-theme-primary focus:border-transparent transition-all duration-200"
           />
         </div>
       </div>
 
       {filteredMessages.length === 0 ? (
-        <div className="text-center py-8 text-gray-500">
+        <div className="text-center py-8 text-theme-muted-foreground">
           <p>No messages found.</p>
           <p className="text-sm mt-2">
             {filters.sources.length === 0
@@ -593,17 +630,17 @@ export default function UnifiedEmailView({ onSendGmailEmail, onSendOutlookEmail 
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Message List */}
-          <div className="space-y-2 max-h-[600px] overflow-y-auto">
+          <div className="space-y-2 max-h-[600px] overflow-y-auto custom-scrollbar">
             {filteredMessages.map((message) => (
               <div
                 key={`${message.source}-${message.id}`}
-                className={`p-3 border rounded-lg cursor-pointer hover:bg-gray-50 ${
+                className={`p-3 border-theme-border border rounded-lg cursor-pointer transition-all duration-200 hover:bg-theme-hover hover:border-theme-hover hover:shadow-lg ${
                   selectedMessage?.id === message.id && selectedMessage?.source === message.source
-                    ? 'bg-blue-50 border-blue-300'
+                    ? 'bg-theme-accent border-theme-primary shadow-lg'
                     : ''
                 } ${
                   message.source === 'outlook' && !message.isRead
-                    ? 'border-l-4 border-l-blue-500'
+                    ? 'border-l-4 border-l-theme-primary'
                     : ''
                 }`}
                 onClick={() => handleMessageClick(message)}
@@ -611,13 +648,13 @@ export default function UnifiedEmailView({ onSendGmailEmail, onSendOutlookEmail 
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-semibold text-sm truncate">
+                      <h4 className="font-semibold text-sm truncate text-theme-foreground">
                         {getMessageSubject(message)}
                       </h4>
                       <span className={`p-1 rounded flex-shrink-0 ${
                         message.source === 'gmail'
-                          ? 'bg-blue-100 text-blue-600'
-                          : 'bg-orange-100 text-orange-600'
+                          ? 'bg-theme-primary text-theme-primary-foreground'
+                          : 'bg-theme-accent text-theme-accent-foreground'
                       }`}>
                         {message.source === 'gmail' ? (
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
@@ -630,9 +667,9 @@ export default function UnifiedEmailView({ onSendGmailEmail, onSendOutlookEmail 
                         )}
                       </span>
                     </div>
-                    <p className="text-gray-600 text-xs truncate">{getMessageFrom(message)}</p>
-                    <p className="text-gray-500 text-xs">{formatDate(getMessageDate(message))}</p>
-                    <p className="text-gray-600 text-xs mt-1 line-clamp-2">
+                    <p className="text-theme-muted-foreground text-xs truncate">{getMessageFrom(message)}</p>
+                    <p className="text-theme-muted-foreground text-xs">{formatDate(getMessageDate(message))}</p>
+                    <p className="text-theme-muted-foreground text-xs mt-1 line-clamp-2">
                       {getMessagePreview(message)}
                     </p>
                   </div>
@@ -642,23 +679,12 @@ export default function UnifiedEmailView({ onSendGmailEmail, onSendOutlookEmail 
           </div>
 
           {/* Message Detail */}
-          <div className="border rounded-lg p-4 max-h-[600px] overflow-y-auto">
+          <div className="border-theme-border border rounded-lg p-4 max-h-[600px] overflow-y-auto bg-theme-background custom-scrollbar">
             {renderMessageDetail()}
           </div>
         </div>
       )}
 
-      {/* Legend */}
-      <div className="mt-4 flex gap-4 text-sm">
-        <div className="flex items-center gap-1">
-          <div className="w-3 h-3 bg-blue-100 border border-blue-300 rounded"></div>
-          <span>Gmail</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <div className="w-3 h-3 bg-orange-100 border border-orange-300 rounded"></div>
-          <span>Outlook</span>
-        </div>
-      </div>
     </div>
   );
 }
