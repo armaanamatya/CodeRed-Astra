@@ -2,11 +2,12 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import type { OutlookEventData } from '@/types/event.d';
 
 interface CreateOutlookEventModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (eventData: any) => void;
+  onSubmit: (eventData: OutlookEventData) => void;
 }
 
 export default function CreateOutlookEventModal({ 
@@ -14,7 +15,7 @@ export default function CreateOutlookEventModal({
   onClose, 
   onSubmit 
 }: CreateOutlookEventModalProps) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<OutlookEventData>({
     subject: '',
     description: '',
     startDateTime: '',

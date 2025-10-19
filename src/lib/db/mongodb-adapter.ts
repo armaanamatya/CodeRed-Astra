@@ -17,7 +17,7 @@ const options = {
   connectTimeoutMS: 10000,
   maxPoolSize: 10,
   retryWrites: true,
-  w: 'majority',
+  w: 'majority' as const,
 };
 
 let client: MongoClient;

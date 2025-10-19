@@ -2,15 +2,16 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import type { EmailData } from '@/types/event.d';
 
 interface SendEmailModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (emailData: any) => void;
+  onSubmit: (emailData: EmailData) => void;
 }
 
 export default function SendEmailModal({ isOpen, onClose, onSubmit }: SendEmailModalProps) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<EmailData>({
     to: '',
     subject: '',
     body: '',

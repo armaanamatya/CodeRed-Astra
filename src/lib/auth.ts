@@ -1,7 +1,5 @@
 import { NextAuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
-import { MongoDBAdapter } from '@auth/mongodb-adapter';
-import clientPromise from './db/mongodb-adapter';
 import connectDB from './db/mongodb';
 import User from '@/models/User';
 
@@ -48,6 +46,7 @@ export const authOptions: NextAuthOptions = {
       // Default to dashboard for external URLs
       return `${baseUrl}/dashboard`;
     },
+<<<<<<< HEAD
     async signIn({ user, account, profile }) {
       if (account?.provider === 'google') {
         try {
@@ -88,6 +87,11 @@ export const authOptions: NextAuthOptions = {
         }
       }
       return true; // Always allow sign in
+=======
+    async signIn() {
+      // Always allow sign in - we handle user creation/updates in the JWT callback
+      return true;
+>>>>>>> ce37ec3 (half-half)
     },
     async session({ session, token }) {
       // Add user ID to session from token
@@ -131,7 +135,7 @@ export const authOptions: NextAuthOptions = {
             accessToken: account.access_token,
             refreshToken: account.refresh_token,
             expiresAt: account.expires_at,
-            id: (updatedUser as any)._id.toString(),
+            id: String(updatedUser._id),
           };
         } catch (error) {
           console.error('Database save error:', error);
@@ -147,12 +151,11 @@ export const authOptions: NextAuthOptions = {
       }
 
       // Return previous token if the access token has not expired yet
-      if (Date.now() < (token.expiresAt as number) * 1000) {
+      if (Date.now() < ((token.expiresAt as number) * 1000)) {
         return token;
       }
-
       // Access token has expired, try to refresh it
-      return await refreshAccessToken(token);
+      return await refreshAccessToken(token as TokenData);
     },
   },
   pages: {
@@ -161,7 +164,14 @@ export const authOptions: NextAuthOptions = {
   },
 };
 
-async function refreshAccessToken(token: any) {
+interface TokenData {
+  refreshToken?: string;
+  expiresAt?: number;
+  email?: string;
+  [key: string]: unknown;
+}
+
+async function refreshAccessToken(token: TokenData) {
   try {
     const response = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
@@ -170,7 +180,7 @@ async function refreshAccessToken(token: any) {
         client_id: process.env.GOOGLE_CLIENT_ID!,
         client_secret: process.env.GOOGLE_CLIENT_SECRET!,
         grant_type: 'refresh_token',
-        refresh_token: token.refreshToken,
+        refresh_token: token.refreshToken || '',
       }),
     });
 
