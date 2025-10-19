@@ -18,7 +18,7 @@ import SendOutlookEmailModal from '@/components/modals/SendOutlookEmailModal';
 import type { EventData, EmailData, OutlookEventData, OutlookEmailData } from '@/types/event.d';
 
 export default function DashboardPage() {
-  const { session } = useAuth();
+  const { session, signOut } = useAuth();
   const [showUnifiedEventModal, setShowUnifiedEventModal] = useState(false);
   const [showSendEmailModal, setShowSendEmailModal] = useState(false);
   const [showSendOutlookEmailModal, setShowSendOutlookEmailModal] = useState(false);
@@ -304,6 +304,12 @@ export default function DashboardPage() {
                 <span className="text-sm font-medium text-[#98CD85]">
                   {session?.user?.name || session?.user?.email}
                 </span>
+                <Button 
+                  onClick={signOut} 
+                  className="bg-[#98CD85] text-[#26200D] hover:bg-[#7AB370] border border-[#98CD85] text-sm px-3 py-1"
+                >
+                  Sign Out
+                </Button>
               </div>
             </div>
           </div>

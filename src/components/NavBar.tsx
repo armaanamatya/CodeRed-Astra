@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { AuthButton } from '@/components/auth/AuthButton';
-import { ThemeToggle } from '@/components/ThemeToggle';
 import Image from 'next/image';
 
 export default function NavBar() {
@@ -51,7 +50,6 @@ export default function NavBar() {
         
         {/* Right side buttons */}
         <div className="flex items-center gap-3">
-          <ThemeToggle />
           <AuthButton />
         </div>
       </div>
