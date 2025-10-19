@@ -31,10 +31,24 @@ export class MicrosoftGraphService {
       // Use the calendar view endpoint which automatically expands recurring events
       let query = '/me/calendarView';
       
-      // Add required parameters
+      // Add required parameters - calendarView requires StartDateTime and EndDateTime
       const params = new URLSearchParams();
-      if (startDate) params.append('startDateTime', startDate);
-      if (endDate) params.append('endDateTime', endDate);
+      if (startDate) {
+        params.append('startDateTime', startDate);
+      } else {
+        // Default to current date if not provided
+        params.append('startDateTime', new Date().toISOString());
+      }
+      
+      if (endDate) {
+        params.append('endDateTime', endDate);
+      } else {
+        // Default to 30 days from now if not provided
+        const futureDate = new Date();
+        futureDate.setDate(futureDate.getDate() + 30);
+        params.append('endDateTime', futureDate.toISOString());
+      }
+      
       params.append('$select', 'subject,start,end,body,location,attendees');
       params.append('$orderby', 'start/dateTime');
       params.append('$top', '100');
@@ -49,6 +63,56 @@ export class MicrosoftGraphService {
     }
   }
 
+  // Get Outlook messages
+  async getMessages() {
+    try {
+      const response = await this.makeRequest(
+        '/me/messages?$select=id,subject,from,receivedDateTime,body,isRead,importance&$orderby=receivedDateTime desc&$top=20'
+      );
+      return response;
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+      throw error;
+    }
+  }
+
+  // Send Outlook message
+  async sendMessage(messageData: {
+    to: string[];
+    subject: string;
+    body: string;
+    importance?: string;
+  }) {
+    try {
+      const message = {
+        subject: messageData.subject,
+        body: {
+          contentType: 'HTML',
+          content: messageData.body
+        },
+        toRecipients: messageData.to.map(email => ({
+          emailAddress: { address: email }
+        })),
+        importance: messageData.importance || 'normal'
+      };
+
+      const response = await this.makeRequest('/me/sendMail', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: message,
+          saveToSentItems: true
+        })
+      });
+
+      return response;
+    } catch (error) {
+      console.error('Error sending message:', error);
+      throw error;
+    }
+  }
 
   // Create a calendar event
   async createCalendarEvent(eventData: {
