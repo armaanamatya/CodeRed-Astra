@@ -6,16 +6,26 @@
     "dev": "next dev -p 3001",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:mcp": "node test-mcp.js",
+    "test:mcp:verbose": "node test-mcp.js --verbose",
+    "test:mcp:gmail": "node test-mcp.js --service=gmail",
+    "test:mcp:calendar": "node test-mcp.js --service=calendar",
+    "test:mcp:outlook": "node test-mcp.js --service=outlook",
+    "test:mcp:notion": "node test-mcp.js --service=notion",
+    "test:mcp:dry": "node test-mcp.js --dry-run",
+    "test:mcp:real": "node test-real-mcp.js"
   },
   "dependencies": {
     "@auth/mongodb-adapter": "^3.11.0",
     "@azure/msal-browser": "^4.25.1",
     "@azure/msal-node": "^3.8.0",
     "@elevenlabs/elevenlabs-js": "^2.19.0",
+    "@google/generative-ai": "^0.24.1",
     "@microsoft/microsoft-graph-client": "^3.0.7",
     "@modelcontextprotocol/sdk": "^1.20.1",
     "@notionhq/notion-mcp-server": "^1.9.0",
+    "@radix-ui/react-scroll-area": "^1.2.10",
     "@radix-ui/react-slot": "^1.2.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -40,6 +50,7 @@
     "autoprefixer": "^10.4.21",
     "eslint": "^9.38.0",
     "eslint-config-next": "^15.5.6",
+    "node-fetch": "^2.7.0",
     "postcss": "^8.5.6",
     "typescript": "^5.9.3"
   }

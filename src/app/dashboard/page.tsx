@@ -393,6 +393,12 @@ export default function DashboardPage() {
             >
               ElevenLabs AI
             </button>
+            <button
+              onClick={() => window.location.href = '/assistant'}
+              className="px-4 py-2 font-medium transition-colors text-theme-foreground hover:text-theme-accent flex items-center gap-2"
+            >
+              <span>🤖</span> AI Assistant
+            </button>
           </div>
 
           {/* Tab Content */}
