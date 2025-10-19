@@ -19,6 +19,13 @@ export class MicrosoftGraphService {
 
     if (!response.ok) {
       const error = await response.text();
+      console.error('Microsoft Graph API error details:', {
+        status: response.status,
+        statusText: response.statusText,
+        url: `${this.baseUrl}${endpoint}`,
+        error: error,
+        requestBody: options.body
+      });
       throw new Error(`Microsoft Graph API error: ${response.status} - ${error}`);
     }
 
@@ -139,8 +146,13 @@ export class MicrosoftGraphService {
     location?: { displayName: string };
   }) {
     try {
+      console.log('Creating Outlook event with data:', eventData);
+      
       return await this.makeRequest('/me/events', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(eventData),
       });
     } catch (error) {

@@ -55,7 +55,10 @@ export default function DashboardPage() {
   const [showUnifiedEventModal, setShowUnifiedEventModal] = useState(false);
   const [showSendEmailModal, setShowSendEmailModal] = useState(false);
   const [showSendOutlookEmailModal, setShowSendOutlookEmailModal] = useState(false);
-  const [activeTab, setActiveTab] = useState<'calendar' | 'emails' | 'notion' | 'elevenlabs'>('calendar');
+  const [activeTab, setActiveTab] = useState<'calendar' | 'emails' | 'notion' | 'elevenlabs' | 'account'>('calendar');
+  const [googleConnected, setGoogleConnected] = useState(false);
+  const [microsoftConnected, setMicrosoftConnected] = useState(false);
+  const [microsoftLoading, setMicrosoftLoading] = useState(false);
   const [showAccountDropdown, setShowAccountDropdown] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<UnifiedEvent | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -175,10 +178,71 @@ export default function DashboardPage() {
         throw new Error(result.error || 'Failed to create Outlook event');
       }
 
+      showToast('Outlook email sent successfully!', 'success');
+      setShowSendOutlookEmailModal(false);
       alert('Outlook event created successfully!');
     } catch (error) {
+      console.error('Error sending Outlook email:', error);
+      showToast('Failed to send Outlook email. Please try again.', 'error');
       console.error('Error creating Outlook event:', error);
       alert('Failed to create Outlook event. Please try again.');
+    }
+  };
+
+  const handleMicrosoftConnect = async () => {
+    try {
+      setMicrosoftLoading(true);
+      const response = await fetch('/api/microsoft/auth');
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to get Microsoft auth URL');
+      }
+
+      if (data.connected) {
+        setMicrosoftConnected(true);
+        showToast('Microsoft account is already connected!', 'info');
+      } else {
+        // Redirect to Microsoft OAuth
+        window.location.href = data.authUrl;
+      }
+    } catch (error) {
+      console.error('Error connecting to Microsoft:', error);
+      showToast('Failed to connect to Microsoft. Please try again.', 'error');
+    } finally {
+      setMicrosoftLoading(false);
+    }
+  };
+
+  const refreshMicrosoftStatus = async () => {
+    try {
+      const response = await fetch('/api/microsoft/auth');
+      const data = await response.json();
+      if (response.ok) {
+        setMicrosoftConnected(data.connected);
+      }
+    } catch (error) {
+      console.error('Error checking Microsoft status:', error);
+    }
+  };
+
+  const handleMicrosoftReconnect = async () => {
+    try {
+      setMicrosoftLoading(true);
+      const response = await fetch('/api/microsoft/reconnect');
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to get Microsoft reconnect URL');
+      }
+
+      // Redirect to Microsoft OAuth for reconnection
+      window.location.href = data.authUrl;
+    } catch (error) {
+      console.error('Error reconnecting to Microsoft:', error);
+      showToast('Failed to reconnect to Microsoft. Please try again.', 'error');
+    } finally {
+      setMicrosoftLoading(false);
     }
   };
 
@@ -351,7 +415,7 @@ export default function DashboardPage() {
           {activeTab === 'emails' && (
             <UnifiedEmailView 
               onSendGmailEmail={() => setShowSendEmailModal(true)}
-              onSendOutlookEmail={() => {}} // Disabled - permission issues
+              onSendOutlookEmail={() => setShowSendOutlookEmailModal(true)}
             />
           )}
 

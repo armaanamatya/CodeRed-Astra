@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { subject, description, startDateTime, endDateTime } = await request.json();
+    const { subject, description, startDateTime, endDateTime, location } = await request.json();
 
     if (!subject || !startDateTime || !endDateTime) {
       return NextResponse.json(
@@ -154,21 +154,30 @@ export async function POST(request: NextRequest) {
 
     // Create calendar event
     const microsoftService = new MicrosoftGraphService(accessToken);
-    const event = await microsoftService.createCalendarEvent({
+    const eventData: any = {
       subject,
       start: {
         dateTime: startDateTime,
-        timeZone: 'America/New_York',
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       },
       end: {
         dateTime: endDateTime,
-        timeZone: 'America/New_York',
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       },
       body: {
         content: description || '',
         contentType: 'text',
       },
-    });
+    };
+    
+    // Add location if provided
+    if (location) {
+      eventData.location = {
+        displayName: location
+      };
+    }
+    
+    const event = await microsoftService.createCalendarEvent(eventData);
 
     return NextResponse.json({
       success: true,

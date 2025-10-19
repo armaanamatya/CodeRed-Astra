@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { summary, description, startDateTime, endDateTime } = await request.json();
+    const { summary, description, startDateTime, endDateTime, allDay } = await request.json();
 
     if (!summary || !startDateTime || !endDateTime) {
       return NextResponse.json(
@@ -112,20 +112,39 @@ export async function POST(request: NextRequest) {
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
 
     // Create calendar event
+    console.log('Creating Google Calendar event with:', {
+      summary,
+      description,
+      startDateTime,
+      endDateTime,
+      allDay
+    });
+    
+    // Handle all-day events vs timed events
+    const eventBody: any = {
+      summary,
+      description,
+    };
+    
+    if (allDay) {
+      // For all-day events, use date instead of dateTime
+      eventBody.start = { date: startDateTime };
+      eventBody.end = { date: endDateTime };
+    } else {
+      // For timed events, use dateTime with timezone
+      eventBody.start = {
+        dateTime: startDateTime,
+        timeZone: 'UTC',
+      };
+      eventBody.end = {
+        dateTime: endDateTime,
+        timeZone: 'UTC',
+      };
+    }
+    
     const event = await calendar.events.insert({
       calendarId: 'primary',
-      requestBody: {
-        summary,
-        description,
-        start: {
-          dateTime: startDateTime,
-          timeZone: 'America/New_York', // You can make this configurable
-        },
-        end: {
-          dateTime: endDateTime,
-          timeZone: 'America/New_York',
-        },
-      },
+      requestBody: eventBody,
     });
 
     return NextResponse.json({
@@ -135,6 +154,12 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Calendar create event error:', error);
+    
+    // Log more details about the error
+    if (error && typeof error === 'object' && 'response' in error) {
+      console.error('Google API error response:', error.response);
+    }
+    
     return NextResponse.json(
       { 
         error: 'Failed to create calendar event',

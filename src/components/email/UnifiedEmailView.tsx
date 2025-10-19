@@ -416,7 +416,7 @@ export default function UnifiedEmailView({ onSendGmailEmail, onSendOutlookEmail 
       <div className="p-6 border rounded-lg">
         <h2 className="text-xl font-semibold mb-4">Unified Emails</h2>
         <div className="text-red-600 mb-4">{error}</div>
-        <Button onClick={fetchMessages} variant="outline">
+        <Button onClick={() => fetchMessages(currentPage)} variant="outline">
           Retry
         </Button>
       </div>
