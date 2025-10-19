@@ -1,4 +1,5 @@
 import NavBar from "@/components/NavBar";
+import Image from "next/image";
 
 export default function Home() {
   return (
@@ -13,9 +14,9 @@ export default function Home() {
       <div className="flex min-h-screen items-center justify-center pt-32 relative z-10">
         <div className="text-center relative z-20">
           <h1 className="text-[107px]  leading-[normal] text-center relative z-30">
-            <p className="text-[#98CD85] mb-0">WELCOME TO</p>
+            <p className="text-[#98CD85] mb-0">Welcome To</p>
             <p className="leading-[normal]">
-              <span className="text-[#98CD85]">NAVI</span><span className="text-[#98CD85]">!</span>
+              <span className="text-[#98CD85] navi-logo">NAVI</span><span className="text-[#98CD85]">!</span>
             </p>
           </h1>
         </div>
@@ -25,11 +26,11 @@ export default function Home() {
       <section className="min-h-screen flex items-center justify-center bg-[#26200D] relative z-10">
         <div className="text-center max-w-4xl mx-auto px-8 relative z-20">
           <h2 className="text-6xl  text-[#98CD85] mb-8 relative z-30">
-            About NAVI
+            About <span className="text-[#98CD85] navi-logo">NAVI</span>
           </h2>
           <p className="text-xl  text-[#98CD85] leading-relaxed relative z-30">
             NAVI is your intelligent assistant designed to help you navigate through your digital life. 
-            With seamless integration of Gmail and Calendar features, NAVI makes managing your daily tasks 
+            With seamless integration of Gmail and Calendar features, <span className="text-[#98CD85] navi-logo">NAVI</span> makes managing your daily tasks 
             and communications effortless and intuitive.
           </p>
         </div>

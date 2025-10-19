@@ -27,7 +27,7 @@ export default function NavBar() {
     >
       <div className="flex justify-between items-center h-full px-8">
         {/* Animated NAVI Logo */}
-        <div className="text-[#98CD85] font-bold text-2xl">
+        <div className="text-[#98CD85] font-bold text-2xl navi-logo">
           <span className="inline-block hover:transform hover:translate-y-[-2px] hover:scale-110 transition-all duration-200 ease-in-out cursor-pointer">N</span>
           <span className="inline-block hover:transform hover:translate-y-[-2px] hover:scale-110 transition-all duration-200 ease-in-out cursor-pointer">A</span>
           <span className="inline-block hover:transform hover:translate-y-[-2px] hover:scale-110 transition-all duration-200 ease-in-out cursor-pointer">V</span>

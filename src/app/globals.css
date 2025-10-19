@@ -52,16 +52,23 @@
 body {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
-  font-family: 'Kenia', sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 
-/* Override all font specifications to use Kenia globally */
+/* Override all font specifications to use Inter globally */
 *, *::before, *::after {
-  font-family: 'Kenia', sans-serif !important;
+  font-family: 'Inter', sans-serif !important;
 }
 
 /* Additional specific overrides for common elements */
 h1, h2, h3, h4, h5, h6, p, span, div, button, a, input, textarea {
+  font-family: 'Inter', sans-serif !important;
+}
+
+/* Keep Kenia font specifically for NAVI logo */
+.navi-logo,
+.navi-logo *,
+.navi-logo span {
   font-family: 'Kenia', sans-serif !important;
 }
 
