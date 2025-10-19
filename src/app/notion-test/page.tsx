@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 
 export default function NotionTestPage() {
   const [apiKey, setApiKey] = useState('');
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(false);
 
   const testApiKey = async () => {
@@ -153,11 +153,11 @@ export default function NotionTestPage() {
             <h3 className="font-semibold text-yellow-800 mb-2">How to get your Notion API key:</h3>
             <ol className="text-sm text-yellow-700 space-y-1">
               <li>1. Go to <a href="https://www.notion.so/my-integrations" target="_blank" className="text-blue-600 hover:underline">https://www.notion.so/my-integrations</a></li>
-              <li>2. Click "New integration"</li>
-              <li>3. Give it a name (e.g., "CodeRed Astra")</li>
+              <li>2. Click &quot;New integration&quot;</li>
+              <li>3. Give it a name (e.g., &quot;CodeRed Astra&quot;)</li>
               <li>4. Select your workspace</li>
-              <li>5. Copy the "Internal Integration Token"</li>
-              <li>6. Make sure it starts with "secret_"</li>
+              <li>5. Copy the &quot;Internal Integration Token&quot;</li>
+              <li>6. Make sure it starts with &quot;secret_&quot;</li>
             </ol>
           </div>
         </div>

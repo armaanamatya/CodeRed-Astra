@@ -20,6 +20,7 @@ import { UnifiedEvent } from '@/types/calendar';
 import { CalendarService } from '@/lib/calendarService';
 import { ToastContainer } from '@/components/ui/toast';
 import type { ToastType } from '@/components/ui/toast';
+import { NaviMascot } from '@/components/NaviMascot';
 
 type EventData = {
   title: string;
@@ -56,7 +57,7 @@ export default function DashboardPage() {
   const [showUnifiedEventModal, setShowUnifiedEventModal] = useState(false);
   const [showSendEmailModal, setShowSendEmailModal] = useState(false);
   const [showSendOutlookEmailModal, setShowSendOutlookEmailModal] = useState(false);
-  const [activeTab, setActiveTab] = useState<'calendar' | 'emails' | 'elevenlabs' | 'account'>('calendar'); // removed 'notion'
+  const [activeTab, setActiveTab] = useState<'calendar' | 'emails' | 'account'>('calendar'); // removed 'notion' and 'elevenlabs'
   const [elevenLabsTab, setElevenLabsTab] = useState<'tts' | 'stt'>('tts');
   const [googleConnected, setGoogleConnected] = useState(false);
   const [microsoftConnected, setMicrosoftConnected] = useState(false);
@@ -384,7 +385,7 @@ export default function DashboardPage() {
             >
               Notion
             </button> */}
-            <button
+            {/* <button
               onClick={() => setActiveTab('elevenlabs')}
               className={`px-4 py-2 font-medium transition-colors ${
                 activeTab === 'elevenlabs'
@@ -393,13 +394,7 @@ export default function DashboardPage() {
               }`}
             >
               ElevenLabs AI
-            </button>
-            <button
-              onClick={() => window.location.href = '/assistant'}
-              className="px-4 py-2 font-medium transition-colors text-theme-foreground hover:text-theme-accent flex items-center gap-2"
-            >
-              <span>🤖</span> AI Assistant
-            </button>
+            </button> */}
           </div>
 
           {/* Tab Content */}
@@ -437,10 +432,10 @@ export default function DashboardPage() {
             }} />
           )} */}
 
-          {activeTab === 'elevenlabs' && (
+          {/* {activeTab === 'elevenlabs' && (
             <div>
               {/* ElevenLabs Tab Navigation */}
-              <div className="flex justify-center mb-8">
+              {/* <div className="flex justify-center mb-8">
                 <div className="bg-white rounded-lg shadow-lg border-2 border-gray-200 p-1">
                   <button
                     onClick={() => setElevenLabsTab('tts')}
@@ -498,7 +493,7 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
-          )}
+          )} */}
 
 
           {/* Modals */}
@@ -538,6 +533,9 @@ export default function DashboardPage() {
           onClose={() => setShowAccountDropdown(false)}
           showToast={showToast}
         />
+        
+        {/* Navi Mascot */}
+        <NaviMascot />
       </main>
     </ProtectedRoute>
   );

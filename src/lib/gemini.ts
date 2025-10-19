@@ -17,25 +17,44 @@ export interface GeminiResponse {
   action?: {
     type: 'gmail' | 'calendar' | 'elevenlabs' | 'general';
     command: string;
-    parameters?: any;
+    parameters?: Record<string, unknown>;
   };
 }
 
-const systemPrompt = `You are an AI assistant integrated. You can execute actions for:
-- Gmail: send emails, read emails
-- Google Calendar: create events, view events
-- ElevenLabs: text-to-speech synthesis
+const systemPrompt = `You are Navi, a friendly and helpful AI voice assistant. You have access to:
+- Gmail: Send and read emails
+- Google Calendar: Create and view events
+- Voice: Speak responses naturally
 
-When the user asks you to perform an action, respond with:
-1. A natural language response
-2. If applicable, an action object specifying what to do
+IMPORTANT RULES:
+1. Always respond in a natural, conversational, and friendly tone
+2. Keep responses concise (2-3 sentences max) since they will be spoken aloud
+3. When you need more information, ask for it clearly
+4. For email actions, you MUST have a valid email address (not just a name), subject, and body
+5. If information is missing, tell the user what you need in your response, but DON'T create an action
+
+Response Format:
+- First provide your natural language response
+- Then if you can execute an action (with ALL required info), provide it in a JSON code block
 
 Examples:
-- "Send an email to john@example.com" -> action: {type: 'gmail', command: 'send', parameters: {to: 'john@example.com'}}
-- "What's on my calendar today?" -> action: {type: 'calendar', command: 'list', parameters: {timeMin: today, timeMax: today}}
-- "Read this text aloud" -> action: {type: 'elevenlabs', command: 'speak', parameters: {text: '...'}}
 
-Always be helpful and conversational while providing structured actions when needed.`;
+User: "Send an email to john@example.com saying hello"
+Response: "Sure! I'll send an email to john@example.com with your message."
+\`\`\`json
+{"type": "gmail", "command": "send", "parameters": {"to": "john@example.com", "subject": "Hello", "body": "Hello!"}}
+\`\`\`
+
+User: "Send an email to John"
+Response: "I'd be happy to send an email to John! However, I need John's email address. Could you provide that along with what you'd like to say?"
+
+User: "Create a meeting tomorrow at 2 PM about project review"
+Response: "I'll create a meeting for tomorrow at 2 PM about the project review!"
+\`\`\`json
+{"type": "calendar", "command": "create", "parameters": {"title": "Project Review", "start": "tomorrow 2pm", "end": "tomorrow 3pm"}}
+\`\`\`
+
+Always be helpful, conversational, and make sure you have complete information before creating actions.`;
 
 export async function processUserCommand(transcript: string): Promise<GeminiResponse> {
   try {
@@ -50,21 +69,33 @@ export async function processUserCommand(transcript: string): Promise<GeminiResp
     const actionMatch = text.match(/```json\s*([\s\S]*?)\s*```/);
     if (actionMatch) {
       try {
-        action = JSON.parse(actionMatch[1]);
+        const jsonStr = actionMatch[1].trim();
+        action = JSON.parse(jsonStr);
+        console.log('Extracted action:', action);
       } catch (e) {
-        console.error('Failed to parse action JSON:', e);
+        console.error('Failed to parse action JSON:', e, '\nJSON string:', actionMatch[1]);
       }
     }
     
     // Clean the text response by removing JSON blocks
-    const cleanText = text.replace(/```json[\s\S]*?```/g, '').trim();
+    let cleanText = text.replace(/```json[\s\S]*?```/g, '').trim();
+    
+    // Remove any remaining markdown code blocks
+    cleanText = cleanText.replace(/```[\s\S]*?```/g, '').trim();
+    
+    // If the response is empty after cleaning, use original text
+    if (!cleanText) {
+      cleanText = text;
+    }
+    
+    console.log('Gemini Response:', { text: cleanText, hasAction: !!action });
     
     return {
-      text: cleanText || text,
+      text: cleanText,
       action
     };
   } catch (error) {
     console.error('Gemini API error:', error);
-    throw error;
+    throw new Error('Failed to process your command. Please try again.');
   }
 }

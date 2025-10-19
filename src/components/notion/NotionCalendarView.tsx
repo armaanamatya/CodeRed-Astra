@@ -27,7 +27,7 @@ export default function NotionCalendarView({ onCreateEvent }: NotionCalendarView
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<boolean>(false);
-  const [availableDatabases, setAvailableDatabases] = useState<any[]>([]);
+  const [availableDatabases, setAvailableDatabases] = useState<Record<string, unknown>[]>([]);
   const [selectedDatabaseId, setSelectedDatabaseId] = useState<string>('');
   const [userToken, setUserToken] = useState<string>('');
 
@@ -126,14 +126,14 @@ Your integration will need access to your databases.
         <div className="text-center">
           <h2 className="text-xl font-semibold mb-4">Notion Calendar</h2>
           <p className="text-gray-600 mb-6">
-            This feature requires Notion integration. If you don't have Notion, you can still use the Google Calendar tab above.
+            This feature requires Notion integration. If you don&apos;t have Notion, you can still use the Google Calendar tab above.
           </p>
           
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 text-left">
             <h3 className="font-semibold text-blue-800 mb-2">Connect Your Notion Calendar:</h3>
             <p className="text-sm text-blue-700 mb-3">
               Connect your personal Notion workspace to view and manage your calendar events. 
-              You'll need to create a Notion integration and get your token.
+              You&apos;ll need to create a Notion integration and get your token.
             </p>
             <div className="text-xs text-blue-600">
               <p>• Your personal Notion workspace</p>

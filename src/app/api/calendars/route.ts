@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
         if (googleResponse.ok) {
           const googleData = await googleResponse.json();
           if (googleData.success) {
-            events.push(...googleData.events.map((event: any) => ({
+            events.push(...googleData.events.map((event: Record<string, unknown>) => ({
               ...event,
               source: 'google'
             })));
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
         if (notionResponse.ok) {
           const notionData = await notionResponse.json();
           if (notionData.success) {
-            events.push(...notionData.events.map((event: any) => ({
+            events.push(...notionData.events.map((event: Record<string, unknown>) => ({
               ...event,
               source: 'notion'
             })));

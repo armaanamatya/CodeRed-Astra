@@ -83,9 +83,9 @@ export async function GET(request: NextRequest) {
           name: userData.name,
           type: userData.type
         },
-        databases: databasesData.results.map((db: any) => ({
+        databases: databasesData.results.map((db: Record<string, unknown>) => ({
           id: db.id,
-          title: db.title?.[0]?.text?.content || 'Untitled Database',
+          title: (db.title as Array<{text: {content: string}}>)?.[0]?.text?.content || 'Untitled Database',
           url: db.url,
           properties: Object.keys(db.properties || {})
         })),

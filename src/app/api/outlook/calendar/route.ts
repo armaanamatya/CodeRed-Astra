@@ -154,7 +154,7 @@ export async function POST(request: NextRequest) {
 
     // Create calendar event
     const microsoftService = new MicrosoftGraphService(accessToken);
-    const eventData: any = {
+    const eventData: Record<string, unknown> = {
       subject,
       start: {
         dateTime: startDateTime,

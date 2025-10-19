@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
     const events = await calendar.events.list({
       calendarId: 'primary',
       timeMin: startDate || new Date().toISOString(),
-      timeMax: endDate,
+      timeMax: endDate || undefined,
       maxResults: 50,
       singleEvents: true,
       orderBy: 'startTime',
@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
     });
     
     // Handle all-day events vs timed events
-    const eventBody: any = {
+    const eventBody: Record<string, unknown> = {
       summary,
       description: description || '',
     };

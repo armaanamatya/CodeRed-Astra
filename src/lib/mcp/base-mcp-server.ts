@@ -19,7 +19,7 @@ export interface MCPFunction {
 
 export interface MCPResponse {
   success: boolean;
-  data?: any;
+  data?: Record<string, unknown>;
   error?: string;
   message?: string;
 }
@@ -33,7 +33,7 @@ export abstract class BaseMCPServer {
 
   // Abstract methods that each MCP server must implement
   abstract getFunctions(): MCPFunction[];
-  abstract executeFunction(functionName: string, parameters: any, userId: string): Promise<MCPResponse>;
+  abstract executeFunction(functionName: string, parameters: Record<string, unknown>, userId: string): Promise<MCPResponse>;
 
   // Common authentication helper
   protected async getAuthenticatedUser() {
@@ -65,7 +65,7 @@ export abstract class BaseMCPServer {
   }
 
   // Common success response
-  protected createSuccessResponse(data?: any, message?: string): MCPResponse {
+  protected createSuccessResponse(data?: Record<string, unknown>, message?: string): MCPResponse {
     return {
       success: true,
       data,
@@ -74,7 +74,7 @@ export abstract class BaseMCPServer {
   }
 
   // Validate required parameters
-  protected validateParameters(parameters: any, required: string[]): string | null {
+  protected validateParameters(parameters: Record<string, unknown>, required: string[]): string | null {
     for (const param of required) {
       if (!parameters[param]) {
         return `Missing required parameter: ${param}`;
@@ -84,26 +84,26 @@ export abstract class BaseMCPServer {
   }
 
   // Get service-specific tokens
-  protected async getServiceTokens(user: any): Promise<{ accessToken: string; refreshToken?: string } | null> {
+  protected async getServiceTokens(user: Record<string, unknown>): Promise<{ accessToken: string; refreshToken?: string } | null> {
     try {
       switch (this.serviceName) {
         case 'gmail':
         case 'calendar':
-          if (!user.accessToken) {
+          if (!(user.accessToken)) {
             throw new Error('Google access token not found');
           }
           return {
-            accessToken: user.accessToken,
-            refreshToken: user.refreshToken,
+            accessToken: user.accessToken as string,
+            refreshToken: user.refreshToken as string | undefined,
           };
         
         case 'outlook':
-          if (!user.microsoftAccessToken) {
+          if (!(user.microsoftAccessToken)) {
             throw new Error('Microsoft access token not found');
           }
           return {
-            accessToken: user.microsoftAccessToken,
-            refreshToken: user.microsoftRefreshToken,
+            accessToken: user.microsoftAccessToken as string,
+            refreshToken: user.microsoftRefreshToken as string | undefined,
           };
         
         default:
@@ -116,5 +116,5 @@ export abstract class BaseMCPServer {
   }
 
   // Token refresh logic (to be implemented per service)
-  protected abstract refreshTokenIfNeeded(user: any): Promise<string>;
+  protected abstract refreshTokenIfNeeded(user: Record<string, unknown>): Promise<string>;
 }

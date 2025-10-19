@@ -101,7 +101,7 @@ export default function UnifiedEmailView({ onSendGmailEmail, onSendOutlookEmail 
               });
             }
             
-            return data.messages.map((msg: any) => ({ ...msg, source: 'gmail' as const }));
+            return data.messages.map((msg: Record<string, unknown>) => ({ ...msg, source: 'gmail' as const }));
           }
           return [];
         })
@@ -116,7 +116,7 @@ export default function UnifiedEmailView({ onSendGmailEmail, onSendOutlookEmail 
         .then(data => {
           if (data.messages) {
             setHasMoreOutlook(data.hasMore || false);
-            return data.messages.map((msg: any) => ({ ...msg, source: 'outlook' as const }));
+            return data.messages.map((msg: Record<string, unknown>) => ({ ...msg, source: 'outlook' as const }));
           }
           return [];
         })

@@ -119,7 +119,7 @@ export default function Home() {
               <h3 className="text-2xl text-[#98CD85] mb-4 font-semibold">The Challenge</h3>
               <p className="text-[#98CD85] opacity-90 leading-relaxed">
                 Managing emails, calendars, and tasks across multiple platforms is time-consuming and error-prone. 
-                You're constantly switching between apps, missing important messages, and struggling to stay organized.
+                You&apos;re constantly switching between apps, missing important messages, and struggling to stay organized.
               </p>
             </div>
             
@@ -304,8 +304,8 @@ export default function Home() {
                 </div>
               </div>
               <p className="text-[#98CD85] opacity-90 italic">
-                "NAVI has completely transformed how I manage my emails and calendar. 
-                I save at least 2 hours every day with their smart automation."
+                &quot;NAVI has completely transformed how I manage my emails and calendar. 
+                I save at least 2 hours every day with their smart automation.&quot;
               </p>
             </div>
 
@@ -320,8 +320,8 @@ export default function Home() {
                 </div>
               </div>
               <p className="text-[#98CD85] opacity-90 italic">
-                "The AI assistant is incredible. It actually understands context and 
-                helps me stay focused on what matters most."
+                &quot;The AI assistant is incredible. It actually understands context and 
+                helps me stay focused on what matters most.&quot;
               </p>
             </div>
 
@@ -336,8 +336,8 @@ export default function Home() {
                 </div>
               </div>
               <p className="text-[#98CD85] opacity-90 italic">
-                "Finally, a tool that actually makes me more productive instead of 
-                adding to the noise. NAVI is a game-changer."
+                &quot;Finally, a tool that actually makes me more productive instead of 
+                adding to the noise. NAVI is a game-changer.&quot;
               </p>
             </div>
           </div>

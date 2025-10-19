@@ -8,13 +8,18 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 // import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '@/components/ui/textarea';
 
+interface ActionData {
+  type: string;
+  command?: string;
+  parameters?: Record<string, unknown>;
+}
 
 interface Message {
   id: string;
   type: 'user' | 'assistant';
   content: string;
   timestamp: Date;
-  action?: any;
+  action?: ActionData;
 }
 
 export function VoiceAssistant() {
@@ -28,53 +33,62 @@ export function VoiceAssistant() {
   const [editableTranscript, setEditableTranscript] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<unknown>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   
 
   useEffect(() => {
     if (typeof window !== 'undefined' && 'webkitSpeechRecognition' in window) {
-      const recognition = new (window as any).webkitSpeechRecognition();
-      recognition.continuous = false;
-      recognition.interimResults = true;
-      recognition.lang = 'en-US';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const SpeechRecognitionAPI = (window as any).webkitSpeechRecognition;
+      if (SpeechRecognitionAPI && typeof SpeechRecognitionAPI === 'function') {
+        const recognition = new (SpeechRecognitionAPI as new() => unknown)() as Record<string, unknown>;
+        recognition.continuous = false;
+        recognition.interimResults = true;
+        recognition.lang = 'en-US';
 
-      recognition.onstart = () => {
-        setIsListening(true);
-        setTranscript('');
-        setInterimTranscript('');
-      };
+        recognition.onstart = () => {
+          setIsListening(true);
+          setTranscript('');
+          setInterimTranscript('');
+        };
 
-      recognition.onresult = (event: any) => {
-        let interim = '';
-        let final = '';
+        recognition.onresult = (event: Record<string, unknown>) => {
+          let interim = '';
+          let final = '';
 
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          if (event.results[i].isFinal) {
-            final += event.results[i][0].transcript;
-          } else {
-            interim += event.results[i][0].transcript;
+          const resultIndex = event.resultIndex as number;
+          const results = event.results as Record<string, unknown>[];
+          for (let i = resultIndex; i < results.length; ++i) {
+            const result = results[i] as Record<string, unknown>;
+            if (result.isFinal) {
+              const alt = (result[0] as Record<string, unknown>);
+              final += alt.transcript as string;
+            } else {
+              const alt = (result[0] as Record<string, unknown>);
+              interim += alt.transcript as string;
+            }
           }
-        }
 
-        setTranscript(final);
-        setInterimTranscript(interim);
-      };
+          setTranscript(final);
+          setInterimTranscript(interim);
+        };
 
-      recognition.onend = () => {
-        setIsListening(false);
-        if (transcript) {
-          setEditableTranscript(transcript);
-          setShowConfirmation(true);
-        }
-      };
+        recognition.onend = () => {
+          setIsListening(false);
+          if (transcript) {
+            setEditableTranscript(transcript);
+            setShowConfirmation(true);
+          }
+        };
 
-      recognition.onerror = (event: any) => {
-        setIsListening(false);
-        console.error('Speech Recognition Error:', event.error);
-      };
+        recognition.onerror = (event: Record<string, unknown>) => {
+          setIsListening(false);
+          console.error('Speech Recognition Error:', event.error);
+        };
 
-      recognitionRef.current = recognition;
+        recognitionRef.current = recognition;
+      }
     }
   }, [transcript]);
 
@@ -84,10 +98,11 @@ export function VoiceAssistant() {
       return;
     }
 
+    const recognition = recognitionRef.current as Record<string, unknown>;
     if (isListening) {
-      recognitionRef.current.stop();
+      (recognition.stop as () => void)();
     } else {
-      recognitionRef.current.start();
+      (recognition.start as () => void)();
     }
   };
 
@@ -155,18 +170,22 @@ export function VoiceAssistant() {
     }
   };
 
-  const executeAction = async (action: any) => {
+  const executeAction = async (action: ActionData) => {
     try {
       switch (action.type) {
         case 'gmail':
           if (action.command === 'send') {
             // Execute Gmail send via MCP
-            await fetch('/api/mcp/execute', {
+            const toParam = action.parameters?.to as string | undefined;
+            const subjectParam = action.parameters?.subject as string | undefined;
+            const bodyParam = action.parameters?.body as string | undefined;
+            await fetch('/api/gmail/send', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                tool: 'gmail_send_email',
-                parameters: action.parameters,
+                to: toParam,
+                subject: subjectParam,
+                body: bodyParam,
               }),
             });
           }
@@ -175,14 +194,20 @@ export function VoiceAssistant() {
         case 'calendar':
           if (action.command === 'create') {
             // Execute Calendar create via MCP
-            await fetch('/api/mcp/execute', {
+            const titleParam = action.parameters?.title as string | undefined;
+            const startParam = action.parameters?.start as string | undefined;
+            const endParam = action.parameters?.end as string | undefined;
+            const calResponse = await fetch('/api/calendar/create', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                tool: 'calendar_create_event',
-                parameters: action.parameters,
+                title: titleParam,
+                start: startParam,
+                end: endParam,
               }),
             });
+            const calData = await calResponse.json();
+            console.log('Calendar response:', calData);
           }
           break;
           
@@ -234,9 +259,9 @@ export function VoiceAssistant() {
         {messages.length === 0 ? (
           <div className="text-center text-muted-foreground py-8">
             <p>Say something like:</p>
-            <p className="text-sm mt-2">"Send an email to John"</p>
-            <p className="text-sm">"What's on my calendar today?"</p>
-            <p className="text-sm">"Create a meeting for tomorrow at 2 PM"</p>
+            <p className="text-sm mt-2">&quot;Send an email to John&quot;</p>
+            <p className="text-sm">&quot;What&apos;s on my calendar today?&quot;</p>
+            <p className="text-sm">&quot;Create a meeting for tomorrow at 2 PM&quot;</p>
           </div>
         ) : (
           <div className="space-y-4">

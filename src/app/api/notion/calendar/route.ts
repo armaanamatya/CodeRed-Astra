@@ -50,9 +50,9 @@ export async function GET(request: NextRequest) {
             success: false,
             error: 'No specific database selected',
             message: 'Please select a database from the list below',
-            availableDatabases: databasesData.results.map((db: any) => ({
+            availableDatabases: databasesData.results.map((db: Record<string, unknown>) => ({
               id: db.id,
-              title: db.title?.[0]?.text?.content || 'Untitled Database',
+              title: (db.title as Array<{text: {content: string}}>)?.[0]?.text?.content || 'Untitled Database',
               url: db.url
             }))
           });
@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Build filter for date range if provided
-    let filter: any = undefined;
+    let filter: Record<string, unknown> | undefined = undefined;
     if (startDate || endDate) {
       filter = {
         and: []
@@ -132,7 +132,7 @@ export async function GET(request: NextRequest) {
     const data = await response.json();
     
     // Transform Notion pages to calendar events format
-    const events = data.results.map((page: any) => {
+    const events = data.results.map((page: Record<string, unknown>) => {
       const properties = page.properties;
       
       return {

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 interface TestCase {
   name: string;
   function: string;
-  parameters: any;
+  parameters: Record<string, unknown>;
   description: string;
   destructive?: boolean;
 }
@@ -16,13 +16,13 @@ interface TestResult {
   service: string;
   function: string;
   success: boolean;
-  data?: any;
+  data?: Record<string, unknown>;
   error?: string;
   duration?: number;
 }
 
 export default function MCPTestPage() {
-  const [services, setServices] = useState<any[]>([]);
+  const [services, setServices] = useState<Record<string, unknown>[]>([]);
   const [selectedService, setSelectedService] = useState('');
   const [selectedFunction, setSelectedFunction] = useState('');
   const [parameters, setParameters] = useState('{}');
@@ -417,7 +417,7 @@ export default function MCPTestPage() {
                       disabled={!selectedService}
                     >
                       <option value="">Select a function...</option>
-                      {selectedServiceFunctions.map((func: any) => (
+                      {selectedServiceFunctions.map((func: Record<string, unknown>) => (
                         <option key={func.name} value={func.name}>
                           {func.name} - {func.description}
                         </option>
@@ -480,7 +480,7 @@ export default function MCPTestPage() {
                       disabled={isLoading || !userEmail}
                       className="bg-yellow-600 hover:bg-yellow-700"
                     >
-                      📧 Send Real Email "Yeet"
+                      📧 Send Real Email &quot;Yeet&quot;
                     </Button>
                     <Button
                       onClick={runRealCalendarTest}
@@ -492,7 +492,7 @@ export default function MCPTestPage() {
                   </div>
                   
                   <p className="text-xs text-yellow-600">
-                    Make sure you're signed in and Google services are connected!
+                    Make sure you&apos;re signed in and Google services are connected!
                   </p>
                 </div>
               </div>

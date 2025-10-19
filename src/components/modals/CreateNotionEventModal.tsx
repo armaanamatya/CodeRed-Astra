@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 interface CreateNotionEventModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (eventData: any) => void;
+  onSubmit: (eventData: Record<string, unknown>) => void;
 }
 
 export default function CreateNotionEventModal({ 

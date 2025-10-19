@@ -94,7 +94,7 @@ export class CalendarService {
         return [];
       }
 
-      const events = (data.events || []).map((event: any) => this.transformGoogleEvent(event));
+      const events = (data.events || []).map((event: Record<string, unknown>) => this.transformGoogleEvent(event));
       console.log('Google events fetched:', events.length);
       
       // Cache the result
@@ -127,7 +127,7 @@ export class CalendarService {
         return []; // Return empty array instead of throwing
       }
 
-      const events = (data.events || []).map((event: any) => this.transformOutlookEvent(event));
+      const events = (data.events || []).map((event: Record<string, unknown>) => this.transformOutlookEvent(event));
       
       // Cache the result
       this.serviceCache.set(cacheKey, { data: events, timestamp: Date.now() });
@@ -169,7 +169,7 @@ export class CalendarService {
         return [];
       }
 
-      const events = (data.events || []).map((event: any) => this.transformNotionEvent(event));
+      const events = (data.events || []).map((event: Record<string, unknown>) => this.transformNotionEvent(event));
       console.log('Notion events fetched:', events.length);
       
       // Cache the result
@@ -182,57 +182,60 @@ export class CalendarService {
     }
   }
 
-  private transformGoogleEvent(event: any): UnifiedEvent {
+  private transformGoogleEvent(event: Record<string, unknown>): UnifiedEvent {
+    const eventObj = event as Record<string, unknown>;
     return {
-      id: event.id,
-      title: event.summary || 'No Title',
-      description: event.description || '',
-      start: event.start.dateTime || event.start.date,
-      end: event.end.dateTime || event.end.date,
-      allDay: !event.start.dateTime,
-      location: event.location || '',
-      attendees: event.attendees?.map((a: any) => a.displayName || a.email) || [],
+      id: eventObj.id as string,
+      title: (eventObj.summary as string) || 'No Title',
+      description: (eventObj.description as string) || '',
+      start: ((eventObj.start as Record<string, unknown>)?.dateTime || (eventObj.start as Record<string, unknown>)?.date) as string,
+      end: ((eventObj.end as Record<string, unknown>)?.dateTime || (eventObj.end as Record<string, unknown>)?.date) as string,
+      allDay: !((eventObj.start as Record<string, unknown>)?.dateTime),
+      location: (eventObj.location as string) || '',
+      attendees: (eventObj.attendees as Array<{displayName?: string; email?: string}>)?.map((a) => a.displayName || a.email) || [],
       source: 'google',
-      sourceId: event.id,
-      url: event.htmlLink || '',
+      sourceId: eventObj.id as string,
+      url: (eventObj.htmlLink as string) || '',
       color: '#4285f4', // Google blue
       status: 'confirmed'
     };
   }
 
-  private transformOutlookEvent(event: any): UnifiedEvent {
+  private transformOutlookEvent(event: Record<string, unknown>): UnifiedEvent {
+    const eventObj = event as Record<string, unknown>;
     return {
-      id: event.id,
-      title: event.subject || 'No Title',
-      description: event.body?.content?.replace(/<[^>]*>/g, '') || '',
-      start: event.start.dateTime,
-      end: event.end.dateTime,
+      id: eventObj.id as string,
+      title: (eventObj.subject as string) || 'No Title',
+      description: ((eventObj.body as Record<string, unknown>)?.content as string)?.replace(/<[^>]*>/g, '') || '',
+      start: ((eventObj.start as Record<string, unknown>)?.dateTime) as string,
+      end: ((eventObj.end as Record<string, unknown>)?.dateTime) as string,
       allDay: false, // Outlook events typically have time
-      location: event.location?.displayName || '',
-      attendees: event.attendees?.map((a: any) => a.emailAddress.name || a.emailAddress.address) || [],
+      location: ((eventObj.location as Record<string, unknown>)?.displayName as string) || '',
+      attendees: (eventObj.attendees as Array<{emailAddress: {name?: string; address?: string}}>)?.map((a) => a.emailAddress.name || a.emailAddress.address) || [],
       source: 'outlook',
-      sourceId: event.id,
-      url: event.webLink || '',
+      sourceId: eventObj.id as string,
+      url: (eventObj.webLink as string) || '',
       color: '#0078d4', // Outlook blue
       status: 'confirmed'
     };
   }
 
-  private transformNotionEvent(event: any): UnifiedEvent {
+  private transformNotionEvent(event: Record<string, unknown>): UnifiedEvent {
+    const eventObj = event as Record<string, unknown>;
     return {
-      id: event.id,
-      title: event.title || 'No Title',
-      description: event.description || '',
-      start: event.start,
-      end: event.end || event.start,
-      allDay: event.allDay || false,
-      location: event.location || '',
-      attendees: event.attendees || [],
+      id: eventObj.id as string,
+      title: (eventObj.title as string) || 'No Title',
+      description: (eventObj.description as string) || '',
+      start: eventObj.start as string,
+      end: (eventObj.end as string) || (eventObj.start as string),
+      allDay: (eventObj.allDay as boolean) || false,
+      location: (eventObj.location as string) || '',
+      attendees: (eventObj.attendees as string[]) || [],
       source: 'notion',
-      sourceId: event.id,
-      url: event.url || '',
+      sourceId: eventObj.id as string,
+      url: (eventObj.url as string) || '',
       color: '#000000', // Notion black
-      status: event.status || 'confirmed'
+      status: (eventObj.status as string) || 'confirmed'
     };
   }
 
@@ -249,7 +252,7 @@ export class CalendarService {
         const sources = ['google', 'outlook', 'notion'];
         for (const source of sources) {
           try {
-            const success = await this.createEvent(eventData, source as any);
+            const success = await this.createEvent(eventData, source as 'google' | 'outlook' | 'notion');
             if (success) return true;
           } catch (error) {
             console.error(`Failed to create event in ${source}:`, error);

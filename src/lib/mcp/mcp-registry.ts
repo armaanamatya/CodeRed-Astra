@@ -2,7 +2,6 @@ import { BaseMCPServer, MCPFunction } from './base-mcp-server';
 import { GmailMCPServer } from './gmail-mcp-server';
 import { CalendarMCPServer } from './calendar-mcp-server';
 import { OutlookMCPServer } from './outlook-mcp-server';
-import { NotionMCPServer } from './notion-mcp-server';
 
 export interface MCPServerInfo {
   name: string;
@@ -54,15 +53,6 @@ export class MCPRegistry {
       functions: outlookServer.getFunctions(),
     });
 
-    // Notion MCP Server
-    const notionServer = new NotionMCPServer();
-    this.servers.set('notion', {
-      name: 'Notion',
-      description: 'Notion workspace and page management',
-      server: notionServer,
-      functions: notionServer.getFunctions(),
-    });
-
     console.log(`MCP Registry initialized with ${this.servers.size} servers`);
   }
 
@@ -94,7 +84,7 @@ export class MCPRegistry {
   public async executeFunction(
     serviceName: string, 
     functionName: string, 
-    parameters: any, 
+    parameters: Record<string, unknown>, 
     userId: string
   ) {
     const serverInfo = this.getServer(serviceName);
@@ -106,8 +96,8 @@ export class MCPRegistry {
   }
 
   // Helper method to get all available functions formatted for AI models
-  public getFunctionsForAI(): any[] {
-    const allFunctions: any[] = [];
+  public getFunctionsForAI(): Record<string, unknown>[] {
+    const allFunctions: Record<string, unknown>[] = [];
     
     for (const [serviceName, serverInfo] of this.servers.entries()) {
       for (const func of serverInfo.functions) {

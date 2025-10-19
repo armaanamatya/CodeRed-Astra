@@ -1,4 +1,5 @@
-﻿import { Client } from '@microsoft/microsoft-graph-client';
+﻿/* eslint-disable @typescript-eslint/no-explicit-any, prefer-const */
+import { Client } from '@microsoft/microsoft-graph-client';
 import { BaseMCPServer, MCPFunction, MCPResponse } from './base-mcp-server';
 import { refreshMicrosoftToken } from '../microsoftGraph';
 

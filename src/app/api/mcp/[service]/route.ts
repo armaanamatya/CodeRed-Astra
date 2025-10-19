@@ -5,7 +5,7 @@ import { MCPRegistry } from '@/lib/mcp/mcp-registry';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { service: string } }
+  { params }: { params: Promise<{ service: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -13,7 +13,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { service } = params;
+    const { service } = await params;
     const registry = MCPRegistry.getInstance();
     const serverInfo = registry.getServer(service);
 
@@ -40,7 +40,7 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { service: string } }
+  { params }: { params: Promise<{ service: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -48,7 +48,7 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { service } = params;
+    const { service } = await params;
     const body = await request.json();
     const { functionName, parameters } = body;
 

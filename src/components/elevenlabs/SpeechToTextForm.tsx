@@ -507,7 +507,7 @@ export function SpeechToTextForm() {
                 <li>• Select your preferred language for transcription</li>
                 <li>• Click to upload an audio file (MP3, WAV, FLAC, M4A, OGG)</li>
                 <li>• Files up to 3GB and 10 hours duration are supported</li>
-                <li>• Click "Transcribe Audio" to process the file</li>
+                <li>• Click &quot;Transcribe Audio&quot; to process the file</li>
                 <li>• Wait for the transcription to complete</li>
                 <li>• Use the Copy button to copy the transcript</li>
               </>
@@ -520,12 +520,12 @@ export function SpeechToTextForm() {
           <p className="text-sm text-gray-600">
             {transcriptionMode === 'realtime' ? (
               <>
-                <strong>Real-time Mode:</strong> Uses your browser's built-in speech recognition for instant transcription. 
+                <strong>Real-time Mode:</strong> Uses your browser&apos;s built-in speech recognition for instant transcription. 
                 Best for quick notes and live conversations. Use keyboard shortcuts for hands-free recording!
               </>
             ) : (
               <>
-                <strong>File Upload Mode:</strong> Uses ElevenLabs' advanced AI for high-accuracy transcription. 
+                <strong>File Upload Mode:</strong> Uses ElevenLabs&apos; advanced AI for high-accuracy transcription. 
                 Supports 99+ languages and provides better accuracy for longer recordings.
               </>
             )}
