@@ -63,11 +63,20 @@ export class MicrosoftGraphService {
     }
   }
 
-  // Get Outlook messages
-  async getMessages() {
+  // Get Outlook messages with pagination
+  async getMessages(maxResults: number = 20, skip: number = 0, mailboxType: string = 'inbox') {
     try {
+      let endpoint = '/me/messages';
+      
+      // Use specific folders for sent and drafts
+      if (mailboxType === 'sent') {
+        endpoint = '/me/mailFolders/sentitems/messages';
+      } else if (mailboxType === 'drafts') {
+        endpoint = '/me/mailFolders/drafts/messages';
+      }
+      
       const response = await this.makeRequest(
-        '/me/messages?$select=id,subject,from,receivedDateTime,body,isRead,importance&$orderby=receivedDateTime desc&$top=20'
+        `${endpoint}?$select=id,subject,from,receivedDateTime,body,isRead,importance&$orderby=receivedDateTime desc&$top=${maxResults}&$skip=${skip}`
       );
       return response;
     } catch (error) {
@@ -179,6 +188,21 @@ export class MicrosoftGraphService {
       return await this.makeRequest('/me?$select=id,displayName,mail,userPrincipalName');
     } catch (error) {
       console.error('Error fetching user profile:', error);
+      throw error;
+    }
+  }
+
+  // Mark email as read
+  async markMessageAsRead(messageId: string) {
+    try {
+      return await this.makeRequest(`/me/messages/${messageId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({
+          isRead: true
+        }),
+      });
+    } catch (error) {
+      console.error('Error marking message as read:', error);
       throw error;
     }
   }
