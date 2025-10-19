@@ -87,6 +87,7 @@ export default function DashboardPage() {
   const handleCreateEvent = async (eventData: Partial<UnifiedEvent>) => {
     try {
       console.log('Creating event:', eventData);
+      console.log('Event data source:', eventData.source);
       
       // Create event directly via the appropriate API based on source
       let response;
@@ -98,7 +99,8 @@ export default function DashboardPage() {
             summary: eventData.title,
             description: eventData.description,
             startDateTime: eventData.start,
-            endDateTime: eventData.end
+            endDateTime: eventData.end,
+            allDay: eventData.allDay
           })
         });
       } else if (eventData.source === 'outlook') {
@@ -107,7 +109,7 @@ export default function DashboardPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             subject: eventData.title,
-            body: eventData.description,
+            description: eventData.description,
             startDateTime: eventData.start,
             endDateTime: eventData.end,
             location: eventData.location
@@ -120,8 +122,8 @@ export default function DashboardPage() {
           body: JSON.stringify({
             title: eventData.title,
             description: eventData.description,
-            start: eventData.start,
-            end: eventData.end,
+            startDate: eventData.start,
+            endDate: eventData.end,
             location: eventData.location,
             allDay: eventData.allDay
           })
@@ -131,8 +133,11 @@ export default function DashboardPage() {
       }
 
       const result = await response.json();
+      console.log('API response:', result);
+      console.log('Response status:', response.status);
       
       if (!response.ok) {
+        console.error('API error:', result);
         throw new Error(result.error || 'Failed to create event');
       }
 
