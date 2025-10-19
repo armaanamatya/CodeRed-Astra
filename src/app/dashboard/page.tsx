@@ -9,6 +9,10 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import Image from 'next/image';
 import UnifiedCalendarGrid from '@/components/calendar/UnifiedCalendarGrid';
 import UnifiedEmailView from '@/components/email/UnifiedEmailView';
+<<<<<<< HEAD
+=======
+import OutlookCalendarView from '@/components/outlook/OutlookCalendarView';
+>>>>>>> b05d43c (unified email section with gmail and outlook, search filtering for emails, inbox/sent/drafts, pagination)
 import { TextToSpeechForm } from '@/components/elevenlabs/TextToSpeechForm';
 import { SubscriptionInfo } from '@/components/elevenlabs/SubscriptionInfo';
 import UnifiedEventModal from '@/components/modals/UnifiedEventModal';
@@ -19,6 +23,7 @@ import { UnifiedEvent } from '@/types/calendar';
 import { CalendarService } from '@/lib/calendarService';
 import { ToastContainer } from '@/components/ui/toast';
 import type { ToastType } from '@/components/ui/toast';
+<<<<<<< HEAD
 
 type EventData = {
   title: string;
@@ -49,14 +54,23 @@ type OutlookEmailData = {
   subject: string;
   body: string;
 };
+=======
+>>>>>>> b05d43c (unified email section with gmail and outlook, search filtering for emails, inbox/sent/drafts, pagination)
 
 export default function DashboardPage() {
   const { session, signOut } = useAuth();
   const [showUnifiedEventModal, setShowUnifiedEventModal] = useState(false);
   const [showSendEmailModal, setShowSendEmailModal] = useState(false);
   const [showSendOutlookEmailModal, setShowSendOutlookEmailModal] = useState(false);
+<<<<<<< HEAD
   const [activeTab, setActiveTab] = useState<'calendar' | 'emails' | 'notion' | 'elevenlabs'>('calendar');
   const [showAccountDropdown, setShowAccountDropdown] = useState(false);
+=======
+  const [activeTab, setActiveTab] = useState<'calendar' | 'emails' | 'outlook-calendar' | 'notion' | 'elevenlabs' | 'account'>('calendar');
+  const [googleConnected, setGoogleConnected] = useState(false);
+  const [microsoftConnected, setMicrosoftConnected] = useState(false);
+  const [microsoftLoading, setMicrosoftLoading] = useState(false);
+>>>>>>> b05d43c (unified email section with gmail and outlook, search filtering for emails, inbox/sent/drafts, pagination)
   const [selectedEvent, setSelectedEvent] = useState<UnifiedEvent | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [toasts, setToasts] = useState<Array<{ id: string; message: string; type: ToastType }>>([]);
@@ -175,10 +189,18 @@ export default function DashboardPage() {
         throw new Error(result.error || 'Failed to create Outlook event');
       }
 
+<<<<<<< HEAD
       alert('Outlook event created successfully!');
     } catch (error) {
       console.error('Error creating Outlook event:', error);
       alert('Failed to create Outlook event. Please try again.');
+=======
+      showToast('Outlook email sent successfully!', 'success');
+      setShowSendOutlookEmailModal(false);
+    } catch (error) {
+      console.error('Error sending Outlook email:', error);
+      showToast('Failed to send Outlook email. Please try again.', 'error');
+>>>>>>> b05d43c (unified email section with gmail and outlook, search filtering for emails, inbox/sent/drafts, pagination)
     }
   };
 
@@ -195,9 +217,26 @@ export default function DashboardPage() {
 
   //     const result = await response.json();
 
+<<<<<<< HEAD
   //     if (!response.ok) {
   //       throw new Error(result.error || 'Failed to send Outlook email');
   //     }
+=======
+      if (data.connected) {
+        setMicrosoftConnected(true);
+        showToast('Microsoft account is already connected!', 'info');
+      } else {
+        // Redirect to Microsoft OAuth
+        window.location.href = data.authUrl;
+      }
+    } catch (error) {
+      console.error('Error connecting to Microsoft:', error);
+      showToast('Failed to connect to Microsoft. Please try again.', 'error');
+    } finally {
+      setMicrosoftLoading(false);
+    }
+  };
+>>>>>>> b05d43c (unified email section with gmail and outlook, search filtering for emails, inbox/sent/drafts, pagination)
 
   //     showToast('Outlook email sent successfully!', 'success');
   //     setShowSendOutlookEmailModal(false);
@@ -207,7 +246,31 @@ export default function DashboardPage() {
   //   }
   // };
 
+<<<<<<< HEAD
   // Check for Microsoft connection success in URL params
+=======
+  const handleMicrosoftReconnect = async () => {
+    try {
+      setMicrosoftLoading(true);
+      const response = await fetch('/api/microsoft/reconnect');
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to get Microsoft reconnect URL');
+      }
+
+      // Redirect to Microsoft OAuth for reconnection
+      window.location.href = data.authUrl;
+    } catch (error) {
+      console.error('Error reconnecting to Microsoft:', error);
+      showToast('Failed to reconnect to Microsoft. Please try again.', 'error');
+    } finally {
+      setMicrosoftLoading(false);
+    }
+  };
+
+  // Check connection status on component mount
+>>>>>>> b05d43c (unified email section with gmail and outlook, search filtering for emails, inbox/sent/drafts, pagination)
   React.useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('microsoft_connected') === 'true') {
@@ -306,6 +369,19 @@ export default function DashboardPage() {
               }`}
             >
               Unified Emails
+<<<<<<< HEAD
+=======
+            </button>
+            <button
+              onClick={() => setActiveTab('outlook-calendar')}
+              className={`px-4 py-2 font-medium ${
+                activeTab === 'outlook-calendar'
+                  ? 'border-b-2 border-blue-500 text-blue-600'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Outlook Calendar
+>>>>>>> b05d43c (unified email section with gmail and outlook, search filtering for emails, inbox/sent/drafts, pagination)
             </button>
             <button
               onClick={() => setActiveTab('notion')}
@@ -351,8 +427,32 @@ export default function DashboardPage() {
           {activeTab === 'emails' && (
             <UnifiedEmailView 
               onSendGmailEmail={() => setShowSendEmailModal(true)}
+<<<<<<< HEAD
               onSendOutlookEmail={() => {}} // Disabled - permission issues
             />
+=======
+              onSendOutlookEmail={() => setShowSendOutlookEmailModal(true)}
+            />
+          )}
+
+          {activeTab === 'outlook-calendar' && (
+            <div className="space-y-6">
+              {!microsoftConnected ? (
+                <div className="text-center py-8">
+                  <div className="text-gray-500 text-lg mb-4">Microsoft account not connected</div>
+                  <Button 
+                    onClick={handleMicrosoftConnect}
+                    disabled={microsoftLoading}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    {microsoftLoading ? 'Connecting...' : 'Connect to Microsoft'}
+                  </Button>
+                </div>
+              ) : (
+                <OutlookCalendarView onCreateEvent={() => setShowUnifiedEventModal(true)} />
+              )}
+            </div>
+>>>>>>> b05d43c (unified email section with gmail and outlook, search filtering for emails, inbox/sent/drafts, pagination)
           )}
 
           {activeTab === 'notion' && (
@@ -404,11 +504,18 @@ export default function DashboardPage() {
             isOpen={showSendOutlookEmailModal}
             onClose={() => setShowSendOutlookEmailModal(false)}
             onSubmit={handleSendOutlookEmail}
+<<<<<<< HEAD
           /> */}
 
           {/* Toast Notifications */}
           <ToastContainer toasts={toasts} removeToast={removeToast} />
           </div>
+=======
+          />
+
+          {/* Toast Notifications */}
+          <ToastContainer toasts={toasts} removeToast={removeToast} />
+>>>>>>> b05d43c (unified email section with gmail and outlook, search filtering for emails, inbox/sent/drafts, pagination)
         </div>
 
         {/* Account Dropdown */}
