@@ -7,12 +7,28 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useTheme } from '@/context/ThemeContext';
 
+interface ActionParameters {
+  to?: string;
+  subject?: string;
+  body?: string;
+  title?: string;
+  start?: string;
+  end?: string;
+  [key: string]: string | undefined;
+}
+
+interface Action {
+  type: string;
+  command?: string;
+  parameters?: ActionParameters;
+}
+
 interface Message {
   id: string;
   type: 'user' | 'assistant';
   content: string;
   timestamp: Date;
-  action?: any;
+  action?: Action;
 }
 
 export function NaviMascot() {
@@ -217,7 +233,7 @@ export function NaviMascot() {
     }
   };
 
-  const executeAction = async (action: any) => {
+  const executeAction = async (action: Action) => {
     switch (action.type) {
       case 'gmail':
         if (action.command === 'send') {

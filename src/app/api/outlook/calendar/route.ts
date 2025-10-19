@@ -63,8 +63,8 @@ export async function GET(request: NextRequest) {
 
     // Get date parameters
     const { searchParams } = new URL(request.url);
-    const startDate = searchParams.get('startDate');
-    const endDate = searchParams.get('endDate');
+    const startDate = searchParams.get('startDate') || undefined;
+    const endDate = searchParams.get('endDate') || undefined;
 
     // Get calendar events with date filtering
     const microsoftService = new MicrosoftGraphService(accessToken);
@@ -154,7 +154,13 @@ export async function POST(request: NextRequest) {
 
     // Create calendar event
     const microsoftService = new MicrosoftGraphService(accessToken);
-    const eventData: Record<string, unknown> = {
+    const eventData: {
+      subject: string;
+      start: { dateTime: string; timeZone: string };
+      end: { dateTime: string; timeZone: string };
+      body?: { content: string; contentType: string };
+      location?: { displayName: string };
+    } = {
       subject,
       start: {
         dateTime: startDateTime,

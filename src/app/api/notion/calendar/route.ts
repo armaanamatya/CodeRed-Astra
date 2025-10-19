@@ -7,6 +7,41 @@ import User from '@/models/User';
 // Notion API client
 const NOTION_API_URL = 'https://api.notion.com/v1';
 
+// Type for Notion filter
+interface NotionDateFilter {
+  property: string;
+  date: {
+    on_or_after?: string;
+    on_or_before?: string;
+  };
+}
+
+interface NotionFilter {
+  and: NotionDateFilter[];
+}
+
+// Type for Notion page properties
+interface NotionPropertyValue {
+  title?: Array<{ text: { content: string } }>;
+  rich_text?: Array<{ text: { content: string } }>;
+  date?: { start: string; end?: string };
+  checkbox?: boolean;
+  people?: unknown[];
+  select?: { name: string };
+}
+
+interface NotionProperties {
+  [key: string]: NotionPropertyValue;
+}
+
+interface NotionPage {
+  id: string;
+  url: string;
+  created_time: string;
+  last_edited_time: string;
+  properties: NotionProperties;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -72,7 +107,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Build filter for date range if provided
-    let filter: Record<string, unknown> | undefined = undefined;
+    let filter: NotionFilter | undefined = undefined;
     if (startDate || endDate) {
       filter = {
         and: []
@@ -132,7 +167,7 @@ export async function GET(request: NextRequest) {
     const data = await response.json();
     
     // Transform Notion pages to calendar events format
-    const events = data.results.map((page: Record<string, unknown>) => {
+    const events = data.results.map((page: NotionPage) => {
       const properties = page.properties;
       
       return {
