@@ -66,6 +66,7 @@ export default function DashboardPage() {
   const [selectedEvent, setSelectedEvent] = useState<UnifiedEvent | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [toasts, setToasts] = useState<Array<{ id: string; message: string; type: ToastType }>>([]);
+  const [calendarRefreshTrigger, setCalendarRefreshTrigger] = useState(0); // Trigger calendar refresh
 
   const showToast = (message: string, type: ToastType) => {
     const id = Math.random().toString(36).substring(7);
@@ -132,9 +133,10 @@ export default function DashboardPage() {
       showToast('Event created successfully!', 'success');
       setShowUnifiedEventModal(false);
       
-      // Clear cache to refresh data
+      // Clear cache and trigger calendar refresh
       const calendarService = CalendarService.getInstance();
       calendarService.clearCache();
+      setCalendarRefreshTrigger(prev => prev + 1); // Increment to trigger refresh
       
     } catch (error) {
       console.error('Error creating event:', error);
@@ -415,6 +417,7 @@ export default function DashboardPage() {
                 setSelectedEvent(null); // Clear selected event for new event creation
                 setShowUnifiedEventModal(true);
               }}
+              refreshTrigger={calendarRefreshTrigger} // Pass refresh trigger
             />
           )}
 

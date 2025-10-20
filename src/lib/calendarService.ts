@@ -5,7 +5,8 @@ export class CalendarService {
   private cache: Map<string, UnifiedEvent[]> = new Map();
   private serviceCache: Map<string, { data: UnifiedEvent[], timestamp: number }> = new Map();
   private lastFetch: number = 0;
-  private readonly CACHE_DURATION = 2 * 60 * 1000; // 2 minutes
+  private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes - extended for better performance
+  private pendingRequests: Map<string, Promise<UnifiedEvent[]>> = new Map(); // Request deduplication
 
   static getInstance(): CalendarService {
     if (!CalendarService.instance) {
@@ -24,6 +25,31 @@ export class CalendarService {
       return this.cache.get(cacheKey) || [];
     }
 
+    // Request deduplication - if same request is in flight, return that promise
+    if (this.pendingRequests.has(cacheKey)) {
+      console.log('Request already in flight, returning existing promise');
+      return this.pendingRequests.get(cacheKey)!;
+    }
+
+    // Create new request and store promise
+    const requestPromise = this.performFetch(startDate, endDate, cacheKey, now);
+    this.pendingRequests.set(cacheKey, requestPromise);
+
+    try {
+      const result = await requestPromise;
+      return result;
+    } finally {
+      // Clean up pending request
+      this.pendingRequests.delete(cacheKey);
+    }
+  }
+
+  private async performFetch(
+    startDate: string | undefined,
+    endDate: string | undefined,
+    cacheKey: string,
+    now: number
+  ): Promise<UnifiedEvent[]> {
     try {
       const allEvents: UnifiedEvent[] = [];
       
@@ -51,7 +77,6 @@ export class CalendarService {
 
       // Sort events by start time
       allEvents.sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
-
 
       // Cache the results
       this.cache.set(cacheKey, allEvents);

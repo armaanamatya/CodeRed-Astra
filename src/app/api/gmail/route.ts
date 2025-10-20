@@ -55,12 +55,15 @@ export async function GET(request: NextRequest) {
     const nextPageToken = messagesResponse.data.nextPageToken;
 
     // Get detailed message data for each message
+    // OPTIMIZATION: Use 'metadata' format instead of 'full' for much faster list loading
+    // Body content will be fetched on-demand when user clicks on a message
     const detailedMessages = await Promise.all(
       messages.map(async (message) => {
         const messageDetails = await gmail.users.messages.get({
           userId: 'me',
           id: message.id!,
-          format: 'full',
+          format: 'metadata',
+          metadataHeaders: ['Subject', 'From', 'Date'],
         });
 
         const headers = messageDetails.data.payload?.headers || [];
@@ -68,31 +71,13 @@ export async function GET(request: NextRequest) {
         const from = headers.find(h => h.name === 'From')?.value || 'Unknown Sender';
         const date = headers.find(h => h.name === 'Date')?.value || '';
 
-        // Get message body
-        let body = '';
-        if (messageDetails.data.payload?.body?.data) {
-          body = Buffer.from(messageDetails.data.payload.body.data, 'base64').toString();
-        } else if (messageDetails.data.payload?.parts) {
-          // Look for text/html first, then text/plain
-          const htmlPart = messageDetails.data.payload.parts.find(
-            part => part.mimeType === 'text/html'
-          );
-          const textPart = messageDetails.data.payload.parts.find(
-            part => part.mimeType === 'text/plain'
-          );
-          const preferredPart = htmlPart || textPart;
-          if (preferredPart?.body?.data) {
-            body = Buffer.from(preferredPart.body.data, 'base64').toString();
-          }
-        }
-
         return {
           id: message.id,
           subject,
           from,
           date,
-          body,
           snippet: messageDetails.data.snippet,
+          // Body is not fetched here for performance - fetch on-demand via /api/gmail/[id]
         };
       })
     );

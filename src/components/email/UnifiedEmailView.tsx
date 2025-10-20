@@ -8,7 +8,7 @@ interface GmailMessage {
   subject: string;
   from: string;
   date: string;
-  body: string;
+  body?: string; // Body is now optional, fetched on-demand
   snippet: string;
   source: 'gmail';
 }
@@ -58,6 +58,7 @@ export default function UnifiedEmailView({ onSendGmailEmail, onSendOutlookEmail 
   const [hasMoreOutlook, setHasMoreOutlook] = useState(false);
   const [gmailPageTokens, setGmailPageTokens] = useState<string[]>([]);
   const [outlookSkipCounts, setOutlookSkipCounts] = useState<number[]>([]);
+  const [loadingMessageBody, setLoadingMessageBody] = useState(false); // Track body loading
 
   const fetchMessages = async (page: number = 1) => {
     try {
@@ -212,6 +213,37 @@ export default function UnifiedEmailView({ onSendGmailEmail, onSendOutlookEmail 
   const handleMessageClick = async (message: UnifiedMessage) => {
     setSelectedMessage(message);
     
+    // Fetch Gmail message body on-demand if not already loaded
+    if (message.source === 'gmail' && !message.body) {
+      try {
+        setLoadingMessageBody(true);
+        const response = await fetch(`/api/gmail/message/${message.id}`);
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+          // Update the message in the list with the body
+          setMessages(prevMessages => 
+            prevMessages.map(msg => 
+              msg.id === message.id && msg.source === 'gmail'
+                ? { ...msg, body: data.body }
+                : msg
+            )
+          );
+          
+          // Update selected message with body
+          setSelectedMessage(prev => 
+            prev && prev.id === message.id && prev.source === 'gmail'
+              ? { ...prev, body: data.body }
+              : prev
+          );
+        }
+      } catch (error) {
+        console.error('Error fetching Gmail message body:', error);
+      } finally {
+        setLoadingMessageBody(false);
+      }
+    }
+    
     // Mark Outlook email as read if it's unread
     if (message.source === 'outlook' && !message.isRead) {
       try {
@@ -326,19 +358,31 @@ export default function UnifiedEmailView({ onSendGmailEmail, onSendOutlookEmail 
           <div className="border-t border-theme-border pt-4">
             <h4 className="font-medium mb-2 text-theme-foreground">Message Content:</h4>
             <div className="text-sm text-theme-foreground max-h-96 overflow-y-auto bg-theme-secondary p-4 rounded border border-theme-border custom-scrollbar">
-              {isHtml ? (
-                <div 
-                  className="email-content overflow-hidden"
-                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(selectedMessage.body) }}
-                  style={{
-                    wordWrap: 'break-word',
-                    overflowWrap: 'break-word',
-                    maxWidth: '100%'
-                  }}
-                />
+              {loadingMessageBody ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-theme-primary"></div>
+                  <span className="ml-3 text-theme-muted-foreground">Loading message...</span>
+                </div>
+              ) : selectedMessage.body ? (
+                isHtml ? (
+                  <div 
+                    className="email-content overflow-hidden"
+                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(selectedMessage.body) }}
+                    style={{
+                      wordWrap: 'break-word',
+                      overflowWrap: 'break-word',
+                      maxWidth: '100%'
+                    }}
+                  />
+                ) : (
+                  <div className="whitespace-pre-wrap break-words overflow-hidden">
+                    {selectedMessage.body}
+                  </div>
+                )
               ) : (
-                <div className="whitespace-pre-wrap break-words overflow-hidden">
-                  {selectedMessage.body || selectedMessage.snippet}
+                <div className="whitespace-pre-wrap break-words overflow-hidden text-theme-muted-foreground">
+                  {selectedMessage.snippet}
+                  <p className="mt-4 text-xs italic">Full message content will load when you select this email.</p>
                 </div>
               )}
             </div>
