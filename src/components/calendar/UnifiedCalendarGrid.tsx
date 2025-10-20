@@ -4,17 +4,20 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { UnifiedEvent, CalendarView, CalendarGridProps } from '@/types/calendar';
 import { CalendarService } from '@/lib/calendarService';
+import { X } from 'lucide-react'; // Add this import at the top
 
 interface UnifiedCalendarGridProps {
   onEventClick: (event: UnifiedEvent) => void;
   onCreateEvent: (date?: Date) => void;
   onDateClick: (date: Date) => void;
+  refreshTrigger?: number; // Optional prop to trigger refresh from parent
 }
 
 export default function UnifiedCalendarGrid({ 
   onEventClick, 
   onCreateEvent, 
-  onDateClick 
+  onDateClick,
+  refreshTrigger 
 }: UnifiedCalendarGridProps) {
   const [events, setEvents] = useState<UnifiedEvent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,12 +28,17 @@ export default function UnifiedCalendarGrid({
     sources: ['google', 'outlook'], // Disabled 'notion' since it's not implemented yet
     searchQuery: ''
   });
+  
+  // ✅ Add these new state variables
+  const [showAllEventsModal, setShowAllEventsModal] = useState(false);
+  const [modalDate, setModalDate] = useState<Date | null>(null);
+  const [modalEvents, setModalEvents] = useState<UnifiedEvent[]>([]);
 
   const calendarService = CalendarService.getInstance();
 
   useEffect(() => {
     fetchEvents();
-  }, [view, filters]);
+  }, [view, filters, refreshTrigger]); // Added refreshTrigger to dependencies
 
   const fetchEvents = async () => {
     try {
@@ -208,6 +216,30 @@ export default function UnifiedCalendarGrid({
     setView({ ...view, date: new Date() });
   };
 
+  // ✅ Add this helper function to format time nicely
+  const formatEventTime = (start: string, end: string) => {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const startTime = startDate.toLocaleTimeString('en-US', { 
+      hour: 'numeric', 
+      minute: '2-digit',
+      hour12: true 
+    });
+    const endTime = endDate.toLocaleTimeString('en-US', { 
+      hour: 'numeric', 
+      minute: '2-digit',
+      hour12: true 
+    });
+    return `${startTime} - ${endTime}`;
+  };
+
+  // ✅ Add this function to handle showing all events
+  const handleShowAllEvents = (date: Date, events: UnifiedEvent[]) => {
+    setModalDate(date);
+    setModalEvents(events);
+    setShowAllEventsModal(true);
+  };
+
   const renderMonthView = () => {
     const days = getDaysInMonth(view.date);
     const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -260,7 +292,13 @@ export default function UnifiedCalendarGrid({
                   </div>
                 ))}
                 {dayEvents.length > 3 && (
-                  <div className="text-xs text-theme-muted-foreground">
+                  <div 
+                    className="text-xs text-theme-primary hover:text-theme-accent font-medium cursor-pointer hover:underline transition-colors duration-200"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleShowAllEvents(date, dayEvents);
+                    }}
+                  >
                     +{dayEvents.length - 3} more
                   </div>
                 )}
@@ -610,6 +648,125 @@ export default function UnifiedCalendarGrid({
         {view.type === 'day' && renderDayView()}
       </div>
 
+      {/* ✅ Add this modal right after Calendar Grid and before Legend */}
+      {showAllEventsModal && modalDate && (
+        <div 
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={() => setShowAllEventsModal(false)}
+        >
+          <div 
+            className="bg-theme-background border border-theme-border rounded-lg shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 border-b border-theme-border bg-theme-secondary">
+              <div>
+                <h3 className="text-xl font-bold text-theme-foreground">
+                  {modalDate.toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    month: 'long', 
+                    day: 'numeric',
+                    year: 'numeric'
+                  })}
+                </h3>
+                <p className="text-sm text-theme-muted-foreground mt-1">
+                  {modalEvents.length} {modalEvents.length === 1 ? 'event' : 'events'}
+                </p>
+              </div>
+              <button
+                onClick={() => setShowAllEventsModal(false)}
+                className="p-2 hover:bg-theme-accent rounded-full transition-colors duration-200"
+              >
+                <X className="h-5 w-5 text-theme-foreground" />
+              </button>
+            </div>
+
+            {/* Modal Content - Scrollable Events List */}
+            <div className="overflow-y-auto max-h-[calc(80vh-120px)] p-6">
+              <div className="space-y-3">
+                {modalEvents.map((event, index) => (
+                  <div
+                    key={`${event.id}-${index}`}
+                    className={`p-4 rounded-lg border-l-4 cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] ${
+                      event.source === 'google' 
+                        ? 'bg-blue-50 dark:bg-blue-950/20 border-blue-500 hover:bg-blue-100 dark:hover:bg-blue-950/30' 
+                        : event.source === 'outlook'
+                        ? 'bg-orange-50 dark:bg-orange-950/20 border-orange-500 hover:bg-orange-100 dark:hover:bg-orange-950/30'
+                        : 'bg-purple-50 dark:bg-purple-950/20 border-purple-500 hover:bg-purple-100 dark:hover:bg-purple-950/30'
+                    }`}
+                    onClick={() => {
+                      setShowAllEventsModal(false);
+                      onEventClick(event);
+                    }}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-theme-foreground text-base mb-1 truncate">
+                          {event.title}
+                        </h4>
+                        <div className="flex items-center gap-2 text-sm text-theme-muted-foreground mb-2">
+                          <svg 
+                            className="h-4 w-4" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path 
+                              strokeLinecap="round" 
+                              strokeLinejoin="round" 
+                              strokeWidth={2} 
+                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" 
+                            />
+                          </svg>
+                          <span>{formatEventTime(event.start, event.end)}</span>
+                        </div>
+                        {event.location && (
+                          <div className="flex items-center gap-2 text-sm text-theme-muted-foreground mb-2">
+                            <svg 
+                              className="h-4 w-4" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              viewBox="0 0 24 24"
+                            >
+                              <path 
+                                strokeLinecap="round" 
+                                strokeLinejoin="round" 
+                                strokeWidth={2} 
+                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" 
+                              />
+                              <path 
+                                strokeLinecap="round" 
+                                strokeLinejoin="round" 
+                                strokeWidth={2} 
+                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" 
+                              />
+                            </svg>
+                            <span className="truncate">{event.location}</span>
+                          </div>
+                        )}
+                        {event.description && (
+                          <p className="text-sm text-theme-muted-foreground line-clamp-2 mt-2">
+                            {event.description}
+                          </p>
+                        )}
+                      </div>
+                      <div className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
+                        event.source === 'google' 
+                          ? 'bg-blue-500 text-white' 
+                          : event.source === 'outlook'
+                          ? 'bg-orange-500 text-white'
+                          : 'bg-purple-500 text-white'
+                      }`}>
+                        {event.source.charAt(0).toUpperCase() + event.source.slice(1)}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Legend */}
       <div className="mt-4 flex gap-4 text-sm">

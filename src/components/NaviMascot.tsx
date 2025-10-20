@@ -7,20 +7,9 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useTheme } from '@/context/ThemeContext';
 
-interface ActionParameters {
-  to?: string;
-  subject?: string;
-  body?: string;
-  title?: string;
-  start?: string;
-  end?: string;
-  [key: string]: string | undefined;
-}
-
 interface Action {
-  type: string;
-  command?: string;
-  parameters?: ActionParameters;
+  functionName: string;
+  parameters?: Record<string, unknown>;
 }
 
 interface Message {
@@ -46,6 +35,7 @@ export function NaviMascot() {
   
   const recognitionRef = useRef<unknown>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const transcriptRef = useRef<string>('');  // ✅ Add this ref to track latest transcript
   const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -57,7 +47,6 @@ export function NaviMascot() {
   // Initialize speech recognition
   useEffect(() => {
     if (typeof window !== 'undefined' && 'webkitSpeechRecognition' in window) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const SpeechRecognitionAPI = (window as any).webkitSpeechRecognition;
       if (SpeechRecognitionAPI && typeof SpeechRecognitionAPI === 'function') {
         const recognition = new (SpeechRecognitionAPI as new() => unknown)() as Record<string, unknown>;
@@ -69,6 +58,7 @@ export function NaviMascot() {
           setIsListening(true);
           setTranscript('');
           setInterimTranscript('');
+          transcriptRef.current = '';  // ✅ Reset the ref too
         };
 
         recognition.onresult = (event: Record<string, unknown>) => {
@@ -88,14 +78,19 @@ export function NaviMascot() {
             }
           }
 
-          setTranscript(final);
+          if (final) {
+            setTranscript(final);
+            transcriptRef.current = final;  // ✅ Update ref immediately
+          }
           setInterimTranscript(interim);
         };
 
         recognition.onend = () => {
           setIsListening(false);
-          if (transcript) {
-            setEditableTranscript(transcript);
+          // ✅ Use the ref which has the latest value, not the state
+          const finalTranscript = transcriptRef.current;
+          if (finalTranscript) {
+            setEditableTranscript(finalTranscript);
             setShowConfirmation(true);
           }
         };
@@ -108,7 +103,7 @@ export function NaviMascot() {
         recognitionRef.current = recognition;
       }
     }
-  }, [transcript]);
+  }, []);  // ✅ Remove transcript from dependency array - only run once on mount
 
   // Keyboard shortcut: Ctrl + Alt
   useEffect(() => {
@@ -234,54 +229,32 @@ export function NaviMascot() {
   };
 
   const executeAction = async (action: Action) => {
-    switch (action.type) {
-      case 'gmail':
-        if (action.command === 'send') {
-          const response = await fetch('/api/gmail/send', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              to: action.parameters?.to,
-              subject: action.parameters?.subject,
-              body: action.parameters?.body,
-            }),
-          });
-          
-          if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.details || errorData.error || 'Failed to send email');
-          }
-          
-          const result = await response.json();
-          return result;
-        }
-        break;
-      
-      case 'calendar':
-        if (action.command === 'create') {
-          const response = await fetch('/api/calendar/create', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              title: action.parameters?.title,
-              start: action.parameters?.start,
-              end: action.parameters?.end,
-            }),
-          });
-          
-          if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.details || errorData.error || 'Failed to create event');
-          }
-          
-          const result = await response.json();
-          return result;
-        }
-        break;
-        
-      default:
-        console.log('Unknown action type:', action.type);
+    console.log('Executing MCP action:', action);
+    
+    // Call the MCP registry to execute the function
+    const response = await fetch('/api/mcp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        functionName: action.functionName,
+        parameters: action.parameters || {}
+      }),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `Failed to execute ${action.functionName}`);
     }
+    
+    const result = await response.json();
+    
+    // Check if the MCP function execution was successful
+    if (!result.success) {
+      throw new Error(result.error || `Failed to execute ${action.functionName}`);
+    }
+    
+    console.log('MCP action result:', result);
+    return result;
   };
 
   const speakResponse = async (text: string) => {
